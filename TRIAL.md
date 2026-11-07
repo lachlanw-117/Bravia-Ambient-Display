@@ -27,12 +27,13 @@ evening; authenticated weather and the TV overlay were verified without photos.
   The TV rounds the host readings. **No album cached** is expected with zero photos.
   The key was not printed or committed; no existing credential files were opened.
 - Failure/recovery: pending. No stop/restart test or HA core restart was performed.
-- Follow-up: human-readable weather labels prepared locally after the trial;
-  the installed APK still displays raw `partlycloudy`. Updated APK installation
-  requires separate approval. Local Android build, DEX, signing verification and
-  all 15 existing JVM assertions passed. The previous APK was preserved locally.
-  Visual verification of the updated labels remains pending installation.
-  No cache implementation change is included.
+- Weather-label update from `8e4e856`: installed with explicit user approval
+  using ADB `install -r` (Success) at approximately 22:18 Australia/Sydney on
+  7 November 2026. Preview visibly showed **Weather: Feed received**,
+  **15°C Partly cloudy**, **High 15° Low 14°**. Saved host settings survived.
+  Local Android build, DEX, signing verification and all 15 existing JVM assertions
+  passed before installation. The previous APK was preserved locally.
+  No cache implementation change or HA core restart was needed or performed.
 - Persistent offline photo storage is no longer required by the user. The installed
   APK still caches photos; no storage implementation change has been made.
 
