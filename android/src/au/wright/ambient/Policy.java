@@ -2,7 +2,7 @@ package au.wright.ambient;
 
 /** Platform-independent invariants shared by the Android components and JVM tests. */
 public final class Policy {
-    public static final int MAX_PHOTOS = 100;
+    public static final int MAX_PHOTOS = 250;
     public static final long MAX_PHOTO_BYTES = 8L * 1024 * 1024;
     public static final long MAX_CACHE_BYTES = 256L * 1024 * 1024;
     public static boolean validId(String id) { return id != null && id.matches("[a-f0-9]{64}"); }

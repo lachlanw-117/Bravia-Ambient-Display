@@ -108,7 +108,7 @@ installation and live weather checks passed without photos; see [trial results](
    [downloading photos](https://support.google.com/photos/answer/7652919).
    Copy JPEG, PNG or WebP images into `/share/bravia-ambient` on the Pi.
    HEIC, RAW and video are not supported; convert those before copying.
-   The MVP limits one album to 100 photos, 8 MiB per photo and 256 MiB total.
+   The MVP limits one album to 250 photos, 8 MiB per photo and 256 MiB total.
    Source files are never deleted. Copy using a temporary extension and rename
    after completion; an empty folder does not clear a working cached album.
 2. Copy the generated `build/bravia_ambient` directory into HA OS's

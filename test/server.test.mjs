@@ -94,3 +94,15 @@ test('HA forecast response is normalised; unavailable current data is rejected',
   assert.equal(result.high,24); assert.equal(result.low,14);
   await assert.rejects(fetchWeather(config,{},async()=>({ok:true,json:async()=>({state:'unavailable',attributes:{}})})));
 });
+
+test('accept a 147-photo album and the 250-photo boundary; reject 251 without replacing the manifest',async t=>{
+  const {album,source}=await fixture(t);
+  const put=async i=>fs.writeFile(path.join(source,String(i).padStart(3,'0')+'.png'),Buffer.concat([png,Buffer.from(String(i))]));
+  for(let i=0;i<147;i++)await put(i);
+  await album.sync();assert.equal(album.manifest.photos.length,147);
+  for(let i=147;i<250;i++)await put(i);
+  await album.sync();assert.equal(album.manifest.photos.length,250);
+  const previous=structuredClone(album.manifest);await put(250);
+  await assert.rejects(album.sync(),/photo count limit/);
+  assert.deepEqual(album.manifest,previous);
+});

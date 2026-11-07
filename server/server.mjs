@@ -4,7 +4,7 @@ import path from 'node:path';
 import { createHash, timingSafeEqual } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 
-export const LIMITS = { count: 100, photoBytes: 8 * 1024 * 1024, albumBytes: 256 * 1024 * 1024 };
+export const LIMITS = { count: 250, photoBytes: 8 * 1024 * 1024, albumBytes: 256 * 1024 * 1024 };
 export const localDay = (date, timeZone) => new Intl.DateTimeFormat('en-CA', {
   timeZone, year: 'numeric', month: '2-digit', day: '2-digit'
 }).format(new Date(date));
