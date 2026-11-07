@@ -1,7 +1,23 @@
 ﻿# Infrastructure trial without photos
 
 Test one dependency at a time. No Google account or family photos are needed.
-Nothing below has been deployed yet; Pi installation and TV sideloading need approval.
+The TV APK was installed on 7 November 2026 and the user confirmed that the
+screensaver works as expected. The Pi host has not yet been deployed.
+Installation and starting the Pi host were approved in this session; that approval
+does not establish that the work has completed.
+
+## Recorded results
+
+- TV APK installation: ADB returned Success; the user confirmed the app is visible.
+- Screensaver behaviour: user reported working as expected. Individual streaming,
+  HDMI, remote-button and power checks have not been separately recorded.
+- TV OS version and system-picker availability: not yet recorded.
+- Local host validation: all 10 synthetic Node tests pass; local app package generated.
+- Pi host, authenticated feed, live weather and failure recovery: pending.
+- Persistent offline photo storage is no longer required by the user. The installed
+  APK still caches photos; no storage implementation change has been made.
+
+## Trial sequence
 
 1. **TV application only.** Sideload the APK and open Preview without configuring
    a host. Expect a diagnostic screen, moving local clock/date and unavailable

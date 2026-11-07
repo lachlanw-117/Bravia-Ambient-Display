@@ -2,7 +2,9 @@
 
 A local-first family-photo screensaver for the Sony X90K Google TV.
 This is an MVP under development. The APK builds and the local tests pass;
-it has not been installed or tested on the TV.
+the debug APK was installed on the TV on 7 November 2026 and the user reports
+that screensaver behaviour works as expected. The Pi host and live weather path
+have not yet been deployed or verified. See [trial results](TRIAL.md).
 
 ## Design
 
@@ -97,7 +99,8 @@ switching signing keys requires uninstalling, which removes the TV cache/setting
 
 ## Installation — approval required
 
-None of these deployment steps has been performed.
+The TV APK has been installed and the screensaver is reported working. Pi-host
+installation and live weather checks remain pending; see [trial results](TRIAL.md).
 
 1. Export the chosen Google Photos album to local files. Google documents
    [downloading photos](https://support.google.com/photos/answer/7652919).
