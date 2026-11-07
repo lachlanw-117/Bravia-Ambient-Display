@@ -177,4 +177,3 @@ responses remain unverified; tests use local mock data, not household photos.
 ## First trial without photos
 
 Follow [the infrastructure trial](TRIAL.md) to test TV rendering and idle behaviour, then Pi connectivity and HA weather separately. Family photos are optional until those checks pass.
-
