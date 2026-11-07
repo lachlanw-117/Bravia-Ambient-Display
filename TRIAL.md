@@ -7,6 +7,10 @@ evening; authenticated weather and the TV overlay were verified without photos.
 
 ## Recorded results
 
+These are historical results from the initial photo-free trial. The later album
+deployment below supersedes its empty-folder, zero-photo and source-revision
+details; neither section proves the current live state.
+
 - TV APK installation: ADB returned Success; the user confirmed the app is visible.
 - Screensaver behaviour: user reported working as expected. Individual streaming,
   HDMI, remote-button and power checks have not been separately recorded.

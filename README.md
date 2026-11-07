@@ -4,7 +4,8 @@ A local-first family-photo screensaver for the Sony X90K Google TV.
 This is an MVP under development. The APK builds and the local tests pass;
 the debug APK was installed on the TV on 7 November 2026 and the user reports
 that screensaver behaviour works as expected. The Pi host is now installed and
-running; authenticated weather and its TV overlay were verified without photos.
+running; authenticated weather and its TV overlay were verified, and the user
+subsequently confirmed playback of the imported 147-photo album.
 See [trial results](TRIAL.md).
 
 ## Design
@@ -67,7 +68,9 @@ requires selection by the user. Google now documents an
 [Ambient API](https://developers.google.com/photos/partner-program/overview), but
 partner access is not a dependency a personal MVP should assume. The Library API's
 [caching guidance](https://developers.google.com/photos/overview/best-practices)
-also makes it unsuitable for the indefinite offline cache wanted here.
+also makes it unsuitable for an indefinite offline cache. Persistent offline
+storage is no longer a user requirement; the current implementation still caches
+user-exported photos, and any storage redesign needs discussion first.
 The implemented cache contains user-exported local files, with no Google API client.
 Automatic syncing from Google Photos is therefore an explicit MVP limitation.
 
@@ -102,7 +105,9 @@ switching signing keys requires uninstalling, which removes the TV cache/setting
 ## Installation — approval required
 
 The TV APK has been installed and the screensaver is reported working. Pi-host
-installation and live weather checks passed without photos; see [trial results](TRIAL.md).
+installation and live weather checks passed, followed by a 147-photo import and
+user-confirmed playback; see [trial results](TRIAL.md). The instructions below
+describe installation, not work that needs repeating to resume the trial.
 
 1. Export the chosen Google Photos album to local files. Google documents
    [downloading photos](https://support.google.com/photos/answer/7652919).
