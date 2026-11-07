@@ -96,6 +96,22 @@ public final class SlideshowView extends FrameLayout {
         images[next].setImageBitmap(bitmap);images[next].setAlpha(0f);images[next].animate().alpha(1f).setDuration(1500).start();
         images[old].animate().alpha(0f).setDuration(1500).start();front=next;
     }
+    private static String conditionLabel(String condition) {
+        switch(condition) {
+            case "partlycloudy": return "Partly cloudy";
+            case "clear-night": return "Clear night";
+            case "lightning-rainy": return "Thunderstorms and rain";
+            case "lightning": return "Thunderstorms";
+            case "snowy-rainy": return "Sleet";
+            case "windy-variant": return "Windy and cloudy";
+            case "pouring": return "Heavy rain";
+            case "exceptional": return "Exceptional weather";
+            case "": case "unknown": case "unavailable": return "Weather unavailable";
+            default:
+                String label=condition.replace('-',' ').replace('_',' ');
+                return label.substring(0,1).toUpperCase(Locale.ROOT)+label.substring(1);
+        }
+    }
     private void updateOverlay() {
         if(empty.getVisibility()==VISIBLE)empty.setText("Wright Ambient - infrastructure trial\nNo photos required\n\nPhotos: "+photoStatus+"\nWeather: "+weatherStatus+"\nRefresh runs at entry and every five minutes.\nA received weather feed may still contain no weather readings.");
         JSONObject w=store.weather();TimeZone zone=TimeZone.getTimeZone(w.optString("timeZone","Australia/Sydney"));
@@ -104,7 +120,7 @@ public final class SlideshowView extends FrameLayout {
         SimpleDateFormat key=new SimpleDateFormat("yyyy-MM-dd",Locale.ROOT);key.setTimeZone(zone);
         String weather="Weather unavailable";
         if(!w.isNull("temperature")&&w.has("temperature")) {
-            weather=String.format(Locale.getDefault(),"%.0f%s  %s",w.optDouble("temperature"),w.optString("unit","°C"),w.optString("condition","").replace('-',' '));
+            weather=String.format(Locale.getDefault(),"%.0f%s  %s",w.optDouble("temperature"),w.optString("unit","°C"),conditionLabel(w.optString("condition","")));
             if(key.format(now).equals(w.optString("forecastDay"))&&!w.isNull("high")&&!w.isNull("low"))
                 weather+=String.format(Locale.getDefault(),"\nHigh %.0f°  Low %.0f°",w.optDouble("high"),w.optDouble("low"));
             boolean stale=w.optBoolean("stale",true)||w.optBoolean("forecastStale",false);

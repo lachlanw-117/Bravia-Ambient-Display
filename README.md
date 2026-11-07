@@ -3,8 +3,9 @@
 A local-first family-photo screensaver for the Sony X90K Google TV.
 This is an MVP under development. The APK builds and the local tests pass;
 the debug APK was installed on the TV on 7 November 2026 and the user reports
-that screensaver behaviour works as expected. The Pi host and live weather path
-have not yet been deployed or verified. See [trial results](TRIAL.md).
+that screensaver behaviour works as expected. The Pi host is now installed and
+running; authenticated weather and its TV overlay were verified without photos.
+See [trial results](TRIAL.md).
 
 ## Design
 
@@ -43,7 +44,8 @@ through `weather.get_forecasts`. It chooses today's entry by local date, never
 substitutes tomorrow, retains same-day forecast data on partial failure, and
 labels stale readings as cached. Missing values stay unavailable. Midnight removes
 yesterday's high/low. These are the only HA operations in the host; it is not an
-arbitrary service proxy. No HA calls from this application have run live yet.
+arbitrary service proxy. The live host and TV weather path passed the photo-free
+trial on 7 November 2026; see [the recorded readings](TRIAL.md).
 
 ## Google Photos decision
 
@@ -100,7 +102,7 @@ switching signing keys requires uninstalling, which removes the TV cache/setting
 ## Installation — approval required
 
 The TV APK has been installed and the screensaver is reported working. Pi-host
-installation and live weather checks remain pending; see [trial results](TRIAL.md).
+installation and live weather checks passed without photos; see [trial results](TRIAL.md).
 
 1. Export the chosen Google Photos album to local files. Google documents
    [downloading photos](https://support.google.com/photos/answer/7652919).
@@ -109,8 +111,9 @@ installation and live weather checks remain pending; see [trial results](TRIAL.m
    The MVP limits one album to 100 photos, 8 MiB per photo and 256 MiB total.
    Source files are never deleted. Copy using a temporary extension and rename
    after completion; an empty folder does not clear a working cached album.
-2. Copy the generated `build/bravia_ambient` directory into HA OS's local
-   `/addons/` directory, reload the app store's local inventory, and install it.
+2. Copy the generated `build/bravia_ambient` directory into HA OS's
+   local-app directory (`/local_apps/` in Terminal & SSH on HA OS 18.4; older
+   instructions call it `/addons/`), reload the local inventory, and install it.
    Installation, starting the app and any reload need explicit approval.
 3. Configure a random photo-host access key of at least 24 characters, weather
    entity and timezone through the app options. Keep the key out of chat/Git.
@@ -174,8 +177,9 @@ can extend the feed later. No aviation, notification, calendar or theme work is 
 - [HA weather forecasts](https://www.home-assistant.io/integrations/weather/)
 - [HA app packaging](https://contributors.home-assistant.io/apps/reference/configuration/)
 
-Research checked 7 November 2026. Sony firmware behaviour and live daily forecast
-responses remain unverified; tests use local mock data, not household photos.
+Research checked 7 November 2026. Individual Sony playback/HDMI scenarios remain
+unverified. Live weather was checked separately; automated tests use local mock
+data, not household photos.
 
 ## First trial without photos
 
