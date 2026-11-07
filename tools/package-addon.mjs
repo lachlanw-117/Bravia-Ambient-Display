@@ -1,0 +1,9 @@
+import { promises as fs } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+const out=path.join(root,'build','bravia_ambient');
+await fs.mkdir(out,{recursive:true});
+for(const file of ['config.yaml','Dockerfile']) await fs.copyFile(path.join(root,'addon',file),path.join(out,file));
+await fs.copyFile(path.join(root,'server/server.mjs'),path.join(out,'server.mjs'));
+console.log('Local add-on package:',out);
