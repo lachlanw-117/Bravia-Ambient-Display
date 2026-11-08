@@ -106,7 +106,7 @@ and failure semantics. Sony input behaviour remains unverified for this feature.
 
 ## D07 - Prefer the installed BOM weather source
 
-**Status:** accepted design; Phase 1; not implemented or deployed.
+**Status:** Phase 1 deployed and scoped acceptance/closeout verified on 8 November; not merged.
 
 Read-only inspection on 8 November identified the installed BOM component and
 its daily/hourly entities; household identifiers belong in the
@@ -114,11 +114,21 @@ its daily/hourly entities; household identifiers belong in the
 The host already supports a selected HA weather entity and daily forecasts.
 Prefer that interface over adding a separate direct BOM client to the TV.
 
-Keep attribution, source freshness and local-day correctness visible. Do not
+Keep provider attribution in the feed/docs, and make source freshness and local-day
+correctness clear. During the 8 November live trial the user rejected the full
+sentence, then a smaller credit, and explicitly selected no visible TV credit.
+That supersedes the original visible-attribution requirement; retain the reason
+so a later redesign does not reintroduce it by accident. Do not
 silently fall back to another provider. Entity ownership was inspected, but live
 readings/forecast output were not verified because the attempted Supervisor API
-route returned 401. Revisit the adapter if actual forecast responses show an
-incompatibility. Verify before a separately approved source change.
+route returned 401. Subsequent authenticated browser inspection verified current
+readings and daily forecast output on 8 November. The offset-free forecast dates
+need explicit local-calendar handling; that fix and provider-isolated caching are
+deployed. Attribution remains in the feed, with visible credit removed after user
+review. See [Phase 1](PHASE1.md) for evidence, acceptance and freshness limitations.
+Revisit if upstream observation
+age cannot be established sufficiently for household use, or actual responses
+change. Future deployments still require a separately approved source change.
 
 ## D08 - Aircraft details are conditional, not a promised free data service
 
@@ -150,16 +160,26 @@ deleting caches, backups or source photos, removing system packages, disabling H
 Terminal & SSH, or relocating shared toolchains. Follow
 [MAINTENANCE.md](MAINTENANCE.md). Revisit when an actual maintenance need appears.
 
-## D10 - Reviewed main branches and short-lived changes
+## D10 - Accepted main branches and short-lived changes
 
 **Status:** repository consolidation authorised on 8 November 2026.
 
-Use `main` as the reviewed baseline in each repository, with a focused branch/PR
+Use `main` as the accepted baseline in each repository, with a focused branch/PR
 per coherent change. GitHub Actions runs synthetic/local checks; it does not
 deploy. Deployment records identify installed revisions separately from `main`.
 Retire incorporated branches without rewriting history. Preserve superseded work
 with an archive reference before deleting its branch. See
 [CONTRIBUTING.md](CONTRIBUTING.md).
+
+On 8 November the user refined the acceptance order: keep runtime PRs open,
+trial-deploy the exact feature-branch commit with approval, record successful
+relevant device acceptance and closeout, then request merge approval. This
+supersedes merging runtime changes before deployment. CI cannot establish Sony
+rendering/input or physical HA behaviour. Failed trials stay on the branch for
+fixes and retesting. Documentation-only changes need review/local checks without
+device deployment. Historical baseline merges do not become retroactive claims
+of device acceptance. Revisit only if a suitable isolated staging environment can
+establish the same acceptance evidence without the household trial.
 
 The initial Bravia branch was also its default branch. Consolidation establishes
 `main` without discarding that history. HA keeps its existing `main`. The repos

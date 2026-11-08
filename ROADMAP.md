@@ -1,7 +1,10 @@
 # Bravia implementation roadmap
 
 Accepted design recorded on 8 November 2026. Phase 0 is implemented as repository
-documentation. Phases 1-6 remain planned and require separate authorisation;
+documentation. Phase 1 local work was authorised on 8 November and is prepared
+for review, then trial-deployed with approval; [its implementation record](PHASE1.md)
+records passed scoped TV acceptance/closeout and pending merge approval.
+Phases 2-6 remain planned and require separate authorisation;
 Phase 7 requires a later implementation plan. Accepting this roadmap is not
 approval to deploy, operate devices or progress automatically to another phase.
 
@@ -30,7 +33,7 @@ runtime state, backups, options and signing material outside Git.
 | Phase | Deliverable and acceptance gate | Excluded |
 |---|---|---|
 | **0 - Record the project** | Roadmap, decisions, deferred work and cleanup documented; local links and diff checked. Stop after documentation. | App/configuration changes and device actions |
-| **1 - BOM weather** | Use the installed daily BOM entity, verify current readings and today's forecast, and show provider attribution. Review source, freshness, local-day selection and rollback before approved deployment. | Photo redesign and notices |
+| **1 - BOM weather** | Use the installed daily BOM entity, verify current readings and today's forecast, and retain attribution in the feed/docs. Live review on 8 November explicitly removed visible TV credit. Review source, freshness, local-day selection and rollback before approved deployment. | Photo redesign and notices |
 | **2 - Photo presentation** | Design B, adaptive portrait pairs, complete-image fitting, subdued background and improved typography/weather layout. Check ordering, transitions, memory and normal exit on the TV. | Live notices and aircraft |
 | **3 - Notice foundation** | Typed records, private inbox, restored active state and native HA routing controls. Washing, backups and grouped updates start capture-only. Verify lifecycle and restart behaviour. | Replacing phone notifications and showing live TV notices |
 | **4 - TV notices and interactions** | Filtered TV feed, remote navigation and local hiding, with immediate exit. Verify Sony input behaviour and persistence. | Household-wide acknowledgement, HA repairs and device control |
@@ -42,8 +45,12 @@ There is no automatic progression. Phase 3 is useful as a private inbox even if
 the TV, phone migration or aircraft phases do not proceed. Source families and
 phone migrations also have individual review points within their phase.
 
-For each phase: **build locally, review, approve named live changes, verify,
-document, close the testing session**. Follow each repository's rules for
+For each runtime phase: **feature branch, PR/local checks, review, approve named
+trial changes, deploy the exact branch commit, pass relevant device acceptance,
+document and close the testing session, then approve and merge into main**.
+Keep the PR open during trials; fix and retest the branch if acceptance fails.
+Documentation-only work uses review/local checks without device deployment.
+Follow each repository's rules for
 commits, pushes and merges; installation approval does not cover those actions.
 Do not mark a phase verified because its build passed. Use synthetic test data.
 
@@ -128,8 +135,11 @@ transition. A decision's revision is found in Git history; deployed revisions
 must be recorded explicitly in trial/household notes.
 
 Phase 0 was authorised and implemented locally on 8 November 2026. No app, HA or
-device changes were made. Later phases have accepted designs, not implementation
-or deployment authorisation. Commit/push/merge approval was supplied separately
+device changes were made during Phase 0. Phase 1 local implementation was then
+authorised and trial-deployed; scoped TV acceptance/closeout passed, with merge
+approval still pending.
+Phases 2-6 have accepted designs, not implementation or deployment authorisation.
+Commit/push/merge approval was supplied separately
 for repository consolidation on 8 November; it does not authorise live changes
 or later feature phases. See [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow.
-The next possible phase is BOM weather, after its own scoped authorisation.
+See the [Phase 1 record](PHASE1.md) for the current stopping point.

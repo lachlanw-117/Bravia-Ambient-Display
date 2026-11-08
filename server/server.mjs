@@ -65,7 +65,16 @@ export class Album {
 
 export function selectForecast(rows, now, zone) {
   const today = localDay(now, zone);
-  return rows.find(r => r.datetime && Number.isFinite(Date.parse(r.datetime)) && localDay(r.datetime, zone) === today);
+  if (!Array.isArray(rows)) return undefined;
+  return rows.find(r => {
+    const stamp = r?.datetime;
+    if (typeof stamp !== 'string') return false;
+    // BOM publishes local wall time without an offset. Its date already belongs
+    // to the configured HA timezone; never interpret it in the Node host's zone.
+    if (/^\d{4}-\d{2}-\d{2}(?:T\d{2}:\d{2}:\d{2}(?:\.\d+)?)?$/.test(stamp))
+      return Number.isFinite(Date.parse(stamp + (stamp.length === 10 ? 'T00:00:00Z' : 'Z'))) && stamp.slice(0, 10) === today;
+    return /(?:Z|[+-]\d{2}:\d{2})$/i.test(stamp) && Number.isFinite(Date.parse(stamp)) && localDay(stamp, zone) === today;
+  });
 }
 export function weatherView(cache, now, zone) {
   const today = localDay(now, zone);
@@ -95,9 +104,10 @@ export async function fetchWeather({ haUrl, haToken, weatherEntity, timeZone }, 
     const result = await call('/api/services/weather/get_forecasts?return_response', { entity_id: weatherEntity, type: 'daily' });
     forecast = selectForecast(result.service_response?.[weatherEntity]?.forecast ?? [], now, timeZone);
   } catch { /* Keep today's previous forecast when only the forecast request fails. */ }
-  const old = previous?.forecastDay === localDay(now, timeZone) ? previous : {};
-  return { temperature: state.attributes.temperature, unit: state.attributes.temperature_unit ?? '°C',
-    condition: state.state, observedAt: state.last_updated, fetchedAt: now.toISOString(),
+  const old = previous?.weatherEntity === weatherEntity && previous?.forecastDay === localDay(now, timeZone) ? previous : {};
+  return { weatherEntity, temperature: state.attributes.temperature, unit: state.attributes.temperature_unit ?? '°C',
+    // HA's report time proves entity reporting, not the upstream observation age.
+    condition: state.state, observedAt: state.last_reported ?? state.last_updated, fetchedAt: now.toISOString(),
     forecastDay: localDay(now, timeZone),
     high: Number.isFinite(forecast?.temperature) ? forecast.temperature : (old.high ?? null),
     low: Number.isFinite(forecast?.templow) ? forecast.templow : (old.low ?? null),
@@ -139,6 +149,8 @@ export async function main() {
     weatherEntity:env.WEATHER_ENTITY || options.weather_entity || 'weather.forecast_home',
     timeZone:env.TIME_ZONE || options.time_zone || 'Australia/Sydney' };
   localDay(new Date(), config.timeZone); // Reject invalid configuration before serving requests.
+  // A provider change must not relabel another provider's last-good reading.
+  if (cached.weatherEntity !== config.weatherEntity) cached = {};
   let busy = false;
   const update = async () => {
     if (busy) return;
