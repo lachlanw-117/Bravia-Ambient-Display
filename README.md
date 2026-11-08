@@ -180,7 +180,7 @@ Clearing the TV app's data explicitly removes its cache and saved access key.
 ## Planned enhancements
 
 [Phase 2](PHASE2.md) records the design B photo/sidebar trial:
-adaptive portrait pairs, complete-image fitting and a static subdued background.
+adaptive portrait pairs, complete-image fitting and a static cream background.
 It is deployed on the TV; final visual acceptance and debugging closeout remain
 pending. The feature PR stays open until acceptance and separate merge approval.
 

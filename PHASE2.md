@@ -10,10 +10,23 @@ remain open; no Phase 2 merge is approved.
 
 Initial deployed source: 95586101a6e70d3ec5c594dc74308701aa89a8f1.
 The user liked the design and requested 60-second scenes and a brighter background.
-Updated source: 8f0fb3078488e1bcb5585dcf7e0b0f915ae386d6.
-Its background tint reduces from about 69% to 50% opacity, retaining the dark
+First brighter trial source: 8f0fb3078488e1bcb5585dcf7e0b0f915ae386d6.
+Its background tint reduced from about 69% to 50% opacity, retaining the dark
 information panel. Installation succeeded; pulling back the installed APK verified
 SHA-256: 689528883aee59f52d26269531d90f4caf01892e6d0a8d39b02a26160f91b881.
+The user found that trial still too dark and asked for cream/white with dark text.
+Current installed source: a8aa2f6f29ac57901058a17e2a6feb721d8c973a.
+Current installed APK SHA-256, verified by pulling it back:
+3345307a2d078b41b2e3094970a151771843470ea04d66f6849b34cc77b26553.
+A warm cream veil now lightens the photo-derived wash; the sidebar is opaque cream
+with charcoal text, darker weather icons and pale photo borders. Foreground photo
+pixels, layout, timing and rendering workload are unchanged. The prior darker APK
+is privately preserved as build/phase2-trial-2026-11-08/installed-brighter.apk.
+Local signed build and all 215 Android assertions passed for the cream revision.
+Cream-source CI passed in Local checks run 42448152522.
+Native Preview showed cream backgrounds, dark readable text and full portrait
+pairs; setup retained 60 seconds and pairing. Final visual acceptance is pending. This replaces the original dark-palette
+direction following actual viewing feedback, not a new phase or theme-switch feature.
 Setup confirmed 60 seconds persisted through installation, with pairing enabled.
 The interval remains configurable from 10 to 300 seconds; the source default is 30.
 ADB is currently enabled for final review; Developer options master remains on.
@@ -21,7 +34,7 @@ Earlier closed-port results describe prior sessions, not the current state.
 
 ## What changes and why
 
-- Design B: fitted photographs occupy the left 72% photo region and a quiet dark
+- Design B: fitted photographs occupy the left 72% photo region and a quiet cream
   information panel sits at the right. A large light-weight clock, date, weather
   glyph, current reading and today's high/low replace the small photo overlay.
   No visible provider credit is reintroduced. No fake notices or aircraft UI is
@@ -102,10 +115,9 @@ p99 10 ms. These initial-candidate observations do not establish long-run memory
 stability or performance for every photo/device. Do not infer a memory improvement
 from the Phase 1 baseline with different content.
 
-Injected Back dismissed the actual dream and returned Preview to setup. The
-brighter installed revision was visually inspected in Preview: full portrait pairs,
-brighter colour fill and readable dark sidebar rendered correctly. Final user
-brightness acceptance, physical remote/ordinary idle checks with debugging disabled
+Injected Back dismissed the actual dream and returned Preview to setup. The earlier
+brighter dark revision was inspected in Preview before user feedback prompted the
+current cream revision. Final user cream-palette acceptance, physical remote/ordinary idle checks with debugging disabled
 and session closeout remain pending. HDMI, streaming, power, failure/recovery and
 older-Android output remain unverified. Private screenshots/profiles stay outside Git.
 
@@ -124,7 +136,7 @@ and preserve it before replacement, then compare the following:
    orientation and order across multiple transitions. Check the single-photo
    setting without exposing credentials in setup. Capture only private evidence.
 2. Clock/date and current BOM weather/today's high/low, no credit line, long
-   condition text, missing/stale readings, sidebar readability and subdued fill.
+   condition text, missing/stale readings, sidebar readability and warm cream fill.
 3. Native memory/frame behaviour across several transitions and prompt exit.
    A locally bounded bitmap calculation does not prove smooth firmware rendering.
 4. Remote Back/first input and normal idle re-entry. Home/power remain system-owned
