@@ -2,6 +2,11 @@ package au.wright.ambient;
 
 /** Platform-independent invariants shared by the Android components and JVM tests. */
 public final class Policy {
+    public static String attributionLabel(String attribution) {
+        String value=attribution==null?"":attribution.trim();
+        return value.equals("Data provided by the Australian Bureau of Meteorology")
+            ? "Bureau of Meteorology" : value;
+    }
     public static final int MAX_PHOTOS = 250;
     public static final long MAX_PHOTO_BYTES = 8L * 1024 * 1024;
     public static final long MAX_CACHE_BYTES = 256L * 1024 * 1024;

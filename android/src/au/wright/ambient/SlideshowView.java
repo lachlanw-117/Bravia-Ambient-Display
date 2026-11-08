@@ -4,6 +4,9 @@ import android.content.Context;
 import android.graphics.*;
 import android.graphics.drawable.GradientDrawable;
 import android.os.*;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.RelativeSizeSpan;
 import android.view.*;
 import android.widget.*;
 import org.json.JSONObject;
@@ -119,6 +122,7 @@ public final class SlideshowView extends FrameLayout {
         SimpleDateFormat day=new SimpleDateFormat("EEE, d MMM yyyy",Locale.getDefault());day.setTimeZone(zone);
         SimpleDateFormat key=new SimpleDateFormat("yyyy-MM-dd",Locale.ROOT);key.setTimeZone(zone);
         String weather="Weather unavailable";
+        String attribution="";
         if(!w.isNull("temperature")&&w.has("temperature")) {
             weather=String.format(Locale.getDefault(),"%.0f%s  %s",w.optDouble("temperature"),w.optString("unit","°C"),conditionLabel(w.optString("condition","")));
             if(key.format(now).equals(w.optString("forecastDay"))&&!w.isNull("high")&&!w.isNull("low"))
@@ -126,9 +130,11 @@ public final class SlideshowView extends FrameLayout {
             boolean stale=w.optBoolean("stale",true)||w.optBoolean("forecastStale",false);
             try{stale|=now.getTime()-Instant.parse(w.getString("fetchedAt")).toEpochMilli()>1800000;}catch(Exception e){stale=true;}
             if(stale)weather+="  · cached";
-            String attribution=w.optString("attribution","").trim();
+            attribution=Policy.attributionLabel(w.optString("attribution",""));
             if(!attribution.isEmpty())weather+="\n"+attribution;
         }
-        overlay.setText(time.format(now)+"\n"+day.format(now)+"\n"+weather);
+        SpannableString text=new SpannableString(time.format(now)+"\n"+day.format(now)+"\n"+weather);
+        if(!attribution.isEmpty())text.setSpan(new RelativeSizeSpan(0.6f),text.length()-attribution.length(),text.length(),Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        overlay.setText(text);
     }
 }
