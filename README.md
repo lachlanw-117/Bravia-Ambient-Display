@@ -213,5 +213,6 @@ Follow [the infrastructure trial](TRIAL.md) to test TV rendering and idle behavi
 The [weather summary refinement](WEATHER_REFINEMENT.md) is implemented locally on
 its separate feature branch: observed temperature under Now, explicit Today and
 Tomorrow forecasts, and check-age/cached labels above the future notice area.
-Its named host/TV trial is deployed; final acceptance and merge are pending.
+Its named host/TV trial is deployed and accepted, with debugging closed; separate
+merge approval remains pending.
 Photo continuation across sessions was subsequently included at the user's request.

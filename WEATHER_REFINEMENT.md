@@ -4,11 +4,13 @@
 
 Implemented locally. The user approved Git publication, the accepted Phase 2
 merges and a TV trial on 8 November. The named photo-host update/rebuild was subsequently approved and completed,
-followed by the initial TV installation. Updated review changes are in trial;
-final device acceptance, debugging closeout and weather-PR merge remain pending. The user accepted the minimalist second mockup,
+followed by the initial TV installation. The user accepted the final display and Back dismissal. ADB was disabled and its
+network port refused connections; the user then confirmed ordinary idle entry and
+Back both work with debugging off. Relevant trial acceptance and closeout are
+complete; separate weather-PR merge approval remains pending. The user accepted the minimalist second mockup,
 then requested implementation and clarified a preference for today's forecast
-rather than an unavailable current-condition message. The installed Phase 2 cream/photo candidate
-remains the accepted baseline. The separately approved Phase 2 merges completed: Bravia PR #3 as
+rather than an unavailable current-condition message. Phase 2 is the main-branch baseline; the accepted weather/playback trial is
+installed and awaiting its separate merge. The separately approved Phase 2 merges completed: Bravia PR #3 as
 6076abeda6acfb7e8fb6f11418917c1faf05d944, companion PR #6 as
 729e9f98c528c10a88f836c75d42442ed1d0045d. This refinement does not reopen the notice or aircraft phases.
 
@@ -209,7 +211,7 @@ Expanded local validation passes: 15 policy + 208 photo + 17 weather assertions
 (240 total), signed Android build; 22 host tests remain passed for unchanged host
 code. The revised exact-commit candidate subsequently passed the checks below.
 
-## Final candidate verification - acceptance pending
+## Final candidate verification and closeout
 
 Runtime revision 55a749b52a065400bb489e29020b9cf658f43431 passed CI and was
 installed on the TV. The actual APK was pulled back and matched the local signed
@@ -232,8 +234,10 @@ restart, and a subsequent APK replacement. Pairing and the 60-second preference
 remained set. This establishes process/session continuation, not a guarantee that
 the newest asynchronous preference write survives an abrupt electrical outage.
 
-User visual/Back acceptance, debugging closeout and ordinary idle entry remain
-pending. ADB is currently on during active review; do not disable it prematurely
-while visual feedback is in progress. Both weather PRs stay open until relevant
-acceptance and separate merge approval. Failure simulation, real midnight/DST
-rollover, HDMI/streaming/power and long-run performance remain unverified.
+The user accepted the final couch-distance display and physical Back dismissal.
+ADB was then disabled; TCP 5555 returned ECONNREFUSED. The user subsequently
+confirmed normal idle entry and Back with debugging off. Developer options master
+remains enabled to preserve unreviewed settings; reboot persistence is untested.
+Both weather PRs stay open awaiting separate merge approval. Failure simulation,
+real midnight/DST rollover, HDMI/streaming/power and long-run performance remain
+unverified. No HA Core restart or unrelated live change was performed.

@@ -27,14 +27,16 @@ Checked items below describe recorded results, not a fresh live inspection.
 - [x] Accept cream palette / 60-second scenes and close Phase 2 debugging.
 - [x] Confirm ordinary idle/Back with debugging off; see [Phase 2](PHASE2.md).
 - [x] Obtain separate Phase 2 merge approval and merge the accepted PRs.
-- [ ] Complete the separate weather-summary/photo-resume trial and close debugging
-  before seeking its merge approval; see WEATHER_REFINEMENT.md.
+- [x] Complete the weather-summary/photo-resume trial, user acceptance and debugging
+  closeout; see WEATHER_REFINEMENT.md.
+- [ ] Obtain separate weather/playback merge approval and merge accepted PRs.
 - [x] Disable TV debugging and verify TCP 5555 refuses connections; leave Developer
   options master enabled to preserve unreviewed settings. Reboot persistence untested.
 - [ ] Consider Google Ambient API partner access only if unattended album sync becomes essential.
 
-Photo presentation and household notices/interactions are accepted future phases,
-not implemented features. Aircraft implementation needs its own later plan.
+Photo presentation is implemented and accepted; the weather/playback refinement
+is accepted in trial and awaiting merge. Household notices/interactions remain
+future phases. Aircraft implementation needs its own later plan.
 Calendar and photo metadata remain deferred. The MVP was deployed on 7 November;
 see [TRIAL.md](TRIAL.md) for results and [VALIDATION.md](VALIDATION.md) for the
 initial local-validation snapshot.
