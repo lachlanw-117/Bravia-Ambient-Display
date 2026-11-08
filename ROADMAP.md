@@ -146,3 +146,36 @@ Commit/push/merge approval was supplied separately
 for repository consolidation on 8 November; it does not authorise live changes
 or later feature phases. See [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow.
 See the [Phase 2 trial record](PHASE2.md) for the current stopping point.
+
+## Recovery scenario to retain for notice planning
+
+On 8 November 2026, the user reported that after an electrical interruption the
+Thread border router and SSH server had not recovered; they manually started both
+in HA UI. HA and the photo host were reachable, and the user reported normal TV
+photos/weather. Therefore HA availability alone did not prove household readiness.
+The concern is an outage while away, followed by returning to non-working lights;
+actual loss of all lights was not established in this incident.
+
+Retain this as a Phase 6 dependency-health acceptance scenario, supported by the
+Phase 3 incident/lifecycle model and later Phase 5 phone routing. It is a planning
+requirement, not implementation authorisation or a change to phase boundaries:
+
+- Classify deliberately required dependencies separately from optional maintenance
+  services. Thread should be checked against its intended running/usable state;
+  SSH being intentionally off must not create a fault notice.
+- After startup, allow a defined recovery grace period, then evaluate required
+  dependencies even when they were already unavailable before monitoring started.
+  Checking only future state transitions could miss the failure.
+- Group a failed dependency and its affected devices into one actionable incident
+  where the dependency is known. Keep device details in the private inbox rather
+  than notifying separately for every unavailable light.
+- Route household-impacting unresolved faults to the selected phone destinations;
+  TV delivery remains secondary and only while the screensaver is running.
+- Clear through verified recovery. Maintenance/intentional-off controls must be
+  explicit; do not infer recovery from merely sending a start command.
+- If HA, the Pi, power or the internet is itself down, an HA-hosted router may
+  be unable to deliver anything. Independent availability monitoring is a separate
+  design decision, not a capability to promise for the native foundation.
+
+No auto-start setting, watchdog, automatic repair or new notification was installed.
+The actual startup policies and reason the services did not recover remain unknown.

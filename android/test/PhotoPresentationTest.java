@@ -46,6 +46,15 @@ public final class PhotoPresentationTest {
         check(!Policy.prunePhotoFile(id,Collections.singleton(id)),"keep a committed photo");
         check(Policy.prunePhotoFile(id+".new",Collections.emptyList()),"retire abandoned photo transaction");
         check(!Policy.prunePhotoFile("unrelated.new",Collections.emptyList()),"leave unrelated files alone");
+        List<String> ids=Arrays.asList("a","b","c","d","e");
+        check(PhotoPresentation.resumeIndex(ids,null,null)==0,"first use begins at start");
+        check(PhotoPresentation.resumeIndex(ids,"c","b")==2,"resume after a displayed pair");
+        check(PhotoPresentation.resumeIndex(ids,"a","e")==0,"wrap persists at end");
+        check(PhotoPresentation.resumeIndex(Arrays.asList("new","a","b","c"),"c","b")==3,"insertions do not reset cursor");
+        check(PhotoPresentation.resumeIndex(ids,"removed","b")==2,"removed next photo continues after last");
+        check(PhotoPresentation.resumeIndex(ids,"removed","e")==0,"removed next at end wraps");
+        check(PhotoPresentation.resumeIndex(ids,"removed","gone")==0,"unrelated replacement album begins safely");
+        check(PhotoPresentation.resumeIndex(Collections.emptyList(),"a","b")==0,"empty album safe");
         System.out.println("PASS "+assertions+" photo layout, sequence, bitmap budget and cache-isolation assertions");
     }
     private static void check(boolean result,String reason){assertions++;if(!result)throw new AssertionError(reason);}

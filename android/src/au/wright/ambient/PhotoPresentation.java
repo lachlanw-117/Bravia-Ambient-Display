@@ -2,6 +2,13 @@ package au.wright.ambient;
 
 /** Pure layout and sequence rules, shared with the synthetic JVM acceptance tests. */
 public final class PhotoPresentation {
+    public static int resumeIndex(java.util.List<String> album,String next,String last) {
+        if(album.isEmpty())return 0;
+        int index=album.indexOf(next);
+        if(index>=0)return index;
+        index=album.indexOf(last);
+        return index>=0?(index+1)%album.size():0;
+    }
     public static final class Box {
         public final float x,y,width,height;
         public Box(float x,float y,float width,float height) {
