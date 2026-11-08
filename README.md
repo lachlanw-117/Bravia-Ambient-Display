@@ -181,8 +181,8 @@ Clearing the TV app's data explicitly removes its cache and saved access key.
 
 [Phase 2](PHASE2.md) records the design B photo/sidebar trial:
 adaptive portrait pairs, complete-image fitting and a static cream background.
-It is deployed on the TV; final visual acceptance and debugging closeout remain
-pending. The feature PR stays open until acceptance and separate merge approval.
+It is deployed on the TV; the user accepted the cream palette and debugging is
+closed. Ordinary idle/Back checks with debugging off remain pending. The feature PR stays open until acceptance and separate merge approval.
 
 The accepted direction is design B with adaptive portrait pairs, BOM weather,
 native HA notice controls and local TV notice hiding. Design C is a later

@@ -24,8 +24,9 @@ Checked items below describe recorded results, not a fresh live inspection.
 - [x] Obtain Phase 1 merge approval and merge accepted PR #2.
 - [x] Prepare the separately authorised Phase 2 photo/sidebar candidate locally.
 - [x] Complete Phase 2 approved commits, pushes, PRs and TV trial installation.
-- [ ] Accept final cream palette / 60-second scenes and close debugging
-  before seeking merge approval; see [Phase 2](PHASE2.md).
+- [x] Accept cream palette / 60-second scenes and close Phase 2 debugging.
+- [ ] Confirm ordinary idle/Back with debugging off before seeking Phase 2 merge
+  approval; see [Phase 2](PHASE2.md).
 - [x] Disable TV debugging and verify TCP 5555 refuses connections; leave Developer
   options master enabled to preserve unreviewed settings. Reboot persistence untested.
 - [ ] Consider Google Ambient API partner access only if unattended album sync becomes essential.

@@ -2,8 +2,8 @@
 
 ## Status - 8 November 2026
 
-Phase 2 is trial-deployed; final visual acceptance and debugging closeout are
-pending. Implementation, TV deployment, commits, pushes and PRs were explicitly
+Phase 2 is trial-deployed; the user accepted the cream palette. Debugging is
+closed; ordinary idle/physical Back checks with debugging off remain pending. Implementation, TV deployment, commits, pushes and PRs were explicitly
 approved. Bravia [PR #3](https://github.com/lachlanw-117/Bravia-Ambient-Display/pull/3)
 and companion HA [PR #6](https://github.com/lachlanw-117/Wright-Home-Assistant/pull/6)
 remain open; no Phase 2 merge is approved.
@@ -25,12 +25,14 @@ is privately preserved as build/phase2-trial-2026-11-08/installed-brighter.apk.
 Local signed build and all 215 Android assertions passed for the cream revision.
 Cream-source CI passed in Local checks run 42448152522.
 Native Preview showed cream backgrounds, dark readable text and full portrait
-pairs; setup retained 60 seconds and pairing. Final visual acceptance is pending. This replaces the original dark-palette
+pairs; setup retained 60 seconds and pairing. The user confirmed the cream design
+looks right. Ordering remains unchanged following their clarification. This replaces the original dark-palette
 direction following actual viewing feedback, not a new phase or theme-switch feature.
 Setup confirmed 60 seconds persisted through installation, with pairing enabled.
 The interval remains configurable from 10 to 300 seconds; the source default is 30.
-ADB is currently enabled for final review; Developer options master remains on.
-Earlier closed-port results describe prior sessions, not the current state.
+After cream acceptance, ADB was disabled and TCP 5555 returned ECONNREFUSED.
+Developer options master remains on to preserve unreviewed settings. Reboot
+persistence is untested. Ordinary idle/physical Back checks remain user-pending.
 
 ## What changes and why
 
@@ -117,9 +119,21 @@ from the Phase 1 baseline with different content.
 
 Injected Back dismissed the actual dream and returned Preview to setup. The earlier
 brighter dark revision was inspected in Preview before user feedback prompted the
-current cream revision. Final user cream-palette acceptance, physical remote/ordinary idle checks with debugging disabled
-and session closeout remain pending. HDMI, streaming, power, failure/recovery and
+current cream revision. The user accepted the cream palette and debugging was closed. Physical remote/
+ordinary idle checks with debugging disabled remain pending. HDMI, streaming, power, failure/recovery and
 older-Android output remain unverified. Private screenshots/profiles stay outside Git.
+
+## Album ordering
+
+The host sorts source filenames with localeCompare and the app follows that
+manifest order, not EXIF date or shuffle. Consecutive portraits may share a scene;
+other photos display alone. Each scene lasts the saved 60 seconds. The sequence
+loops at the end and starts at the beginning of every new dream/Preview session.
+An actual album-list change also resets traversal. Routine identical refreshes do
+not reset it. Repeated development installs/previews explain seeing early photos
+again. Private screenshots of the uninterrupted cream preview confirmed different
+pairs at successive minutes. The user asked for an explanation, not an ordering
+change; no shuffle or persistent cursor was added.
 
 ## Approved trial scope and remaining gate
 
