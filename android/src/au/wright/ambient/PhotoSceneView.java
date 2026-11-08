@@ -39,12 +39,13 @@ final class PhotoSceneView extends View {
             paint.setColor(Color.WHITE);rect.set(0,0,layout.width,layout.height);
             canvas.drawBitmap(scene.background,null,rect,paint);
         }
-        canvas.drawColor(0x800b1115);
+        // A cream veil keeps even dark source photos light; foreground pixels are unchanged.
+        canvas.drawColor(0xe0f5f1e7);
         for(int i=0;i<scene.photos.length;i++) {
             Bitmap photo=scene.photos[i];
             PhotoPresentation.Box box=PhotoPresentation.fit(photo.getWidth(),photo.getHeight(),layout.slot(i,scene.photos.length));
             rect.set(box.x-6,box.y-6,box.x+box.width+6,box.y+box.height+6);
-            paint.setColor(0x48000000);canvas.drawRoundRect(rect,12,12,paint);
+            paint.setColor(0xfffaf8f1);canvas.drawRoundRect(rect,12,12,paint);
             rect.set(box.x,box.y,box.x+box.width,box.y+box.height);
             paint.setColor(Color.WHITE);canvas.drawBitmap(photo,null,rect,paint);
         }

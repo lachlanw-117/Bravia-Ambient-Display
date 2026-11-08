@@ -43,11 +43,11 @@ public final class SlideshowView extends FrameLayout {
         }
     }
     public SlideshowView(Context context) {
-        super(context);setBackgroundColor(0xff10181b);store=new PhotoStore(context);
+        super(context);setBackgroundColor(0xfff5f1e7);store=new PhotoStore(context);
         for(int i=0;i<2;i++) {
             scenes[i]=new PhotoSceneView(context);scenes[i].setAlpha(i==0?1f:0f);addView(scenes[i],new LayoutParams(-1,-1));
         }
-        empty=new TextView(context);empty.setTextColor(0xffc6cec7);empty.setGravity(Gravity.CENTER);
+        empty=new TextView(context);empty.setTextColor(0xff60665c);empty.setGravity(Gravity.CENTER);
         empty.setText("Your photos will appear here\nConnect the photo host in Wright Ambient setup.");
         addView(empty,new LayoutParams(-1,-1));
         panel=new InformationPanel(context);addView(panel,new LayoutParams(-1,-1));

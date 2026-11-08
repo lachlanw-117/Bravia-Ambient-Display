@@ -68,19 +68,19 @@ final class InformationPanel extends View {
         PhotoPresentation.Layout layout=new PhotoPresentation.Layout(getWidth(),getHeight());
         int save=canvas.save();canvas.scale(getWidth()/layout.width,getHeight()/layout.height);
         float h=layout.height,x=layout.panelLeft+h*0.045f,right=layout.width-h*0.045f,w=right-x;
-        paint.setColor(0xce10171a);canvas.drawRect(layout.panelLeft,0,layout.width,h,paint);
-        text(canvas,weekday,x,h*0.15f,h*0.018f,w,0xffb8b9af,normal);
-        paint.setTypeface(light);paint.setTextSize(h*0.078f);paint.setColor(0xfff6f1e6);
+        paint.setColor(0xfff5f1e7);canvas.drawRect(layout.panelLeft,0,layout.width,h,paint);
+        text(canvas,weekday,x,h*0.15f,h*0.018f,w,0xff60665c,normal);
+        paint.setTypeface(light);paint.setTextSize(h*0.078f);paint.setColor(0xff30342f);
         float clockWidth=paint.measureText(clock);
-        text(canvas,clock,x,h*0.255f,h*0.078f,w,0xfff6f1e6,light);
-        text(canvas,period,x+clockWidth+12,h*0.255f,h*0.023f,Math.max(1,w-clockWidth-12),0xffd4d5cd,normal);
-        text(canvas,date,x,h*0.305f,h*0.023f,w,0xffd4d5cd,normal);
+        text(canvas,clock,x,h*0.255f,h*0.078f,w,0xff30342f,light);
+        text(canvas,period,x+clockWidth+12,h*0.255f,h*0.023f,Math.max(1,w-clockWidth-12),0xff60665c,normal);
+        text(canvas,date,x,h*0.305f,h*0.023f,w,0xff60665c,normal);
         glyph(canvas,x,h*0.405f,h*0.09f);
-        text(canvas,temperature,x+h*0.115f,h*0.48f,h*0.07f,w-h*0.115f,0xfff6f1e6,light);
-        text(canvas,condition,x,h*0.55f,h*0.027f,w,0xffeeece2,normal);
-        text(canvas,forecast,x,h*0.60f,h*0.022f,w,0xffc9cbc1,normal);
-        paint.setColor(0x506d7c77);paint.setStrokeWidth(1);canvas.drawLine(x,h*0.66f,right,h*0.66f,paint);
-        text(canvas,status,x,h*0.705f,h*0.018f,w,0xffcbb895,normal);
+        text(canvas,temperature,x+h*0.115f,h*0.48f,h*0.07f,w-h*0.115f,0xff30342f,light);
+        text(canvas,condition,x,h*0.55f,h*0.027f,w,0xff30342f,normal);
+        text(canvas,forecast,x,h*0.60f,h*0.022f,w,0xff60665c,normal);
+        paint.setColor(0xffd5d6ca);paint.setStrokeWidth(1);canvas.drawLine(x,h*0.66f,right,h*0.66f,paint);
+        text(canvas,status,x,h*0.705f,h*0.018f,w,0xff795c32,normal);
         canvas.restoreToCount(save);
     }
     private void text(Canvas canvas,String text,float x,float baseline,float size,float width,int colour,Typeface face) {
@@ -92,23 +92,23 @@ final class InformationPanel extends View {
         int save=canvas.save();canvas.translate(x,y);canvas.scale(size/100,size/100);
         paint.setStrokeWidth(4);paint.setStrokeCap(Paint.Cap.ROUND);
         if(code.isEmpty()||code.equals("unknown")||code.equals("unavailable")) {
-            paint.setColor(0xffa3b0ac);canvas.drawLine(20,50,80,50,paint);canvas.restoreToCount(save);return;
+            paint.setColor(0xff60665c);canvas.drawLine(20,50,80,50,paint);canvas.restoreToCount(save);return;
         }
         if(code.equals("sunny")||code.equals("partlycloudy")) {
-            paint.setColor(0xffe7b76a);paint.setStyle(Paint.Style.FILL);canvas.drawCircle(64,32,18,paint);
+            paint.setColor(0xff976621);paint.setStyle(Paint.Style.FILL);canvas.drawCircle(64,32,18,paint);
             for(int i=0;i<8;i++) { double angle=i*Math.PI/4;canvas.drawLine(64+(float)Math.cos(angle)*25,32+(float)Math.sin(angle)*25,64+(float)Math.cos(angle)*32,32+(float)Math.sin(angle)*32,paint); }
         }
         if(code.equals("clear-night")) {
-            paint.setColor(0xffe9dfbd);paint.setStyle(Paint.Style.STROKE);rect.set(20,10,80,70);canvas.drawArc(rect,35,285,false,paint);
+            paint.setColor(0xff686047);paint.setStyle(Paint.Style.STROKE);rect.set(20,10,80,70);canvas.drawArc(rect,35,285,false,paint);
         } else if(!code.equals("sunny")) {
-            paint.setColor(0xffdce5df);paint.setStyle(Paint.Style.STROKE);
+            paint.setColor(0xff52645c);paint.setStyle(Paint.Style.STROKE);
             Path cloud=new Path();cloud.moveTo(24,72);cloud.cubicTo(-2,72,0,39,25,40);
             cloud.cubicTo(25,12,67,10,73,42);cloud.cubicTo(101,36,108,72,80,72);cloud.close();canvas.drawPath(cloud,paint);
             if(code.contains("rain")||code.equals("pouring")) {
-                paint.setColor(0xff97b9c2);for(int i=0;i<3;i++)canvas.drawLine(27+i*23,83,21+i*23,96,paint);
+                paint.setColor(0xff3f6c7a);for(int i=0;i<3;i++)canvas.drawLine(27+i*23,83,21+i*23,96,paint);
             }
             if(code.contains("lightning")) {
-                paint.setColor(0xffe7b76a);Path bolt=new Path();bolt.moveTo(60,72);bolt.lineTo(49,87);bolt.lineTo(61,87);bolt.lineTo(51,100);canvas.drawPath(bolt,paint);
+                paint.setColor(0xff976621);Path bolt=new Path();bolt.moveTo(60,72);bolt.lineTo(49,87);bolt.lineTo(61,87);bolt.lineTo(51,100);canvas.drawPath(bolt,paint);
             }
         }
         paint.setStyle(Paint.Style.FILL);canvas.restoreToCount(save);
