@@ -21,7 +21,10 @@ Checked items below describe recorded results, not a fresh live inspection.
 - [x] Commit/push Phase 1, open PRs and perform the separately approved branch trial.
 - [x] Finish scoped Phase 1 TV acceptance and debugging closeout; record tool
   evidence and user-reported ordinary playback, idle entry and Back dismissal.
-- [ ] Obtain Phase 1 merge approval. Do not start later phases automatically.
+- [x] Obtain Phase 1 merge approval and merge accepted PR #2.
+- [x] Prepare the separately authorised Phase 2 photo/sidebar candidate locally.
+- [ ] Complete Phase 2 Git/PR approval, approved TV trial, user visual acceptance
+  and debugging closeout before seeking merge approval; see [Phase 2](PHASE2.md).
 - [x] Disable TV debugging and verify TCP 5555 refuses connections; leave Developer
   options master enabled to preserve unreviewed settings. Reboot persistence untested.
 - [ ] Consider Google Ambient API partner access only if unattended album sync becomes essential.

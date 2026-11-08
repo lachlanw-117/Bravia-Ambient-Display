@@ -17,6 +17,8 @@ public final class PhotoStore {
     private final Context context;
     private volatile List<String> ids = Collections.emptyList();
     private volatile JSONObject weather = new JSONObject();
+    private final Object weatherLock=new Object();
+    private final Set<HttpURLConnection> requests=java.util.concurrent.ConcurrentHashMap.newKeySet();
     public PhotoStore(Context context) {
         this.context = context;
         root = new File(context.getFilesDir(), "ambient"); root.mkdirs();
@@ -51,14 +53,18 @@ public final class PhotoStore {
         } catch(Exception e) { return false; }
     }
     private HttpURLConnection connect(String route) throws Exception {
+        if(Thread.currentThread().isInterrupted())throw new InterruptedIOException();
         android.content.SharedPreferences prefs = context.getSharedPreferences("ambient",Context.MODE_PRIVATE);
         String base=prefs.getString("base","").replaceAll("/+$","");
         if(!allowedBase(base))throw new IOException("Configure a LAN HTTP or HTTPS address");
         HttpURLConnection c=(HttpURLConnection)new URL(base+route).openConnection();
         c.setInstanceFollowRedirects(false); c.setConnectTimeout(5000); c.setReadTimeout(10000);
         c.setRequestProperty("Authorization","Bearer "+prefs.getString("key",""));
-        if(c.getResponseCode()!=200){ c.disconnect(); throw new IOException("Feed unavailable"); }
-        return c;
+        requests.add(c);
+        try {
+            if(Thread.currentThread().isInterrupted()||c.getResponseCode()!=200)throw new IOException("Feed unavailable");
+            return c;
+        } catch(Exception error){requests.remove(c);c.disconnect();throw error;}
     }
     private byte[] get(String route,int limit) throws Exception {
         HttpURLConnection c=connect(route);
@@ -69,8 +75,9 @@ public final class PhotoStore {
                 total+=n;if(total>limit)throw new IOException("Response too large");out.write(buffer,0,n);
             }
             return out.toByteArray();
-        } finally { c.disconnect(); }
+        } finally { requests.remove(c);c.disconnect(); }
     }
+    public void cancelRequests() { for(HttpURLConnection request:requests)request.disconnect(); }
     public synchronized void sync() throws Exception {
         prune(ids); // Discard remnants of an interrupted previous transaction.
         JSONObject manifest = new JSONObject(new String(get("/manifest",65536),StandardCharsets.UTF_8));
@@ -107,13 +114,16 @@ public final class PhotoStore {
         write(new AtomicFile(new File(root,"manifest.json")),manifest.toString().getBytes(StandardCharsets.UTF_8));
         ids=Collections.unmodifiableList(next); prune(next);
     }
-    public synchronized void syncWeather() throws Exception {
-        byte[] bytes=get("/weather",32768);JSONObject next=new JSONObject(new String(bytes,StandardCharsets.UTF_8));
-        write(new AtomicFile(new File(root,"weather.json")),bytes);weather=next;
+    public void syncWeather() throws Exception {
+        synchronized(weatherLock) {
+            byte[] bytes=get("/weather",32768);JSONObject next=new JSONObject(new String(bytes,StandardCharsets.UTF_8));
+            if(Thread.currentThread().isInterrupted())throw new InterruptedIOException();
+            write(new AtomicFile(new File(root,"weather.json")),bytes);weather=next;
+        }
     }
     private void prune(List<String> keep) {
         File[] files=root.listFiles();if(files==null)return;
-        for(File f:files)if((Policy.validId(f.getName())&&!keep.contains(f.getName()))||f.getName().endsWith(".new"))f.delete();
+        for(File f:files)if(Policy.prunePhotoFile(f.getName(),keep))f.delete();
     }
     private static String read(AtomicFile file)throws Exception {return new String(file.readFully(),StandardCharsets.UTF_8);}
     private static void write(AtomicFile file,byte[] bytes)throws Exception {

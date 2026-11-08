@@ -51,7 +51,8 @@ default.
 
 ## D03 - Designs B and C, with adaptive portrait pairs
 
-**Status:** accepted design; Phase 2 and future Phase 7; not implemented.
+**Status:** Phase 2 locally implemented, with TV trial authorised but pending;
+future Phase 7 remains an accepted concept only. See [Phase 2](PHASE2.md).
 
 B is a photo area beside a clear information column. C is a dark aircraft map
 with selected-flight details and the shared notice layer. The generated mockups
@@ -106,7 +107,7 @@ and failure semantics. Sony input behaviour remains unverified for this feature.
 
 ## D07 - Prefer the installed BOM weather source
 
-**Status:** Phase 1 deployed and scoped acceptance/closeout verified on 8 November; not merged.
+**Status:** Phase 1 deployed, scoped acceptance/closeout verified and PR #2 merged on 8 November.
 
 Read-only inspection on 8 November identified the installed BOM component and
 its daily/hourly entities; household identifiers belong in the

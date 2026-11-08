@@ -2,131 +2,170 @@ package au.wright.ambient;
 
 import android.content.Context;
 import android.graphics.*;
-import android.graphics.drawable.GradientDrawable;
+import android.media.ExifInterface;
 import android.os.*;
 import android.view.*;
 import android.widget.*;
-import org.json.JSONObject;
-import java.io.File;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
+import java.io.*;
 import java.util.*;
 import java.util.concurrent.*;
 
-/** Two image layers and a permanent overlay; network and decoding stay off the UI thread. */
+/** Two bounded photo scenes; the independent information panel never crossfades. */
 public final class SlideshowView extends FrameLayout {
     private final Handler handler=new Handler(Looper.getMainLooper());
     private final PhotoStore store;
-    private final ImageView[] images=new ImageView[2];
-    private final TextView overlay;
+    private final PhotoSceneView[] scenes=new PhotoSceneView[2];
+    private final InformationPanel panel;
     private final TextView empty;
-    private ScheduledExecutorService worker;
+    private ScheduledExecutorService photoWorker,weatherWorker;
     private ExecutorService decoder;
     private volatile boolean running;
-    private volatile String photoStatus="Not checked", weatherStatus="Not checked";
-    private int generation=0,front=0,index=0;
-    private Bitmap[] bitmaps=new Bitmap[2];
-    public SlideshowView(Context context) {
-        super(context);setBackgroundColor(Color.BLACK);store=new PhotoStore(context);
-        for(int i=0;i<2;i++) {
-            images[i]=new ImageView(context);images[i].setScaleType(ImageView.ScaleType.FIT_CENTER);
-            images[i].setAlpha(i==0?1f:0f);addView(images[i],new LayoutParams(-1,-1));
+    private volatile int generation;
+    private volatile String photoStatus="Waiting for photos";
+    private int front;
+    private boolean photoQueued;
+    private Sequence sequence;
+    private static final class Sequence { List<String> album=Collections.emptyList();int index; }
+    private static final class Source {
+        final File file;
+        final int width,height,orientation;
+        Source(File file) throws IOException {
+            this.file=file;
+            BitmapFactory.Options options=new BitmapFactory.Options();options.inJustDecodeBounds=true;
+            BitmapFactory.decodeFile(file.getPath(),options);
+            if(options.outWidth<=0||options.outHeight<=0)throw new IOException("Photo unavailable");
+            int exif=ExifInterface.ORIENTATION_NORMAL;
+            try { exif=new ExifInterface(file.getPath()).getAttributeInt(ExifInterface.TAG_ORIENTATION,ExifInterface.ORIENTATION_NORMAL); }
+            catch(IOException ignored){}
+            orientation=exif;
+            boolean swap=exif>=5&&exif<=8;
+            width=swap?options.outHeight:options.outWidth;height=swap?options.outWidth:options.outHeight;
         }
-        empty=new TextView(context);empty.setText("Waiting for family photos\nOpen Wright Ambient setup to check the photo host.");
-        empty.setTextColor(0xffaaaaaa);empty.setTextSize(20);empty.setGravity(Gravity.CENTER);addView(empty,new LayoutParams(-1,-1));
-        overlay=new TextView(context);overlay.setTextColor(Color.argb(220,255,255,255));
-        overlay.setTextSize(20);overlay.setGravity(Gravity.RIGHT);overlay.setShadowLayer(3,0,1,Color.BLACK);
-        overlay.setPadding(dp(28),dp(16),dp(28),dp(16));
-        overlay.setBackground(new GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT,new int[]{Color.TRANSPARENT,0x90000000}));
-        LayoutParams p=new LayoutParams(-2,-2,Gravity.BOTTOM|Gravity.RIGHT);p.setMargins(dp(24),dp(24),dp(24),dp(24));addView(overlay,p);
     }
-    private int dp(int n){return (int)(n*getResources().getDisplayMetrics().density);}
+    public SlideshowView(Context context) {
+        super(context);setBackgroundColor(0xff10181b);store=new PhotoStore(context);
+        for(int i=0;i<2;i++) {
+            scenes[i]=new PhotoSceneView(context);scenes[i].setAlpha(i==0?1f:0f);addView(scenes[i],new LayoutParams(-1,-1));
+        }
+        empty=new TextView(context);empty.setTextColor(0xffc6cec7);empty.setGravity(Gravity.CENTER);
+        empty.setText("Your photos will appear here\nConnect the photo host in Wright Ambient setup.");
+        addView(empty,new LayoutParams(-1,-1));
+        panel=new InformationPanel(context);addView(panel,new LayoutParams(-1,-1));
+    }
+    @Override protected void onSizeChanged(int w,int h,int oldW,int oldH) {
+        super.onSizeChanged(w,h,oldW,oldH);
+        LayoutParams layout=(LayoutParams)empty.getLayoutParams();layout.width=(int)(w*0.72f);empty.setLayoutParams(layout);
+        empty.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX,h*0.025f);
+        if(running&&!photoQueued){handler.removeCallbacks(advance);handler.post(advance);}
+    }
     public void start() {
-        if(running)return;running=true;generation++;index=0;
-        worker=Executors.newSingleThreadScheduledExecutor();
-        decoder=Executors.newSingleThreadExecutor();
-        handler.post(tick);queuePhoto();
-        worker.scheduleWithFixedDelay(()->{
-            if(!running)return;
-            try{store.sync();photoStatus="Album cached";}catch(Exception ignored){photoStatus="No album cached (empty feed or connection failure)";}
-            if(!running)return;
-            try{store.syncWeather();weatherStatus="Feed received";}catch(Exception ignored){weatherStatus="Feed unavailable";}
+        if(running)return;running=true;final int ticket=++generation;
+        sequence=new Sequence();front=0;photoQueued=false;photoStatus="Waiting for photos";
+        photoWorker=Executors.newSingleThreadScheduledExecutor();weatherWorker=Executors.newSingleThreadScheduledExecutor();
+        decoder=Executors.newSingleThreadExecutor();handler.post(tick);handler.post(advance);
+        photoWorker.scheduleWithFixedDelay(()->{
+            if(!running||ticket!=generation)return;
+            try {store.sync();if(ticket==generation)photoStatus="Photos ready";}
+            catch(Exception ignored){if(ticket==generation)photoStatus="Waiting for the photo host";}
+        },0,300,TimeUnit.SECONDS);
+        weatherWorker.scheduleWithFixedDelay(()->{
+            if(!running||ticket!=generation)return;
+            try {store.syncWeather();}catch(Exception ignored){}
         },0,300,TimeUnit.SECONDS);
     }
     public void stop() {
-        if(!running)return;running=false;generation++;handler.removeCallbacksAndMessages(null);
-        if(worker!=null)worker.shutdownNow();
-        if(decoder!=null)decoder.shutdownNow();
-        for(int i=0;i<2;i++){images[i].animate().cancel();images[i].setImageDrawable(null);if(bitmaps[i]!=null){bitmaps[i].recycle();bitmaps[i]=null;}}
+        if(!running)return;running=false;generation++;handler.removeCallbacksAndMessages(null);photoQueued=false;
+        if(photoWorker!=null)photoWorker.shutdownNow();if(weatherWorker!=null)weatherWorker.shutdownNow();
+        if(decoder!=null)decoder.shutdownNow();store.cancelRequests();
+        for(PhotoSceneView scene:scenes){scene.animate().cancel();scene.clear();}
     }
-    private final Runnable tick=new Runnable(){public void run(){if(running){updateOverlay();handler.postDelayed(this,1000);}}};
+    private final Runnable tick=new Runnable(){public void run(){if(running){
+        panel.update(store.weather(),new Date());
+        if(empty.getVisibility()==VISIBLE)empty.setText("Your photos will appear here\n"+photoStatus+"\nOpen Wright Ambient setup to check the connection.");
+        handler.postDelayed(this,1000);
+    }}};
     private final Runnable advance=()->queuePhoto();
     private void queuePhoto() {
-        if(!running||decoder==null)return;final int ticket=generation;
+        if(!running||decoder==null||photoQueued||getWidth()==0||getHeight()==0)return;
+        photoQueued=true;handler.removeCallbacks(advance);final int ticket=generation;
+        final Sequence cursor=sequence;
+        final PhotoPresentation.Layout layout=new PhotoPresentation.Layout(getWidth(),getHeight());
+        final boolean pairs=getContext().getSharedPreferences("ambient",Context.MODE_PRIVATE).getBoolean("portrait_pairs",true);
         decoder.execute(()->{
-            List<String> photos=store.photos();Bitmap bitmap=null;
-            for(int attempt=0;attempt<photos.size();attempt++) {
-                File photo=store.file(photos.get((index++)%photos.size()));
-                try {
-                    if(Build.VERSION.SDK_INT>=28) bitmap=ImageDecoder.decodeBitmap(ImageDecoder.createSource(photo),(decoder,info,source)->{
-                        int sample=Policy.sampleSize(info.getSize().getWidth(),info.getSize().getHeight());
-                        decoder.setTargetSampleSize(sample);decoder.setAllocator(ImageDecoder.ALLOCATOR_SOFTWARE);
-                    });
-                    else {
-                        BitmapFactory.Options o=new BitmapFactory.Options();o.inJustDecodeBounds=true;BitmapFactory.decodeFile(photo.getPath(),o);
-                        o.inSampleSize=Policy.sampleSize(o.outWidth,o.outHeight);o.inJustDecodeBounds=false;bitmap=BitmapFactory.decodeFile(photo.getPath(),o);
-                    }
-                    if(bitmap!=null)break;
-                } catch(Exception|OutOfMemoryError ignored){}
-            }
-            final Bitmap decoded=bitmap;
+            PhotoSceneView.Scene decoded=loadGroup(cursor,layout,pairs);
             handler.post(()->{
                 if(!running||ticket!=generation){if(decoded!=null)decoded.recycle();return;}
-                if(decoded!=null)show(decoded);
+                photoQueued=false;
+                if(decoded!=null)show(decoded,ticket);
                 int seconds=Policy.slideSeconds(getContext().getSharedPreferences("ambient",Context.MODE_PRIVATE).getInt("seconds",30));
                 handler.postDelayed(advance,decoded==null?5000:seconds*1000L);
             });
         });
     }
-    private void show(Bitmap bitmap) {
+    private PhotoSceneView.Scene loadGroup(Sequence cursor,PhotoPresentation.Layout layout,boolean pairs) {
+        List<String> photos=store.photos();
+        if(!photos.equals(cursor.album)){cursor.album=photos;cursor.index=0;}
+        for(int attempt=0;attempt<photos.size()&&!Thread.currentThread().isInterrupted();attempt++) {
+            int index=cursor.index;
+            cursor.index=PhotoPresentation.nextIndex(index,1,photos.size());
+            Bitmap first=null,second=null;
+            try {
+                Source source=new Source(store.file(photos.get(index))),next=null;
+                if(pairs&&PhotoPresentation.portrait(source.width,source.height)&&index+1<photos.size()) {
+                    try {next=new Source(store.file(photos.get(index+1)));}catch(IOException ignored){}
+                }
+                int count=PhotoPresentation.groupSize(pairs,index,photos.size(),source.width,source.height,
+                    next==null?0:next.width,next==null?0:next.height,layout);
+                first=decode(source,layout.slot(0,count));
+                if(first==null)continue;
+                if(count==2) {
+                    // A failed second image is skipped without losing or reordering the first.
+                    cursor.index=PhotoPresentation.nextIndex(index,2,photos.size());
+                    try {second=decode(next,layout.slot(1,2));}catch(IOException|OutOfMemoryError ignored){}
+                }
+                if(Thread.currentThread().isInterrupted()){first.recycle();if(second!=null)second.recycle();return null;}
+                return new PhotoSceneView.Scene(second==null?new Bitmap[]{first}:new Bitmap[]{first,second});
+            } catch(IOException|RuntimeException|OutOfMemoryError ignored) {
+                if(first!=null)first.recycle();if(second!=null)second.recycle();
+            }
+        }
+        return null;
+    }
+    private Bitmap decode(Source source,PhotoPresentation.Box slot) throws IOException {
+        if(Thread.currentThread().isInterrupted())throw new InterruptedIOException();
+        int[] size=PhotoPresentation.decodeSize(source.width,source.height,slot);
+        if(Build.VERSION.SDK_INT>=28)return ImageDecoder.decodeBitmap(ImageDecoder.createSource(source.file),(decoder,info,input)->{
+            decoder.setTargetSize(size[0],size[1]);decoder.setAllocator(ImageDecoder.ALLOCATOR_SOFTWARE);
+            decoder.setTargetColorSpace(ColorSpace.get(ColorSpace.Named.SRGB));
+        });
+        // Native EXIF support keeps complete images correctly oriented on API 26-27 too.
+        BitmapFactory.Options options=new BitmapFactory.Options();int sample=1;
+        options.inPreferredConfig=Bitmap.Config.ARGB_8888;options.inPreferredColorSpace=ColorSpace.get(ColorSpace.Named.SRGB);
+        while(source.width/sample>size[0]||source.height/sample>size[1])sample*=2;
+        options.inSampleSize=sample;
+        Bitmap bitmap=BitmapFactory.decodeFile(source.file.getPath(),options);if(bitmap==null)return null;
+        Matrix matrix=new Matrix();
+        switch(source.orientation) {
+            case 2:matrix.setScale(-1,1);break;
+            case 3:matrix.setRotate(180);break;
+            case 4:matrix.setRotate(180);matrix.postScale(-1,1);break;
+            case 5:matrix.setRotate(90);matrix.postScale(-1,1);break;
+            case 6:matrix.setRotate(90);break;
+            case 7:matrix.setRotate(-90);matrix.postScale(-1,1);break;
+            case 8:matrix.setRotate(-90);break;
+            default:return bitmap;
+        }
+        try {Bitmap rotated=Bitmap.createBitmap(bitmap,0,0,bitmap.getWidth(),bitmap.getHeight(),matrix,true);if(rotated!=bitmap)bitmap.recycle();return rotated;}
+        catch(RuntimeException|OutOfMemoryError error){bitmap.recycle();throw error;}
+    }
+    private void show(PhotoSceneView.Scene group,int ticket) {
         empty.setVisibility(GONE);
         final int next=1-front,old=front;
-        images[next].animate().cancel();images[old].animate().cancel();
-        images[next].setImageDrawable(null);if(bitmaps[next]!=null)bitmaps[next].recycle();bitmaps[next]=bitmap;
-        images[next].setImageBitmap(bitmap);images[next].setAlpha(0f);images[next].animate().alpha(1f).setDuration(1500).start();
-        images[old].animate().alpha(0f).setDuration(1500).start();front=next;
-    }
-    private static String conditionLabel(String condition) {
-        switch(condition) {
-            case "partlycloudy": return "Partly cloudy";
-            case "clear-night": return "Clear night";
-            case "lightning-rainy": return "Thunderstorms and rain";
-            case "lightning": return "Thunderstorms";
-            case "snowy-rainy": return "Sleet";
-            case "windy-variant": return "Windy and cloudy";
-            case "pouring": return "Heavy rain";
-            case "exceptional": return "Exceptional weather";
-            case "": case "unknown": case "unavailable": return "Weather unavailable";
-            default:
-                String label=condition.replace('-',' ').replace('_',' ');
-                return label.substring(0,1).toUpperCase(Locale.ROOT)+label.substring(1);
-        }
-    }
-    private void updateOverlay() {
-        if(empty.getVisibility()==VISIBLE)empty.setText("Wright Ambient - infrastructure trial\nNo photos required\n\nPhotos: "+photoStatus+"\nWeather: "+weatherStatus+"\nRefresh runs at entry and every five minutes.\nA received weather feed may still contain no weather readings.");
-        JSONObject w=store.weather();TimeZone zone=TimeZone.getTimeZone(w.optString("timeZone","Australia/Sydney"));
-        Date now=new Date();SimpleDateFormat time=new SimpleDateFormat("h:mm a",Locale.getDefault());time.setTimeZone(zone);
-        SimpleDateFormat day=new SimpleDateFormat("EEE, d MMM yyyy",Locale.getDefault());day.setTimeZone(zone);
-        SimpleDateFormat key=new SimpleDateFormat("yyyy-MM-dd",Locale.ROOT);key.setTimeZone(zone);
-        String weather="Weather unavailable";
-        if(!w.isNull("temperature")&&w.has("temperature")) {
-            weather=String.format(Locale.getDefault(),"%.0f%s  %s",w.optDouble("temperature"),w.optString("unit","°C"),conditionLabel(w.optString("condition","")));
-            if(key.format(now).equals(w.optString("forecastDay"))&&!w.isNull("high")&&!w.isNull("low"))
-                weather+=String.format(Locale.getDefault(),"\nHigh %.0f°  Low %.0f°",w.optDouble("high"),w.optDouble("low"));
-            boolean stale=w.optBoolean("stale",true)||w.optBoolean("forecastStale",false);
-            try{stale|=now.getTime()-Instant.parse(w.getString("fetchedAt")).toEpochMilli()>1800000;}catch(Exception e){stale=true;}
-            if(stale)weather+="  · cached";
-        }
-        overlay.setText(time.format(now)+"\n"+day.format(now)+"\n"+weather);
+        scenes[next].animate().cancel();scenes[old].animate().cancel();
+        scenes[next].setScene(group);scenes[next].setAlpha(0f);
+        scenes[next].animate().alpha(1f).setDuration(1500).start();
+        scenes[old].animate().alpha(0f).setDuration(1500).withEndAction(()->{
+            if(ticket==generation&&front!=old)scenes[old].clear();
+        }).start();front=next;
     }
 }

@@ -1,10 +1,11 @@
 # Bravia implementation roadmap
 
 Accepted design recorded on 8 November 2026. Phase 0 is implemented as repository
-documentation. Phase 1 local work was authorised on 8 November and is prepared
-for review, then trial-deployed with approval; [its implementation record](PHASE1.md)
-records passed scoped TV acceptance/closeout and pending merge approval.
-Phases 2-6 remain planned and require separate authorisation;
+documentation. Phase 1 was trial-deployed with approval, passed scoped acceptance
+and closeout, then merged with approval on 8 November; see [its record](PHASE1.md).
+Phase 2 local work and TV trial were subsequently authorised; its
+[candidate record](PHASE2.md) distinguishes preparation from deployment and
+acceptance. Phases 3-6 remain planned and require separate authorisation;
 Phase 7 requires a later implementation plan. Accepting this roadmap is not
 approval to deploy, operate devices or progress automatically to another phase.
 
@@ -137,8 +138,10 @@ must be recorded explicitly in trial/household notes.
 Phase 0 was authorised and implemented locally on 8 November 2026. No app, HA or
 device changes were made during Phase 0. Phase 1 local implementation was then
 authorised and trial-deployed; scoped TV acceptance/closeout passed, with merge
-approval still pending.
-Phases 2-6 have accepted designs, not implementation or deployment authorisation.
+approval was subsequently supplied and PR #2 merged as
+`49f8b8e8173e8265a58a08d24032f665657d43d3`. Phase 2 local implementation and a TV
+trial were then authorised; Git operations for that new phase remain separately
+governed. Phases 3-6 have accepted designs, not implementation or deployment authorisation.
 Commit/push/merge approval was supplied separately
 for repository consolidation on 8 November; it does not authorise live changes
 or later feature phases. See [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow.
