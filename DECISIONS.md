@@ -51,7 +51,7 @@ default.
 
 ## D03 - Designs B and C, with adaptive portrait pairs
 
-**Status:** Phase 2 trial-deployed and visually accepted; ordinary-use checks pending;
+**Status:** Phase 2 trial-deployed with scoped visual/ordinary-use acceptance recorded;
 future Phase 7 remains an accepted concept only. See [Phase 2](PHASE2.md).
 
 B is a photo area beside a clear information column. C is a dark aircraft map

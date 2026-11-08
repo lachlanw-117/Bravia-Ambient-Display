@@ -3,7 +3,9 @@
 ## Status - 8 November 2026
 
 Phase 2 is trial-deployed; the user accepted the cream palette. Debugging is
-closed; ordinary idle/physical Back checks with debugging off remain pending. Implementation, TV deployment, commits, pushes and PRs were explicitly
+closed; the user confirmed ordinary idle entry and physical Back dismissal both
+work normally with debugging disabled. Relevant Phase 2 acceptance is complete;
+separate merge approval remains required. Implementation, TV deployment, commits, pushes and PRs were explicitly
 approved. Bravia [PR #3](https://github.com/lachlanw-117/Bravia-Ambient-Display/pull/3)
 and companion HA [PR #6](https://github.com/lachlanw-117/Wright-Home-Assistant/pull/6)
 remain open; no Phase 2 merge is approved.
@@ -32,7 +34,8 @@ Setup confirmed 60 seconds persisted through installation, with pairing enabled.
 The interval remains configurable from 10 to 300 seconds; the source default is 30.
 After cream acceptance, ADB was disabled and TCP 5555 returned ECONNREFUSED.
 Developer options master remains on to preserve unreviewed settings. Reboot
-persistence is untested. Ordinary idle/physical Back checks remain user-pending.
+persistence is untested. The user subsequently confirmed both ordinary idle entry and physical Back
+dismissal work normally with debugging disabled.
 
 ## What changes and why
 
@@ -119,8 +122,7 @@ from the Phase 1 baseline with different content.
 
 Injected Back dismissed the actual dream and returned Preview to setup. The earlier
 brighter dark revision was inspected in Preview before user feedback prompted the
-current cream revision. The user accepted the cream palette and debugging was closed. Physical remote/
-ordinary idle checks with debugging disabled remain pending. HDMI, streaming, power, failure/recovery and
+current cream revision. The user accepted the cream palette and debugging was closed. The user confirmed physical Back and ordinary idle entry with debugging disabled. HDMI, streaming, power, failure/recovery and
 older-Android output remain unverified. Private screenshots/profiles stay outside Git.
 
 ## Album ordering
@@ -135,7 +137,7 @@ again. Private screenshots of the uninterrupted cream preview confirmed differen
 pairs at successive minutes. The user asked for an explanation, not an ordering
 change; no shuffle or persistent cursor was added.
 
-## Approved trial scope and remaining gate
+## Completed trial scope and remaining merge gate
 
 The source commit/PR gate passed. Installations used only TV APK `install -r`,
 preserving its key, settings, cached album and signing identity. The user approved
