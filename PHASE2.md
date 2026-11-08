@@ -170,3 +170,51 @@ Host and household configuration are unchanged. Verify photo/weather playback
 and ordinary dismissal again and record the actual outcome. Artifact hashes,
 not version 0.1.0 alone, identify these trial builds; a release/versioning policy
 for a published milestone remains separate.
+
+## Accepted weather refinement design - not implemented
+
+Household feedback accepted the cream palette and existing native text sizes,
+but requested explicit Now/Today labels, today's forecast condition, tomorrow's
+condition/high/low, and honest freshness information. A first mockup was too dense
+and oversized. The revised concept moves information upward, preserves small
+native-style text and reserves the entire area below the existing divider for
+future HA notices. No placeholder notice appears when the area is empty.
+
+The user accepted the revised minimalist mockup. This accepts the design, not
+permission to deploy a weather-feed/schema change.
+Verify BOM's daily forecast fields and actual timestamp availability before building.
+A last-successful-check label must not be presented as observation or forecast issue
+age. The revised preview uses illustrative scenic photographs and weather values;
+no household photo was sent for image generation. Tomorrow's forecast and these
+new labels are not in the installed APK. Existing Phase 2 acceptance remains scoped
+to the installed cream photo-presentation revision.
+
+## Unplanned outage observation - 8 November 2026
+
+At approximately 16:24 Australia/Sydney, following the user's report of an
+electrical interruption affecting internet, LAN and Pi, read-only checks found:
+
+- HA HTTP returned 200 and its normal web port accepted connections.
+- Photo host health returned 200 with ok=true; unauthenticated weather returned
+  401. This proves service reachability and rejection, not authenticated weather
+  freshness or the complete album.
+- TV ADB port returned ECONNREFUSED: the closed debugging port stayed closed
+  through the reported incident. The check does not independently prove TV reboot.
+- The previously used Pi SSH connection returned connection refused. No remote
+  command ran, so app startup policy, uptime and Core/app process status could not
+  be established over that route. The user subsequently reported that Terminal & SSH and the Thread border router
+  had not recovered, and manually started both in HA UI. Their startup settings
+  and the cause of the failure were not independently inspected. The agent made
+  no restart or configuration change.
+- The user confirmed photos and weather look normal after the outage, with no
+  reported waiting/cached warning. This establishes visible recovery, not verified
+  BOM observation age. Internet/BOM upstream recovery and full HA device health
+  have not been established by the HTTP checks.
+
+No live repair, deployment, service restart or debugging enablement was performed.
+This is partial recovery evidence, not a blanket failure/recovery acceptance pass.
+
+The accepted weather concept is now scoped in [WEATHER_REFINEMENT.md](WEATHER_REFINEMENT.md);
+that document records source semantics, compatibility, validation and the separate
+trial gate. The user subsequently authorised local refinement implementation on
+separate stacked branches; no refinement deployment or merge has occurred.

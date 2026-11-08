@@ -59,9 +59,10 @@ Run the policy harness with JDK 21, creating the output directory first:
 
 ```sh
 mkdir -p build/policy-tests
-javac -d build/policy-tests android/src/au/wright/ambient/Policy.java android/src/au/wright/ambient/PhotoPresentation.java android/test/PolicyTest.java android/test/PhotoPresentationTest.java
+javac -d build/policy-tests android/src/au/wright/ambient/Policy.java android/src/au/wright/ambient/PhotoPresentation.java android/test/PolicyTest.java android/test/PhotoPresentationTest.java android/src/au/wright/ambient/WeatherPresentation.java android/test/WeatherPresentationTest.java
 java -cp build/policy-tests PolicyTest
 java -cp build/policy-tests PhotoPresentationTest
+java -cp build/policy-tests WeatherPresentationTest
 ```
 
 The full Windows APK build remains the separate process in [README.md](README.md).

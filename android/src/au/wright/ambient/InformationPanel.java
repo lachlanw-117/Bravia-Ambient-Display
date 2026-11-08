@@ -5,14 +5,14 @@ import android.graphics.*;
 import android.view.View;
 import org.json.JSONObject;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
 import java.util.*;
 
 /** Quiet clock/weather sidebar. No notices, provider-credit line or device controls. */
 final class InformationPanel extends View {
     private final Paint paint=new Paint(Paint.ANTI_ALIAS_FLAG);
     private final RectF rect=new RectF();
-    private String clock="",period="",weekday="",date="",temperature="—",condition="Weather unavailable",forecast="",status="",code="";
+    private WeatherPresentation.Forecast today,tomorrow;
+    private String clock="",period="",weekday="",date="",temperature="\u2014",status="";
     private final Typeface light=Typeface.create("sans-serif-light",Typeface.NORMAL);
     private final Typeface normal=Typeface.create("sans-serif",Typeface.NORMAL);
     private String lastContent="";
@@ -28,40 +28,37 @@ final class InformationPanel extends View {
         weekday=format("EEEE",now,zone).toUpperCase(Locale.getDefault());date=format("d MMMM yyyy",now,zone);
         boolean available=weather.has("temperature")&&!weather.isNull("temperature")&&Double.isFinite(weather.optDouble("temperature"));
         temperature=available?String.format(Locale.getDefault(),"%.0f%s",weather.optDouble("temperature"),weather.optString("unit","°C")):"—";
-        code=available?weather.optString("condition",""):"";condition=conditionLabel(code);
-        forecast="";
-        if(available&&format("yyyy-MM-dd",now,zone).equals(weather.optString("forecastDay"))) {
-            String high=value(weather,"high"),low=value(weather,"low");
-            if(!high.isEmpty()||!low.isEmpty())forecast="High "+(high.isEmpty()?"—":high)+"   Low "+(low.isEmpty()?"—":low);
+        java.time.Instant instant=now.toInstant();
+        java.time.LocalDate local=WeatherPresentation.day(instant,zone.getID());
+        List<WeatherPresentation.Forecast> rows=new ArrayList<>();
+        org.json.JSONArray daily=weather.optJSONArray("dailyForecasts");
+        if(daily!=null)for(int i=0;i<Math.min(daily.length(),2);i++) {
+            JSONObject row=daily.optJSONObject(i);if(row==null)continue;
+            rows.add(new WeatherPresentation.Forecast(row.optString("date"),row.optString("condition",null),
+                number(row,"high"),number(row,"low"),row.optString("checkedAt",null),
+                row.optBoolean("cached",false)||row.optBoolean("stale",false)));
         }
-        boolean stale=weather.optBoolean("stale",true);
-        try { stale|=now.getTime()-Instant.parse(weather.getString("fetchedAt")).toEpochMilli()>1800000; }
-        catch(Exception ignored){stale=true;}
-        status=!available?"Waiting for weather":stale?"Cached weather":
-            !forecast.isEmpty()&&weather.optBoolean("forecastStale",true)?"Cached forecast":"";
-        String content=weekday+" "+clock+" "+period+" "+date+" "+temperature+" "+condition+" "+forecast+" "+status;
+        // Legacy host compatibility supplies today's range, never a guessed condition.
+        if(daily==null&&local.toString().equals(weather.optString("forecastDay")))
+            rows.add(new WeatherPresentation.Forecast(local.toString(),null,number(weather,"high"),number(weather,"low"),
+                weather.optString("forecastAt",null),weather.optBoolean("forecastStale",true)));
+        today=WeatherPresentation.find(rows,local);tomorrow=WeatherPresentation.find(rows,local.plusDays(1));
+        long fetchedAge=WeatherPresentation.age(weather.optString("fetchedAt",null),instant);
+        long reportAge=WeatherPresentation.age(weather.optString("haReportedAt",weather.optString("observedAt",null)),instant);
+        boolean stale=weather.optBoolean("stale",true)||fetchedAge<0||fetchedAge>1800||reportAge<0||reportAge>10800;
+        status=!available?"Waiting for weather":WeatherPresentation.freshness(weather.optString("fetchedAt",null),stale,today,tomorrow,instant);
+        String content=weekday+" "+clock+" "+period+" "+date+" Now "+temperature+
+            " Today "+forecastContent(today)+" Tomorrow "+forecastContent(tomorrow)+" "+status;
         if(!content.equals(lastContent)){lastContent=content;setContentDescription(content);invalidate();}
     }
-    private static String value(JSONObject weather,String key) {
-        return weather.has(key)&&!weather.isNull(key)&&Double.isFinite(weather.optDouble(key))
-            ?String.format(Locale.getDefault(),"%.0f°",weather.optDouble(key)):"";
+    private static Double number(JSONObject row,String key) {
+        return row.has(key)&&!row.isNull(key)&&Double.isFinite(row.optDouble(key))?row.optDouble(key):null;
+    }
+    private static String forecastContent(WeatherPresentation.Forecast row) {
+        return WeatherPresentation.condition(row==null?null:row.condition)+" "+WeatherPresentation.range(row);
     }
     private static String format(String pattern,Date now,TimeZone zone) {
         SimpleDateFormat formatter=new SimpleDateFormat(pattern,Locale.getDefault());formatter.setTimeZone(zone);return formatter.format(now);
-    }
-    private static String conditionLabel(String value) {
-        switch(value) {
-            case "partlycloudy":return "Partly cloudy";
-            case "clear-night":return "Clear night";
-            case "lightning-rainy":return "Thunderstorms and rain";
-            case "lightning":return "Thunderstorms";
-            case "snowy-rainy":return "Sleet";
-            case "windy-variant":return "Windy and cloudy";
-            case "pouring":return "Heavy rain";
-            case "exceptional":return "Exceptional weather";
-            case "":case "unknown":case "unavailable":return "Weather unavailable";
-            default:String label=value.replace('-',' ').replace('_',' ');return label.substring(0,1).toUpperCase(Locale.ROOT)+label.substring(1);
-        }
     }
     @Override protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);if(getWidth()==0||getHeight()==0)return;
@@ -69,26 +66,36 @@ final class InformationPanel extends View {
         int save=canvas.save();canvas.scale(getWidth()/layout.width,getHeight()/layout.height);
         float h=layout.height,x=layout.panelLeft+h*0.045f,right=layout.width-h*0.045f,w=right-x;
         paint.setColor(0xfff5f1e7);canvas.drawRect(layout.panelLeft,0,layout.width,h,paint);
-        text(canvas,weekday,x,h*0.15f,h*0.018f,w,0xff60665c,normal);
+        text(canvas,weekday,x,h*0.07f,h*0.018f,w,0xff60665c,normal);
         paint.setTypeface(light);paint.setTextSize(h*0.078f);paint.setColor(0xff30342f);
         float clockWidth=paint.measureText(clock);
-        text(canvas,clock,x,h*0.255f,h*0.078f,w,0xff30342f,light);
-        text(canvas,period,x+clockWidth+12,h*0.255f,h*0.023f,Math.max(1,w-clockWidth-12),0xff60665c,normal);
-        text(canvas,date,x,h*0.305f,h*0.023f,w,0xff60665c,normal);
-        glyph(canvas,x,h*0.405f,h*0.09f);
-        text(canvas,temperature,x+h*0.115f,h*0.48f,h*0.07f,w-h*0.115f,0xff30342f,light);
-        text(canvas,condition,x,h*0.55f,h*0.027f,w,0xff30342f,normal);
-        text(canvas,forecast,x,h*0.60f,h*0.022f,w,0xff60665c,normal);
+        text(canvas,clock,x,h*0.16f,h*0.078f,w,0xff30342f,light);
+        text(canvas,period,x+clockWidth+12,h*0.16f,h*0.023f,Math.max(1,w-clockWidth-12),0xff60665c,normal);
+        text(canvas,date,x,h*0.205f,h*0.023f,w,0xff60665c,normal);
+        text(canvas,"NOW",x,h*0.265f,h*0.018f,w,0xff60665c,normal);
+        text(canvas,temperature,x,h*0.35f,h*0.07f,w,0xff30342f,light);
+        forecast(canvas,"TODAY",today,x,h*0.425f,h,w);
+        forecast(canvas,"TOMORROW",tomorrow,x,h*0.525f,h,w);
+        text(canvas,status,x,h*0.635f,h*0.018f,w,0xff60665c,normal);
         paint.setColor(0xffd5d6ca);paint.setStrokeWidth(1);canvas.drawLine(x,h*0.66f,right,h*0.66f,paint);
-        text(canvas,status,x,h*0.705f,h*0.018f,w,0xff795c32,normal);
+        // The region below the divider is reserved for a separately approved notice phase.
         canvas.restoreToCount(save);
+    }
+    private void forecast(Canvas canvas,String label,WeatherPresentation.Forecast row,float x,float baseline,float h,float w) {
+        text(canvas,label,x,baseline,h*0.018f,w,0xff60665c,normal);
+        String forecastCode=row==null?null:row.condition;
+        boolean icon=!WeatherPresentation.condition(forecastCode).equals("Forecast unavailable");
+        if(icon)glyph(canvas,x,baseline+h*0.005f,h*0.028f,forecastCode);
+        float inset=icon?h*0.043f:0;
+        text(canvas,WeatherPresentation.condition(forecastCode),x+inset,baseline+h*0.03f,h*0.022f,w-inset,0xff30342f,normal);
+        text(canvas,WeatherPresentation.range(row),x,baseline+h*0.057f,h*0.022f,w,0xff60665c,normal);
     }
     private void text(Canvas canvas,String text,float x,float baseline,float size,float width,int colour,Typeface face) {
         if(text.isEmpty())return;paint.setTypeface(face);paint.setTextSize(size);
         float measured=paint.measureText(text);if(measured>width)paint.setTextSize(size*width/measured);
         paint.setColor(colour);paint.setStyle(Paint.Style.FILL);canvas.drawText(text,x,baseline,paint);
     }
-    private void glyph(Canvas canvas,float x,float y,float size) {
+    private void glyph(Canvas canvas,float x,float y,float size,String code) {
         int save=canvas.save();canvas.translate(x,y);canvas.scale(size/100,size/100);
         paint.setStrokeWidth(4);paint.setStrokeCap(Paint.Cap.ROUND);
         if(code.isEmpty()||code.equals("unknown")||code.equals("unavailable")) {

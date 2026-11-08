@@ -63,27 +63,47 @@ export class Album {
   }
 }
 
-export function selectForecast(rows, now, zone) {
-  const today = localDay(now, zone);
+export function calendarDay(day, offset) {
+  const date = new Date(day + 'T12:00:00Z');
+  date.setUTCDate(date.getUTCDate() + offset);
+  return date.toISOString().slice(0, 10);
+}
+export function selectForecast(rows, now, zone, day = localDay(now, zone)) {
   if (!Array.isArray(rows)) return undefined;
   return rows.find(r => {
     const stamp = r?.datetime;
     if (typeof stamp !== 'string') return false;
+    const calendar = stamp.slice(0, 10);
+    const calendarStamp = Date.parse(calendar + 'T00:00:00Z');
+    if (!Number.isFinite(calendarStamp) || new Date(calendarStamp).toISOString().slice(0, 10) !== calendar) return false;
     // BOM publishes local wall time without an offset. Its date already belongs
     // to the configured HA timezone; never interpret it in the Node host's zone.
     if (/^\d{4}-\d{2}-\d{2}(?:T\d{2}:\d{2}:\d{2}(?:\.\d+)?)?$/.test(stamp))
-      return Number.isFinite(Date.parse(stamp + (stamp.length === 10 ? 'T00:00:00Z' : 'Z'))) && stamp.slice(0, 10) === today;
-    return /(?:Z|[+-]\d{2}:\d{2})$/i.test(stamp) && Number.isFinite(Date.parse(stamp)) && localDay(stamp, zone) === today;
+      return Number.isFinite(Date.parse(stamp + (stamp.length === 10 ? 'T00:00:00Z' : 'Z'))) &&
+        (stamp.length === 10 || Number(stamp.slice(11, 13)) < 24) && calendar === day;
+    return /(?:Z|[+-]\d{2}:\d{2})$/i.test(stamp) && Number.isFinite(Date.parse(stamp)) && localDay(stamp, zone) === day;
   });
+}
+const conditions = new Set(['clear-night','cloudy','fog','hail','lightning','lightning-rainy','partlycloudy','pouring','rainy','snowy','snowy-rainy','sunny','windy','windy-variant','exceptional']);
+const numberOrNull = value => Number.isFinite(value) ? value : null;
+function checkedAge(stamp, now, limit) {
+  const age = now - Date.parse(stamp);
+  return !Number.isFinite(age) || age < 0 || age > limit;
 }
 export function weatherView(cache, now, zone) {
   const today = localDay(now, zone);
+  const days = [today, calendarDay(today, 1)];
+  const legacy = cache?.forecastDay === today && (Number.isFinite(cache.high) || Number.isFinite(cache.low))
+    ? [{ date: today, condition: null, high: numberOrNull(cache.high), low: numberOrNull(cache.low), checkedAt: cache.forecastAt ?? null, cached: true }] : [];
+  const dailyForecasts = (Array.isArray(cache?.dailyForecasts) ? cache.dailyForecasts : legacy)
+    .filter(row => row && days.includes(row.date)).slice(0, 2)
+    .map(row => ({ ...row, stale: row.cached === true || checkedAge(row.checkedAt, now, 21600000) }));
   return { ...cache, timeZone: zone,
+    dailyForecasts,
     high: cache?.forecastDay === today ? cache.high : null,
     low: cache?.forecastDay === today ? cache.low : null,
-    stale: !Number.isFinite(Date.parse(cache?.fetchedAt)) || now - Date.parse(cache.fetchedAt) > 1800000 ||
-      !Number.isFinite(Date.parse(cache?.observedAt)) || now - Date.parse(cache.observedAt) > 10800000,
-    forecastStale: !Number.isFinite(Date.parse(cache?.forecastAt)) || now - Date.parse(cache.forecastAt) > 21600000 };
+    stale: checkedAge(cache?.fetchedAt, now, 1800000) || checkedAge(cache?.haReportedAt ?? cache?.observedAt, now, 10800000),
+    forecastStale: checkedAge(cache?.forecastAt, now, 21600000) || dailyForecasts.some(row => row.stale) };
 }
 export async function fetchWeather({ haUrl, haToken, weatherEntity, timeZone }, previous, fetcher = fetch, now = new Date()) {
   if (!/^weather\.[a-z0-9_]+$/.test(weatherEntity)) throw Error('Invalid weather entity');
@@ -99,19 +119,40 @@ export async function fetchWeather({ haUrl, haToken, weatherEntity, timeZone }, 
   // Only these two fixed operations exist; no device-control or arbitrary proxy route.
   const state = await call('/api/states/' + weatherEntity);
   if (!Number.isFinite(state.attributes?.temperature) || ['unknown','unavailable'].includes(state.state)) throw Error('Weather unavailable');
-  let forecast;
+  let rows;
   try {
     const result = await call('/api/services/weather/get_forecasts?return_response', { entity_id: weatherEntity, type: 'daily' });
-    forecast = selectForecast(result.service_response?.[weatherEntity]?.forecast ?? [], now, timeZone);
+    rows = result.service_response?.[weatherEntity]?.forecast;
   } catch { /* Keep today's previous forecast when only the forecast request fails. */ }
-  const old = previous?.weatherEntity === weatherEntity && previous?.forecastDay === localDay(now, timeZone) ? previous : {};
+  const today = localDay(now, timeZone);
+  const old = previous?.weatherEntity === weatherEntity ? previous : {};
+  const dailyForecasts = [today, calendarDay(today, 1)].map(date => {
+    const usable = Array.isArray(rows) ? rows.filter(row => row &&
+      (conditions.has(row.condition) || Number.isFinite(row.temperature) || Number.isFinite(row.templow))) : [];
+    const row = selectForecast(usable, now, timeZone, date);
+    const condition = conditions.has(row?.condition) ? row.condition : null;
+    const high = numberOrNull(row?.temperature), low = numberOrNull(row?.templow);
+    if (condition || high !== null || low !== null)
+      return { date, condition, high, low, checkedAt: now.toISOString(), cached: false };
+    const retained = Array.isArray(old.dailyForecasts) ? old.dailyForecasts.find(r => r?.date === date) : null;
+    if (retained) return { ...retained, cached: true };
+    // Legacy cache compatibility: never promote an old entity condition into a forecast.
+    if (old.forecastDay === date && (Number.isFinite(old.high) || Number.isFinite(old.low)))
+      return { date, condition: null, high: numberOrNull(old.high), low: numberOrNull(old.low), checkedAt: old.forecastAt ?? null, cached: true };
+    return null;
+  }).filter(Boolean);
+  const forecast = dailyForecasts.find(row => row.date === today);
+  const conditionSource = state.attributes.condition_source ?? 'unspecified';
   return { weatherEntity, temperature: state.attributes.temperature, unit: state.attributes.temperature_unit ?? '°C',
     // HA's report time proves entity reporting, not the upstream observation age.
-    condition: state.state, observedAt: state.last_reported ?? state.last_updated, fetchedAt: now.toISOString(),
-    forecastDay: localDay(now, timeZone),
-    high: Number.isFinite(forecast?.temperature) ? forecast.temperature : (old.high ?? null),
-    low: Number.isFinite(forecast?.templow) ? forecast.templow : (old.low ?? null),
-    forecastAt: forecast ? now.toISOString() : (old.forecastAt ?? null),
+    condition: state.state, conditionSource,
+    // Only an explicit observation provenance may label a condition as observed.
+    currentCondition: conditionSource === 'observation' && conditions.has(state.state) ? state.state : null,
+    haReportedAt: state.last_reported ?? state.last_updated,
+    observedAt: state.last_reported ?? state.last_updated, fetchedAt: now.toISOString(),
+    dailyForecasts, forecastDay: today,
+    high: forecast?.high ?? null, low: forecast?.low ?? null,
+    forecastAt: forecast?.checkedAt ?? null,
     attribution: state.attributes.attribution ?? '' };
 }
 function authorised(header, key) {
