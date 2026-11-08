@@ -7,6 +7,10 @@ public final class Policy {
     public static final long MAX_CACHE_BYTES = 256L * 1024 * 1024;
     public static boolean validId(String id) { return id != null && id.matches("[a-f0-9]{64}"); }
     public static int slideSeconds(int value) { return Math.max(10, Math.min(300, value)); }
+    public static boolean prunePhotoFile(String name,java.util.Collection<String> keep) {
+        boolean abandonedPhoto=name.endsWith(".new")&&validId(name.substring(0,name.length()-4));
+        return (validId(name)&&!keep.contains(name))||abandonedPhoto||name.equals("manifest.json.new");
+    }
     public static int sampleSize(int width, int height) {
         int sample = 1;
         while (width / sample > 1920 || height / sample > 1080) sample *= 2;

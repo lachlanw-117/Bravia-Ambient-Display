@@ -57,7 +57,7 @@ labels stale readings as cached. [Phase 1](PHASE1.md) records the selected BOM
 source, offset-free local forecast dates and provider-isolated caching. Provider
 attribution remains in the feed; the user requested no visible TV credit during
 review. That final version passed scoped TV acceptance/closeout; merge approval
-is pending. Missing values stay unavailable. Midnight removes
+was supplied and Phase 1 merged. Missing values stay unavailable. Midnight removes
 yesterday's high/low. These are the only HA operations in the host; it is not an
 arbitrary service proxy. The live host and TV weather path passed the photo-free
 trial on 7 November 2026; see [the recorded readings](TRIAL.md).
@@ -178,6 +178,11 @@ Clearing the TV app's data explicitly removes its cache and saved access key.
   (up to 512 MiB on each host/TV cache), plus source files and decoded bitmaps.
 
 ## Planned enhancements
+
+[Phase 2](PHASE2.md) records the design B photo/sidebar trial:
+adaptive portrait pairs, complete-image fitting and a static cream background.
+It is deployed on the TV; the user accepted the cream palette and debugging is
+closed. The user confirmed ordinary idle/Back with debugging off. The feature PR stays open until acceptance and separate merge approval.
 
 The accepted direction is design B with adaptive portrait pairs, BOM weather,
 native HA notice controls and local TV notice hiding. Design C is a later

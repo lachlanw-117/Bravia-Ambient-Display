@@ -8,13 +8,15 @@ and checks are complete. The user approved committing and pushing both Phase 1
 branches and opening PRs on 8 November, then approved the feature-branch live trial.
 The host and TV have been updated; scoped Phase 1 acceptance and closeout passed
 on 8 November, including user-reported ordinary use with debugging disabled.
-Merge remains unapproved and the PR stays open. Phase 2 has not started.
+The user subsequently approved merge: PR #2 merged as
+`49f8b8e8173e8265a58a08d24032f665657d43d3`; companion HA PR #5 merged as
+`d043d0154b03677ab56a7711e2eaf3b75d280fe6`. The later [Phase 2 record](PHASE2.md)
+tracks the separately authorised photo-presentation work.
 
 The installed BOM adapter source was inspected read-only. An authenticated HA
 browser session then verified current weather and retrieved daily forecasts using
 `weather.get_forecasts`. Household entity identifiers and the dated readings live
-in the [HA companion record](https://github.com/lachlanw-117/Wright-Home-Assistant/blob/docs/bom-weather/docs/bravia_ambient_host.md#phase-1-local-implementation---8-november-2026).
-That companion branch contains the household review record.
+in the [HA companion record](https://github.com/lachlanw-117/Wright-Home-Assistant/blob/main/docs/bravia_ambient_host.md#phase-1-local-implementation---8-november-2026).
 The initial inspection changed no configuration. The approved selector change and
 device trial are recorded below.
 
