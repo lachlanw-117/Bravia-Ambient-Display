@@ -21,7 +21,8 @@ public final class WeatherPresentation {
         return null;
     }
     public static long age(String stamp,Instant now) {
-        try { long seconds=Duration.between(Instant.parse(stamp),now).getSeconds();return seconds<0?-1:seconds; }
+        // HA uses microseconds and +00:00; ISO_INSTANT on older Android can reject offsets.
+        try { long seconds=Duration.between(OffsetDateTime.parse(stamp).toInstant(),now).getSeconds();return seconds<0?-1:seconds; }
         catch(Exception ignored){return -1;}
     }
     public static String ageLabel(long seconds) {

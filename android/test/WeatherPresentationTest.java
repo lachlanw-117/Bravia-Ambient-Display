@@ -19,6 +19,10 @@ public final class WeatherPresentationTest {
         check(WeatherPresentation.day(Instant.parse("2026-04-04T14:00:00Z"),"Australia/Sydney").plusDays(1).toString().equals("2026-04-06"),"autumn DST calendar day");
         check(WeatherPresentation.age(null,now)==-1,"unknown age");
         check(WeatherPresentation.age(now.plusSeconds(60).toString(),now)==-1,"future age");
+        check(WeatherPresentation.age("2026-11-08T01:59:00.123456+00:00",now)==59,"HA microsecond UTC offset");
+        check(WeatherPresentation.age("2026-11-08T12:59:00.123456+11:00",now)==59,"HA local offset");
+        check(WeatherPresentation.age("2026-11-08T01:59:00.000Z",now)==60,"host millisecond Z timestamp");
+        check(WeatherPresentation.age("2026-11-08T01:59:00",now)==-1,"offset-free age never guessed");
         check(WeatherPresentation.ageLabel(120).equals("Checked 2 min ago"),"check wording");
         check(WeatherPresentation.freshness(now.toString(),false,today,tomorrow,now).equals("Checked just now"),"fresh checks");
         Forecast retained=new Forecast(tomorrow.date,tomorrow.condition,21d,14d,now.minusSeconds(900).toString(),true);
