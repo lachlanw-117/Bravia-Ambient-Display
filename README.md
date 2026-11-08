@@ -8,10 +8,14 @@ running; authenticated weather and its TV overlay were verified, and the user
 subsequently confirmed playback of the imported 147-photo album.
 See [trial results](TRIAL.md).
 
+[![Local checks](https://github.com/lachlanw-117/Bravia-Ambient-Display/actions/workflows/checks.yml/badge.svg?branch=main)](https://github.com/lachlanw-117/Bravia-Ambient-Display/actions/workflows/checks.yml)
+
 The [implementation roadmap](ROADMAP.md) separates the accepted enhancements into
 individually authorised phases. [Decisions](DECISIONS.md) preserve the reasons and
 deferred alternatives; [maintenance](MAINTENANCE.md) covers acceptance, rollback
 and debugging cleanup. Phase 0 records that plan; it does not deploy enhancements.
+The [development workflow](CONTRIBUTING.md) describes short-lived branches, PR
+checks and the separation between reviewed source and actual deployment.
 
 ## Design
 

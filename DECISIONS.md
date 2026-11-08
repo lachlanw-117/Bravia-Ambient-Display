@@ -110,7 +110,7 @@ and failure semantics. Sony input behaviour remains unverified for this feature.
 
 Read-only inspection on 8 November identified the installed BOM component and
 its daily/hourly entities; household identifiers belong in the
-[HA companion notes](https://github.com/lachlanw-117/Wright-Home-Assistant/blob/docs/bravia-host-trial/docs/bravia_ambient_host.md).
+[HA companion notes](https://github.com/lachlanw-117/Wright-Home-Assistant/blob/main/docs/bravia_ambient_host.md).
 The host already supports a selected HA weather entity and daily forecasts.
 Prefer that interface over adding a separate direct BOM client to the TV.
 
@@ -149,3 +149,20 @@ Keep recovery artifacts and signing material private. Do not equate cleanup with
 deleting caches, backups or source photos, removing system packages, disabling HA
 Terminal & SSH, or relocating shared toolchains. Follow
 [MAINTENANCE.md](MAINTENANCE.md). Revisit when an actual maintenance need appears.
+
+## D10 - Reviewed main branches and short-lived changes
+
+**Status:** repository consolidation authorised on 8 November 2026.
+
+Use `main` as the reviewed baseline in each repository, with a focused branch/PR
+per coherent change. GitHub Actions runs synthetic/local checks; it does not
+deploy. Deployment records identify installed revisions separately from `main`.
+Retire incorporated branches without rewriting history. Preserve superseded work
+with an archive reference before deleting its branch. See
+[CONTRIBUTING.md](CONTRIBUTING.md).
+
+The initial Bravia branch was also its default branch. Consolidation establishes
+`main` without discarding that history. HA keeps its existing `main`. The repos
+retain separate source/household responsibilities. Bravia's private visibility is
+unchanged; publishing is a separate decision. Revisit branch complexity only if
+parallel release support or collaboration creates a demonstrated need.

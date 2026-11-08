@@ -8,7 +8,7 @@ approval to deploy, operate devices or progress automatically to another phase.
 Read [AGENTS.md](AGENTS.md) before acting, then this roadmap, the
 [decision log](DECISIONS.md), [maintenance procedure](MAINTENANCE.md) and
 [historical trial results](TRIAL.md). Read the companion HA repository's
-`AGENTS.md` and [household host notes](https://github.com/lachlanw-117/Wright-Home-Assistant/blob/docs/bravia-host-trial/docs/bravia_ambient_host.md)
+`AGENTS.md` and [household host notes](https://github.com/lachlanw-117/Wright-Home-Assistant/blob/main/docs/bravia_ambient_host.md)
 before work that crosses repositories.
 
 ## Current baseline and ownership
@@ -129,5 +129,7 @@ must be recorded explicitly in trial/household notes.
 
 Phase 0 was authorised and implemented locally on 8 November 2026. No app, HA or
 device changes were made. Later phases have accepted designs, not implementation
-or deployment authorisation. No new commit/push/merge is implied by this record.
+or deployment authorisation. Commit/push/merge approval was supplied separately
+for repository consolidation on 8 November; it does not authorise live changes
+or later feature phases. See [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow.
 The next possible phase is BOM weather, after its own scoped authorisation.
