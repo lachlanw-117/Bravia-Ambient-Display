@@ -39,7 +39,7 @@ final class PhotoSceneView extends View {
             paint.setColor(Color.WHITE);rect.set(0,0,layout.width,layout.height);
             canvas.drawBitmap(scene.background,null,rect,paint);
         }
-        canvas.drawColor(0xb00b1115);
+        canvas.drawColor(0x800b1115);
         for(int i=0;i<scene.photos.length;i++) {
             Bitmap photo=scene.photos[i];
             PhotoPresentation.Box box=PhotoPresentation.fit(photo.getWidth(),photo.getHeight(),layout.slot(i,scene.photos.length));
