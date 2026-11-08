@@ -1,7 +1,14 @@
 # Local validation
 
-Checked on 7 November 2026. No installation, live application weather request,
-device action or deployment was performed.
+This is the historical initial local-validation snapshot from 7 November 2026.
+No installation, live application weather request, device action or deployment
+was performed during those checks. Later deployment and the 11-test album-limit
+validation are recorded in [TRIAL.md](TRIAL.md); statements below about an
+unbuilt/uninstalled container apply to this earlier snapshot only.
+
+Phase 0 on 8 November adds documentation and reconciles status descriptions only.
+Its Markdown-link/whitespace checks do not revalidate Android, the host or live
+devices. Accepted enhancements are tracked in the [roadmap](ROADMAP.md).
 
 | Component | Result |
 |---|---|

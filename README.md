@@ -8,6 +8,15 @@ running; authenticated weather and its TV overlay were verified, and the user
 subsequently confirmed playback of the imported 147-photo album.
 See [trial results](TRIAL.md).
 
+[![Local checks](https://github.com/lachlanw-117/Bravia-Ambient-Display/actions/workflows/checks.yml/badge.svg?branch=main)](https://github.com/lachlanw-117/Bravia-Ambient-Display/actions/workflows/checks.yml)
+
+The [implementation roadmap](ROADMAP.md) separates the accepted enhancements into
+individually authorised phases. [Decisions](DECISIONS.md) preserve the reasons and
+deferred alternatives; [maintenance](MAINTENANCE.md) covers acceptance, rollback
+and debugging cleanup. Phase 0 records that plan; it does not deploy enhancements.
+The [development workflow](CONTRIBUTING.md) describes short-lived branches, PR
+checks and the separation between reviewed source and actual deployment.
+
 ## Design
 
 ```mermaid
@@ -163,17 +172,18 @@ Clearing the TV app's data explicitly removes its cache and saved access key.
 - Account for roughly two album generations during a transactional update
   (up to 512 MiB on each host/TV cache), plus source files and decoded bitmaps.
 
-## Phase 2 seams
+## Planned enhancements
 
-Keep the system-owned dream lifecycle. A future content controller can switch
-between SlideshowView and an aviation view. Only then make the dream interactive,
-reserve a small set of D-pad keys for navigation, and keep an explicit immediate
-exit path for ordinary TV activity. This is not implemented in the MVP.
+The accepted direction is design B with adaptive portrait pairs, BOM weather,
+native HA notice controls and local TV notice hiding. Design C is a later
+aircraft scene. These features are not implemented by the documentation phase.
+See the [phase boundaries](ROADMAP.md#phase-boundaries-and-stopping-points).
 
-The photo/weather host is separate from view rendering. A future household-status
-handler can publish a narrow, versioned notification feed without giving the TV
-HA credentials or arbitrary device-control access. Calendar and photo metadata
-can extend the feed later. No aviation, notification, calendar or theme work is included.
+Keep the system-owned dream lifecycle and a clear immediate exit path. Notice
+interaction is planned for Phase 4 independently of aircraft work; it does not
+require implementing an aviation view first. The host must not expose HA
+credentials or an arbitrary device-control proxy. Calendar and photo metadata
+remain outside the current roadmap.
 
 ## Research references
 
