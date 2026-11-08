@@ -22,8 +22,8 @@ public final class WeatherPresentationTest {
         check(WeatherPresentation.ageLabel(120).equals("Checked 2 min ago"),"check wording");
         check(WeatherPresentation.freshness(now.toString(),false,today,tomorrow,now).equals("Checked just now"),"fresh checks");
         Forecast retained=new Forecast(tomorrow.date,tomorrow.condition,21d,14d,now.minusSeconds(900).toString(),true);
-        check(WeatherPresentation.freshness(now.toString(),false,today,retained,now).equals("Forecast cached · checked 15 min ago"),"fresh temperature cannot conceal cached forecast");
-        check(WeatherPresentation.freshness(now.toString(),true,today,tomorrow,now).startsWith("Cached weather"),"stale report retained");
+        check(WeatherPresentation.freshness(now.toString(),false,today,retained,now).equals("Checked 15 min ago · Forecast check delayed"),"fresh temperature cannot conceal retained forecast");
+        check(WeatherPresentation.freshness(now.toString(),true,today,tomorrow,now).contains("Weather check delayed"),"stale report retained");
         check(WeatherPresentation.condition("unknown").equals("Forecast unavailable"),"unknown is explicit");
         check(WeatherPresentation.condition("lightning-rainy").equals("Thunderstorms"),"bounded long condition");
         check(WeatherPresentation.range(tomorrow).contains("Low —"),"missing low never fabricated");

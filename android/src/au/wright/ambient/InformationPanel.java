@@ -22,6 +22,7 @@ final class InformationPanel extends View {
     void update(JSONObject weather,Date now) {
         long minute=now.getTime()/60000;
         if(weather==lastWeather&&minute==lastMinute)return;
+        boolean newWeather=weather!=lastWeather;
         lastWeather=weather;lastMinute=minute;
         TimeZone zone=TimeZone.getTimeZone(weather.optString("timeZone","Australia/Sydney"));
         clock=format("h:mm",now,zone);period=format("a",now,zone);
@@ -46,6 +47,8 @@ final class InformationPanel extends View {
         long fetchedAge=WeatherPresentation.age(weather.optString("fetchedAt",null),instant);
         long reportAge=WeatherPresentation.age(weather.optString("haReportedAt",weather.optString("observedAt",null)),instant);
         boolean stale=weather.optBoolean("stale",true)||fetchedAge<0||fetchedAge>1800||reportAge<0||reportAge>10800;
+        if(stale&&newWeather)android.util.Log.w("AmbientWeather","Freshness: checkAgeSeconds="+fetchedAge+
+            " reportAgeSeconds="+reportAge+" feedStale="+weather.optBoolean("stale",true));
         status=!available?"Waiting for weather":WeatherPresentation.freshness(weather.optString("fetchedAt",null),stale,today,tomorrow,instant);
         String content=weekday+" "+clock+" "+period+" "+date+" Now "+temperature+
             " Today "+forecastContent(today)+" Tomorrow "+forecastContent(tomorrow)+" "+status;

@@ -39,8 +39,8 @@ public final class WeatherPresentation {
             if(value<0)oldest=-1;else if(oldest>=0)oldest=Math.max(oldest,value);
             forecastCached|=row.cached||value<0||value>21600;
         }
-        if(cached)return "Cached weather · "+ageLabel(oldest).toLowerCase(Locale.ROOT);
-        if(forecastCached)return "Forecast cached · "+ageLabel(oldest).toLowerCase(Locale.ROOT);
+        if(cached)return ageLabel(oldest)+" · Weather check delayed";
+        if(forecastCached)return ageLabel(oldest)+" · Forecast check delayed";
         return ageLabel(oldest);
     }
     public static String condition(String code) {

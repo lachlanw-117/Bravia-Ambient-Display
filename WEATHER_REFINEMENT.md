@@ -177,3 +177,32 @@ future dependency-health evidence; it does not authorise changing startup settin
   authenticated weather verification and host/TV trial remain pending; the old
   accepted cream APK and host remain deployed. No HA restart, provider/option
   change or debugging enablement occurred.
+
+## Trial progress and requested adjustments
+
+The user approved Git publication, accepted Phase 2 merges, the TV trial and
+separately the named photo-host update/rebuild. Initial weather PR heads passed CI
+and the host/TV trial was deployed from the exact weather feature revision.
+Source identity and trial evidence are retained locally; private recovery artifacts
+and inventory remain outside version control. Health/authentication checks passed.
+The TV displayed both days and retained pairing/60-second settings. User visual
+acceptance and debugging closeout are pending. No HA Core restart occurred.
+
+The user rejected Cached weather wording and asked to continue the photo loop
+across sessions. The revised candidate uses check-age wording with specific
+delayed-check warnings. Read-only HA template checks confirmed recent reports;
+the original diagnostic draft was restored and HA configuration was unchanged.
+The initial freshness warning is being investigated using numeric age/flag logs
+only, with no credentials, private addresses or photo IDs logged.
+
+Playback now saves the next photo and last shown photo in private preferences only
+when a scene starts displaying. Both portraits count as shown. Static order and
+end-of-album wrapping remain; a missing next photo falls back after the last shown
+photo where possible. Preview and actual dreams share this state. First use begins
+once at the start because old versions recorded no cursor. Preference writes are
+asynchronous, so the latest scene across sudden power loss is not guaranteed.
+No photo/cache deletion or credential change is involved.
+
+Expanded local validation passes: 15 policy + 208 photo + 17 weather assertions
+(240 total), signed Android build; 22 host tests remain passed for unchanged host
+code. The revised exact-commit candidate still requires device verification.

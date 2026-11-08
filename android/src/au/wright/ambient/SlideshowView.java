@@ -25,7 +25,14 @@ public final class SlideshowView extends FrameLayout {
     private int front;
     private boolean photoQueued;
     private Sequence sequence;
-    private static final class Sequence { List<String> album=Collections.emptyList();int index; }
+    private static final class Sequence {
+        List<String> album=Collections.emptyList();int index;String nextId,lastId;
+        Sequence(String nextId,String lastId){this.nextId=nextId;this.lastId=lastId;}
+    }
+    private static final class DecodedScene {
+        final PhotoSceneView.Scene scene;final String nextId,lastId;
+        DecodedScene(PhotoSceneView.Scene scene,String nextId,String lastId){this.scene=scene;this.nextId=nextId;this.lastId=lastId;}
+    }
     private static final class Source {
         final File file;
         final int width,height,orientation;
@@ -60,7 +67,9 @@ public final class SlideshowView extends FrameLayout {
     }
     public void start() {
         if(running)return;running=true;final int ticket=++generation;
-        sequence=new Sequence();front=0;photoQueued=false;photoStatus="Waiting for photos";
+        android.content.SharedPreferences playback=getContext().getSharedPreferences("playback",Context.MODE_PRIVATE);
+        sequence=new Sequence(playback.getString("next_photo",null),playback.getString("last_photo",null));
+        front=0;photoQueued=false;photoStatus="Waiting for photos";
         photoWorker=Executors.newSingleThreadScheduledExecutor();weatherWorker=Executors.newSingleThreadScheduledExecutor();
         decoder=Executors.newSingleThreadExecutor();handler.post(tick);handler.post(advance);
         photoWorker.scheduleWithFixedDelay(()->{
@@ -92,19 +101,26 @@ public final class SlideshowView extends FrameLayout {
         final PhotoPresentation.Layout layout=new PhotoPresentation.Layout(getWidth(),getHeight());
         final boolean pairs=getContext().getSharedPreferences("ambient",Context.MODE_PRIVATE).getBoolean("portrait_pairs",true);
         decoder.execute(()->{
-            PhotoSceneView.Scene decoded=loadGroup(cursor,layout,pairs);
+            DecodedScene decoded=loadGroup(cursor,layout,pairs);
             handler.post(()->{
-                if(!running||ticket!=generation){if(decoded!=null)decoded.recycle();return;}
+                if(!running||ticket!=generation){if(decoded!=null)decoded.scene.recycle();return;}
                 photoQueued=false;
-                if(decoded!=null)show(decoded,ticket);
+                if(decoded!=null) {
+                    show(decoded.scene,ticket);
+                    // Persist only a scene that starts displaying, never a decoded/stale job.
+                    getContext().getSharedPreferences("playback",Context.MODE_PRIVATE).edit()
+                        .putString("next_photo",decoded.nextId).putString("last_photo",decoded.lastId).apply();
+                }
                 int seconds=Policy.slideSeconds(getContext().getSharedPreferences("ambient",Context.MODE_PRIVATE).getInt("seconds",30));
                 handler.postDelayed(advance,decoded==null?5000:seconds*1000L);
             });
         });
     }
-    private PhotoSceneView.Scene loadGroup(Sequence cursor,PhotoPresentation.Layout layout,boolean pairs) {
+    private DecodedScene loadGroup(Sequence cursor,PhotoPresentation.Layout layout,boolean pairs) {
         List<String> photos=store.photos();
-        if(!photos.equals(cursor.album)){cursor.album=photos;cursor.index=0;}
+        if(!photos.equals(cursor.album)) {
+            cursor.album=photos;cursor.index=PhotoPresentation.resumeIndex(photos,cursor.nextId,cursor.lastId);
+        }
         for(int attempt=0;attempt<photos.size()&&!Thread.currentThread().isInterrupted();attempt++) {
             int index=cursor.index;
             cursor.index=PhotoPresentation.nextIndex(index,1,photos.size());
@@ -124,7 +140,8 @@ public final class SlideshowView extends FrameLayout {
                     try {second=decode(next,layout.slot(1,2));}catch(IOException|OutOfMemoryError ignored){}
                 }
                 if(Thread.currentThread().isInterrupted()){first.recycle();if(second!=null)second.recycle();return null;}
-                return new PhotoSceneView.Scene(second==null?new Bitmap[]{first}:new Bitmap[]{first,second});
+                cursor.nextId=photos.get(cursor.index);cursor.lastId=photos.get(second==null?index:index+1);
+                return new DecodedScene(new PhotoSceneView.Scene(second==null?new Bitmap[]{first}:new Bitmap[]{first,second}),cursor.nextId,cursor.lastId);
             } catch(IOException|RuntimeException|OutOfMemoryError ignored) {
                 if(first!=null)first.recycle();if(second!=null)second.recycle();
             }
