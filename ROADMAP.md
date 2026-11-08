@@ -145,4 +145,4 @@ governed. Phases 3-6 have accepted designs, not implementation or deployment aut
 Commit/push/merge approval was supplied separately
 for repository consolidation on 8 November; it does not authorise live changes
 or later feature phases. See [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow.
-See the [Phase 1 record](PHASE1.md) for the current stopping point.
+See the [Phase 2 trial record](PHASE2.md) for the current stopping point.

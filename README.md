@@ -179,10 +179,10 @@ Clearing the TV app's data explicitly removes its cache and saved access key.
 
 ## Planned enhancements
 
-[Phase 2](PHASE2.md) implements the design B photo/sidebar candidate locally:
+[Phase 2](PHASE2.md) records the design B photo/sidebar trial:
 adaptive portrait pairs, complete-image fitting and a static subdued background.
-It has not yet been deployed or accepted on the TV. Phase 2 trial deployment has
-been authorised; Git/PR steps, device checks and later merge remain distinct gates.
+It is deployed on the TV; final visual acceptance and debugging closeout remain
+pending. The feature PR stays open until acceptance and separate merge approval.
 
 The accepted direction is design B with adaptive portrait pairs, BOM weather,
 native HA notice controls and local TV notice hiding. Design C is a later

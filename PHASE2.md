@@ -2,16 +2,22 @@
 
 ## Status - 8 November 2026
 
-Local implementation is prepared on `feature/photo-presentation`, based on
-accepted Phase 1 merge `49f8b8e8173e8265a58a08d24032f665657d43d3`. The user approved
-the Phase 2 TV trial and briefly re-enabled debugging before stepping away.
-The user subsequently explicitly approved Phase 2 commits, pushes and PRs on
-8 November. The candidate is prepared for that Git/PR gate; it is not deployed,
-device-tested or merged. The installed baseline remains the accepted Phase 1
-no-credit APK. While Git approval was pending, debugging was closed again and
-TCP 5555 returned ECONNREFUSED.
-Developer options master remains enabled. A future trial connection will need the
-user to briefly re-enable USB/ADB debugging again.
+Phase 2 is trial-deployed; final visual acceptance and debugging closeout are
+pending. Implementation, TV deployment, commits, pushes and PRs were explicitly
+approved. Bravia [PR #3](https://github.com/lachlanw-117/Bravia-Ambient-Display/pull/3)
+and companion HA [PR #6](https://github.com/lachlanw-117/Wright-Home-Assistant/pull/6)
+remain open; no Phase 2 merge is approved.
+
+Initial deployed source: 95586101a6e70d3ec5c594dc74308701aa89a8f1.
+The user liked the design and requested 60-second scenes and a brighter background.
+Updated source: 8f0fb3078488e1bcb5585dcf7e0b0f915ae386d6.
+Its background tint reduces from about 69% to 50% opacity, retaining the dark
+information panel. Installation succeeded; pulling back the installed APK verified
+SHA-256: 689528883aee59f52d26269531d90f4caf01892e6d0a8d39b02a26160f91b881.
+Setup confirmed 60 seconds persisted through installation, with pairing enabled.
+The interval remains configurable from 10 to 300 seconds; the source default is 30.
+ADB is currently enabled for final review; Developer options master remains on.
+Earlier closed-port results describe prior sessions, not the current state.
 
 ## What changes and why
 
@@ -65,9 +71,10 @@ and deployment notes remain in the companion HA repository.
   landscape/square rejection, small inputs, 720p/1080p/4K decode budgets, a narrow
   surface fallback and weather/photo transaction isolation. These exercise the
   actual layout/sequence/pruning functions used by the app.
-- CI and the local build now run the same new JVM harness. CI results remain
-  pending an approved push/PR; the full APK build is local, not a CI deployment.
-- Current local APK SHA-256:
+- CI and the local build run the same JVM harness. Initial checks passed, as did
+  updated source 8f0fb30 in Local checks run 42447727049. The updated local APK
+  again passed all 215 Android assertions, build and signature verification.
+- Initial trial APK SHA-256:
   `d9ca612c35218fa2c5578399cfb160d44a1b3d4dad8d741fd6606726bbb6b922`.
 - The accepted Phase 1 APK is preserved privately at ignored
   `build/phase2-trial-2026-11-08/phase1-known-good.apk`, SHA-256
@@ -79,14 +86,32 @@ and deployment notes remain in the companion HA repository.
   native heap PSS 13,948 KiB. These describe Phase 1, not candidate performance;
   compare like-for-like active scenes before drawing a conclusion.
 
-These are local/synthetic results. Rendering, native decode orientation, actual
-heap/GPU usage, frame pacing, concurrent network cancellation and Sony dismissal
-have not been verified for this implementation. Photos/screenshot evidence stay
-outside Git, and no precise household location is used in fixtures or source.
+## Device evidence and remaining limits
+
+The initial candidate ran as the actual Sony dream, with mCurrentDreamIsTest=false.
+Private screenshots showed successive complete portrait pairs, a single portrait,
+clock and BOM current/high/low, without provider credit. Single-photo mode was
+saved and visibly checked, then pairing restored. Landscape/square-alone behaviour
+is covered by synthetic tests; a live landscape scene is not yet explicitly
+recorded. Selected orientation looked correct; not every album photo was reviewed.
+
+Startup: PSS 40,530 KiB / RSS 122,588 KiB, 5 janky frames of 88. Later warm sample:
+PSS 37,922 KiB / RSS 120,656 KiB. After resetting frame statistics, a short
+transition sample recorded 177 frames, zero janky frames, median/p95 5 ms and
+p99 10 ms. These initial-candidate observations do not establish long-run memory
+stability or performance for every photo/device. Do not infer a memory improvement
+from the Phase 1 baseline with different content.
+
+Injected Back dismissed the actual dream and returned Preview to setup. The
+brighter installed revision was visually inspected in Preview: full portrait pairs,
+brighter colour fill and readable dark sidebar rendered correctly. Final user
+brightness acceptance, physical remote/ordinary idle checks with debugging disabled
+and session closeout remain pending. HDMI, streaming, power, failure/recovery and
+older-Android output remain unverified. Private screenshots/profiles stay outside Git.
 
 ## Approved trial scope and remaining gate
 
-After the required source commit/PR gate, update only the TV APK with `install -r`,
+The source commit/PR gate passed. Installations used only TV APK `install -r`,
 preserving its key, settings, cached album and signing identity. The user approved
 that Phase 2 trial; this is not permission to merge or deploy later phases.
 No host rebuild, BOM selector change, HA config change, core restart/reload,
