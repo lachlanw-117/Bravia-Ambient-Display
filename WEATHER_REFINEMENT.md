@@ -3,8 +3,9 @@
 ## Status and boundaries - 8 November 2026
 
 Implemented locally. The user approved Git publication, the accepted Phase 2
-merges and a TV trial on 8 November. The required photo-host update/rebuild has
-been requested separately and is pending; no refinement deployment has occurred. The user accepted the minimalist second mockup,
+merges and a TV trial on 8 November. The named photo-host update/rebuild was subsequently approved and completed,
+followed by the initial TV installation. Updated review changes are in trial;
+final device acceptance, debugging closeout and weather-PR merge remain pending. The user accepted the minimalist second mockup,
 then requested implementation and clarified a preference for today's forecast
 rather than an unavailable current-condition message. The installed Phase 2 cream/photo candidate
 remains the accepted baseline. The separately approved Phase 2 merges completed: Bravia PR #3 as
@@ -14,7 +15,7 @@ remains the accepted baseline. The separately approved Phase 2 merges completed:
 Keep implementation and tests in Bravia, household dependencies/deployment notes
 in the HA companion. Local work is on feature/weather-summary and docs/weather-summary, branched from
 the accepted-but-unmerged Phase 2 feature heads to preserve the existing local
-notes without merging or changing main. The accepted Phase 2 main merges will be incorporated before publication so
+notes without merging or changing main. The accepted Phase 2 main merges were incorporated before publication, so
 the refinement PRs show only their own changes. Do not publish
 new runtime work as an amendment to the already-accepted photo trial.
 
@@ -151,7 +152,7 @@ Do not uninstall, clear photos/cache, inspect credentials or alter shared toolch
 
 Live notices/remote interactions, Thread health rules, SSH startup policy, automatic
 repairs/watchdogs, extra phone routes, independent HA outage monitoring, aircraft,
-photo ordering/resume/shuffle, photo cache removal and system-package debloating
+photo ordering/shuffle, photo cache removal and system-package debloating
 remain separate. The reported power-reset scenario is retained in ROADMAP.md as
 future dependency-health evidence; it does not authorise changing startup settings.
 
@@ -171,12 +172,13 @@ future dependency-health evidence; it does not authorise changing startup settin
 - 22 synthetic Node tests passed; package generation and packaged-server syntax
   check passed. Full local Android build/signature verification passed with
   15 existing policy + 200 photo + 17 new weather assertions (232 total).
-- Local APK SHA-256: 0318e386b6e8cf61c99bbe77ad1bb3f5d3e61156b4a7b43c140802f314121779.
-  This identifies a local artifact, not an installed TV build.
-- CI is not run for this unpushed branch. Native visual/readability checks, live
-  authenticated weather verification and host/TV trial remain pending; the old
-  accepted cream APK and host remain deployed. No HA restart, provider/option
-  change or debugging enablement occurred.
+- Initial local APK SHA-256: 0318e386b6e8cf61c99bbe77ad1bb3f5d3e61156b4a7b43c140802f314121779.
+  This identifies the initial artifact; later installed revisions are recorded in
+  the private trial inventory.
+- The initial exact-head CI and named host/TV trial passed their build/install
+  gates. The new weather fields rendered using the TV's configured authenticated
+  connection. Final user acceptance and testing-session closeout remain pending.
+  No HA Core restart, provider/option or credential change occurred.
 
 ## Trial progress and requested adjustments
 
@@ -192,8 +194,8 @@ The user rejected Cached weather wording and asked to continue the photo loop
 across sessions. The revised candidate uses check-age wording with specific
 delayed-check warnings. Read-only HA template checks confirmed recent reports;
 the original diagnostic draft was restored and HA configuration was unchanged.
-The initial freshness warning is being investigated using numeric age/flag logs
-only, with no credentials, private addresses or photo IDs logged.
+The initial freshness warning was traced using numeric age/flag logs only,
+with no credentials, private addresses or photo IDs logged.
 
 Playback now saves the next photo and last shown photo in private preferences only
 when a scene starts displaying. Both portraits count as shown. Static order and
@@ -205,4 +207,33 @@ No photo/cache deletion or credential change is involved.
 
 Expanded local validation passes: 15 policy + 208 photo + 17 weather assertions
 (240 total), signed Android build; 22 host tests remain passed for unchanged host
-code. The revised exact-commit candidate still requires device verification.
+code. The revised exact-commit candidate subsequently passed the checks below.
+
+## Final candidate verification - acceptance pending
+
+Runtime revision 55a749b52a065400bb489e29020b9cf658f43431 passed CI and was
+installed on the TV. The actual APK was pulled back and matched the local signed
+artifact; its hash and recovery inventory are stored privately outside Git. The
+host remains on the earlier reviewed runtime revision because this correction
+changes Android only; no additional host rebuild was required.
+
+The first device trial exposed an Android timestamp-parser mismatch: host freshness
+was false for stale, but TV parsing returned unknown report age. HA live/serialized
+reporting timestamps and device clocks were checked read-only. Parsing offset-aware
+ISO date-times fixed the problem on the Sony; healthy data now shows only Checked
+N min ago. Four added timestamp-format cases cover microsecond offsets and host Z
+timestamps. Local validation now totals 244 JVM assertions; the unchanged host's
+22 tests remain passed. Build/signature and runtime-source CI passed.
+
+Private screenshots confirmed full photos, separate Today/Tomorrow descriptions
+and icons, a quiet check-age line and empty space below the divider. Photos
+continued beyond the initial group after Preview exit, an explicit app process
+restart, and a subsequent APK replacement. Pairing and the 60-second preference
+remained set. This establishes process/session continuation, not a guarantee that
+the newest asynchronous preference write survives an abrupt electrical outage.
+
+User visual/Back acceptance, debugging closeout and ordinary idle entry remain
+pending. ADB is currently on during active review; do not disable it prematurely
+while visual feedback is in progress. Both weather PRs stay open until relevant
+acceptance and separate merge approval. Failure simulation, real midnight/DST
+rollover, HDMI/streaming/power and long-run performance remain unverified.

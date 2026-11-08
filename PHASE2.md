@@ -8,7 +8,10 @@ work normally with debugging disabled. Relevant Phase 2 acceptance is complete;
 separate merge approval remains required. Implementation, TV deployment, commits, pushes and PRs were explicitly
 approved. Bravia [PR #3](https://github.com/lachlanw-117/Bravia-Ambient-Display/pull/3)
 and companion HA [PR #6](https://github.com/lachlanw-117/Wright-Home-Assistant/pull/6)
-remain open; no Phase 2 merge is approved.
+were merged after acceptance and explicit approval. Bravia merge:
+6076abeda6acfb7e8fb6f11418917c1faf05d944; companion merge:
+729e9f98c528c10a88f836c75d42442ed1d0045d. This completed Phase 2; the subsequent
+weather refinement has its own open PRs and trial record.
 
 Initial deployed source: 95586101a6e70d3ec5c594dc74308701aa89a8f1.
 The user liked the design and requested 60-second scenes and a brighter background.
