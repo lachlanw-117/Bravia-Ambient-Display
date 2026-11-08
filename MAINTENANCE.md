@@ -58,8 +58,11 @@ The installed app does not need ADB for normal playback. Android documents
 [ADB](https://developer.android.com/tools/adb) and
 [Developer options](https://developer.android.com/studio/debug/dev-options)
 separately; Sony menus and behaviour still need observation. The last recorded
-trial had debugging enabled. Disabling it and confirming normal use are pending,
-not completed by writing this procedure.
+trial had debugging enabled. The later [Phase 1 record](PHASE1.md) documents
+debugging disabled, TCP 5555 refusing connections and user-confirmed ordinary use
+on 8 November. The master switch remains on to preserve unreviewed settings;
+reboot persistence was not tested. Consult the latest trial record, not this
+historical baseline, before a future approved maintenance session.
 
 If the session ends before cleanup or a check can be completed, record the
 remaining item and its reason. Do not report the session fully verified/closed.

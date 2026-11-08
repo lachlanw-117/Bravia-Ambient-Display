@@ -18,10 +18,12 @@ Checked items below describe recorded results, not a fresh live inspection.
 - [x] Complete Phase 0 documentation: roadmap, decision log and maintenance procedure.
 - [x] Obtain Phase 1 local authorisation, verify the BOM source and prepare tested
   local changes; see [Phase 1](PHASE1.md).
-- [ ] Review Phase 1, obtain commit/push/merge approvals and separately approve
-  deployment and TV acceptance. Do not start later phases automatically.
-- [ ] Complete an approved TV-session closeout: debugging disabled and ordinary
-  playback, idle entry and exit checked. Current debugging state is not reverified.
+- [x] Commit/push Phase 1, open PRs and perform the separately approved branch trial.
+- [x] Finish scoped Phase 1 TV acceptance and debugging closeout; record tool
+  evidence and user-reported ordinary playback, idle entry and Back dismissal.
+- [ ] Obtain Phase 1 merge approval. Do not start later phases automatically.
+- [x] Disable TV debugging and verify TCP 5555 refuses connections; leave Developer
+  options master enabled to preserve unreviewed settings. Reboot persistence untested.
 - [ ] Consider Google Ambient API partner access only if unattended album sync becomes essential.
 
 Photo presentation and household notices/interactions are accepted future phases,
