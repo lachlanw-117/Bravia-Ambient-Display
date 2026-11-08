@@ -16,8 +16,10 @@ Checked items below describe recorded results, not a fresh live inspection.
 - [ ] Check actual TV behaviour at midnight/DST; synthetic coverage is not device evidence.
 - [x] Build/start the HA OS local app on the Pi and record health/authentication/weather checks.
 - [x] Complete Phase 0 documentation: roadmap, decision log and maintenance procedure.
-- [ ] Obtain the scoped authorisation for Phase 1 BOM weather; then implement,
-  review and separately approve its deployment. Do not start later phases automatically.
+- [x] Obtain Phase 1 local authorisation, verify the BOM source and prepare tested
+  local changes; see [Phase 1](PHASE1.md).
+- [ ] Review Phase 1, obtain commit/push/merge approvals and separately approve
+  deployment and TV acceptance. Do not start later phases automatically.
 - [ ] Complete an approved TV-session closeout: debugging disabled and ordinary
   playback, idle entry and exit checked. Current debugging state is not reverified.
 - [ ] Consider Google Ambient API partner access only if unattended album sync becomes essential.

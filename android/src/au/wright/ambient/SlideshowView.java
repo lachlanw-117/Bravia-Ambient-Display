@@ -126,6 +126,8 @@ public final class SlideshowView extends FrameLayout {
             boolean stale=w.optBoolean("stale",true)||w.optBoolean("forecastStale",false);
             try{stale|=now.getTime()-Instant.parse(w.getString("fetchedAt")).toEpochMilli()>1800000;}catch(Exception e){stale=true;}
             if(stale)weather+="  · cached";
+            String attribution=w.optString("attribution","").trim();
+            if(!attribution.isEmpty())weather+="\n"+attribution;
         }
         overlay.setText(time.format(now)+"\n"+day.format(now)+"\n"+weather);
     }

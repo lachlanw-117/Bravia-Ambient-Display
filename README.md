@@ -48,11 +48,13 @@ today's forecast high/low at bottom right. Slide duration is configurable from
 10 to 300 seconds. Bitmaps are decoded to a maximum 1920 by 1080 bounding box to
 limit TV memory use; the screen scales them to its resolution.
 
-Weather comes from `weather.forecast_home`, confirmed present in this installation,
+The last recorded deployment gets weather from `weather.forecast_home`, confirmed present in this installation,
 using `Australia/Sydney`. The adapter reads its state and requests daily forecasts
 through `weather.get_forecasts`. It chooses today's entry by local date, never
 substitutes tomorrow, retains same-day forecast data on partial failure, and
-labels stale readings as cached. Missing values stay unavailable. Midnight removes
+labels stale readings as cached. [Phase 1](PHASE1.md) prepares the selected BOM
+source, offset-free local forecast dates, provider-isolated caching and visible
+attribution; this local change has not been deployed. Missing values stay unavailable. Midnight removes
 yesterday's high/low. These are the only HA operations in the host; it is not an
 arbitrary service proxy. The live host and TV weather path passed the photo-free
 trial on 7 November 2026; see [the recorded readings](TRIAL.md).

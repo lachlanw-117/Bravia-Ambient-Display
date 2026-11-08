@@ -106,7 +106,7 @@ and failure semantics. Sony input behaviour remains unverified for this feature.
 
 ## D07 - Prefer the installed BOM weather source
 
-**Status:** accepted design; Phase 1; not implemented or deployed.
+**Status:** local implementation prepared for review; Phase 1; not deployed.
 
 Read-only inspection on 8 November identified the installed BOM component and
 its daily/hourly entities; household identifiers belong in the
@@ -117,8 +117,13 @@ Prefer that interface over adding a separate direct BOM client to the TV.
 Keep attribution, source freshness and local-day correctness visible. Do not
 silently fall back to another provider. Entity ownership was inspected, but live
 readings/forecast output were not verified because the attempted Supervisor API
-route returned 401. Revisit the adapter if actual forecast responses show an
-incompatibility. Verify before a separately approved source change.
+route returned 401. Subsequent authenticated browser inspection verified current
+readings and daily forecast output on 8 November. The offset-free forecast dates
+need explicit local-calendar handling; provider-isolated cache handling and TV
+attribution are now implemented locally. See [Phase 1](PHASE1.md) for evidence,
+freshness limitations and pending live acceptance. Revisit if upstream observation
+age cannot be established sufficiently for household use, or actual responses
+change. Deployment still requires a separately approved source change.
 
 ## D08 - Aircraft details are conditional, not a promised free data service
 

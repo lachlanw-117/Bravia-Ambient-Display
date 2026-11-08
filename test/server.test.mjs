@@ -73,6 +73,49 @@ test('stale weather is labelled; yesterday high and low never appear as today',(
   const out=weatherView(old,new Date('2026-11-08T00:00:00Z'),'Australia/Sydney');
   assert.equal(out.stale,true);assert.equal(out.high,null);assert.equal(out.low,null);
 });
+
+test('BOM local daily timestamps do not depend on the host timezone, including DST dates',()=>{
+  const original = process.env.TZ;
+  try {
+    for (const hostZone of ['UTC', 'America/Los_Angeles', 'Australia/Sydney', 'Pacific/Auckland']) {
+      process.env.TZ = hostZone;
+      for (const [stamp, instant] of [
+        ['2026-11-08T00:00:00', '2026-11-08T01:00:00Z'],
+        ['2026-11-08T23:00:00', '2026-11-08T10:00:00Z'],
+        ['2026-10-04T00:00:00', '2026-10-03T14:00:00Z'],
+        ['2026-04-05', '2026-04-04T14:00:00Z']
+      ]) {
+        const today={datetime:stamp,temperature:24};
+        assert.equal(selectForecast([null,{datetime:'invalid'},today],new Date(instant),'Australia/Sydney'),today);
+      }
+      assert.equal(selectForecast([{datetime:'2026-11-09T00:00:00'}],new Date('2026-11-08T10:00:00Z'),'Australia/Sydney'),undefined);
+    }
+    assert.equal(selectForecast({},new Date(),'Australia/Sydney'),undefined);
+  } finally {
+    if (original === undefined) delete process.env.TZ; else process.env.TZ = original;
+  }
+});
+
+test('provider selection preserves attribution and never borrows another entity forecast',async()=>{
+  const config={haUrl:'http://mock',haToken:'test',weatherEntity:'weather.synthetic_bom',timeZone:'Australia/Sydney'};
+  const now=new Date('2026-11-08T10:00:00Z');
+  const state={state:'partlycloudy',last_updated:'2026-11-07T00:00:00Z',last_reported:now.toISOString(),
+    attributes:{temperature:20,temperature_unit:'°C',attribution:'Data provided by the Bureau of Meteorology'}};
+  const fetcher=async(url)=>{
+    if (!url.includes('/states/')) throw Error('forecast offline');
+    return {ok:true,json:async()=>state};
+  };
+  const previous={weatherEntity:'weather.previous_provider',forecastDay:'2026-11-08',high:99,low:88};
+  const result=await fetchWeather(config,previous,fetcher,now);
+  assert.equal(result.high,null); assert.equal(result.low,null);
+  assert.equal(result.weatherEntity,config.weatherEntity);
+  assert.equal(result.attribution,state.attributes.attribution);
+  assert.equal(weatherView(result,now,config.timeZone).stale,false);
+  assert.equal(weatherView(result,new Date('2026-11-08T14:00:00Z'),config.timeZone).stale,true);
+  const response=await fetchWeather(config,{},async(url)=>({ok:true,json:async()=>url.includes('/states/')?state:
+    {service_response:{[config.weatherEntity]:{forecast:[{datetime:'2026-11-08T23:00:00',temperature:25,templow:15}]}}}}),now);
+  assert.equal(response.high,25); assert.equal(response.low,15);
+});
 test('HA adapter only requests weather, keeps same-day forecast on partial failure',async()=>{
   const calls=[]; const fetcher=async(url,options)=>{
     calls.push({url,options});
@@ -80,7 +123,7 @@ test('HA adapter only requests weather, keeps same-day forecast on partial failu
     return {ok:true,json:async()=>({state:'rainy',last_updated:'2026-11-07T01:00:00Z',attributes:{temperature:18,temperature_unit:'°C'}})};
   };
   const result=await fetchWeather({haUrl:'http://mock-ha',haToken:'test-only',weatherEntity:'weather.forecast_home',timeZone:'Australia/Sydney'},
-    {forecastDay:'2026-11-07',high:22,low:12},fetcher,new Date('2026-11-07T02:00:00Z'));
+    {weatherEntity:'weather.forecast_home',forecastDay:'2026-11-07',high:22,low:12},fetcher,new Date('2026-11-07T02:00:00Z'));
   assert.equal(result.high,22);assert.equal(calls.length,2);
   assert.equal(calls[1].url,'http://mock-ha/api/services/weather/get_forecasts?return_response');
   assert.deepEqual(JSON.parse(calls[1].options.body),{entity_id:'weather.forecast_home',type:'daily'});

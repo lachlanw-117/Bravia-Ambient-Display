@@ -1,7 +1,9 @@
 # Bravia implementation roadmap
 
 Accepted design recorded on 8 November 2026. Phase 0 is implemented as repository
-documentation. Phases 1-6 remain planned and require separate authorisation;
+documentation. Phase 1 local work was authorised on 8 November and is prepared
+for review; [its implementation record](PHASE1.md) separates local checks from
+pending deployment and TV acceptance. Phases 2-6 remain planned and require separate authorisation;
 Phase 7 requires a later implementation plan. Accepting this roadmap is not
 approval to deploy, operate devices or progress automatically to another phase.
 
@@ -128,8 +130,10 @@ transition. A decision's revision is found in Git history; deployed revisions
 must be recorded explicitly in trial/household notes.
 
 Phase 0 was authorised and implemented locally on 8 November 2026. No app, HA or
-device changes were made. Later phases have accepted designs, not implementation
-or deployment authorisation. Commit/push/merge approval was supplied separately
+device changes were made during Phase 0. Phase 1 local implementation was then
+authorised and prepared for review; deployment and TV acceptance remain pending.
+Phases 2-6 have accepted designs, not implementation or deployment authorisation.
+Commit/push/merge approval was supplied separately
 for repository consolidation on 8 November; it does not authorise live changes
 or later feature phases. See [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow.
-The next possible phase is BOM weather, after its own scoped authorisation.
+See the [Phase 1 record](PHASE1.md) for the current stopping point.
