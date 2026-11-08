@@ -155,16 +155,26 @@ deleting caches, backups or source photos, removing system packages, disabling H
 Terminal & SSH, or relocating shared toolchains. Follow
 [MAINTENANCE.md](MAINTENANCE.md). Revisit when an actual maintenance need appears.
 
-## D10 - Reviewed main branches and short-lived changes
+## D10 - Accepted main branches and short-lived changes
 
 **Status:** repository consolidation authorised on 8 November 2026.
 
-Use `main` as the reviewed baseline in each repository, with a focused branch/PR
+Use `main` as the accepted baseline in each repository, with a focused branch/PR
 per coherent change. GitHub Actions runs synthetic/local checks; it does not
 deploy. Deployment records identify installed revisions separately from `main`.
 Retire incorporated branches without rewriting history. Preserve superseded work
 with an archive reference before deleting its branch. See
 [CONTRIBUTING.md](CONTRIBUTING.md).
+
+On 8 November the user refined the acceptance order: keep runtime PRs open,
+trial-deploy the exact feature-branch commit with approval, record successful
+relevant device acceptance and closeout, then request merge approval. This
+supersedes merging runtime changes before deployment. CI cannot establish Sony
+rendering/input or physical HA behaviour. Failed trials stay on the branch for
+fixes and retesting. Documentation-only changes need review/local checks without
+device deployment. Historical baseline merges do not become retroactive claims
+of device acceptance. Revisit only if a suitable isolated staging environment can
+establish the same acceptance evidence without the household trial.
 
 The initial Bravia branch was also its default branch. Consolidation establishes
 `main` without discarding that history. HA keeps its existing `main`. The repos

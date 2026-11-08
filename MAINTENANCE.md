@@ -8,6 +8,10 @@ outside its scope.
 
 ## Before a maintenance session
 
+Runtime trials deploy an exact feature-branch commit while its PR stays open.
+Successful relevant device acceptance and recorded closeout precede merge
+approval; `main` is the accepted baseline. See [CONTRIBUTING.md](CONTRIBUTING.md).
+
 1. Name the phase and exact local work. Inspect branches, working trees and
    relevant live drift without opening credentials or saved app options.
 2. Record the reviewed revision/local diff and relevant APK/package hashes.

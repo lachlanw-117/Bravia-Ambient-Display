@@ -44,8 +44,12 @@ There is no automatic progression. Phase 3 is useful as a private inbox even if
 the TV, phone migration or aircraft phases do not proceed. Source families and
 phone migrations also have individual review points within their phase.
 
-For each phase: **build locally, review, approve named live changes, verify,
-document, close the testing session**. Follow each repository's rules for
+For each runtime phase: **feature branch, PR/local checks, review, approve named
+trial changes, deploy the exact branch commit, pass relevant device acceptance,
+document and close the testing session, then approve and merge into main**.
+Keep the PR open during trials; fix and retest the branch if acceptance fails.
+Documentation-only work uses review/local checks without device deployment.
+Follow each repository's rules for
 commits, pushes and merges; installation approval does not cover those actions.
 Do not mark a phase verified because its build passed. Use synthetic test data.
 

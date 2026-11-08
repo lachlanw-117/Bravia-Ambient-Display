@@ -1,7 +1,8 @@
 # Development workflow
 
-`main` is the reviewed source baseline. It is not a claim that every change is
-installed on the TV or Pi. [TRIAL.md](TRIAL.md) and the companion HA deployment
+`main` is the accepted source baseline. Runtime changes reach it after successful
+relevant device testing of an approved feature-branch trial. It is not a claim
+that every change is currently installed on the TV or Pi. [TRIAL.md](TRIAL.md) and the companion HA deployment
 notes identify actual deployed revisions and remaining acceptance checks.
 Read [AGENTS.md](AGENTS.md) before acting.
 
@@ -13,10 +14,20 @@ Read [AGENTS.md](AGENTS.md) before acting.
 3. Run the relevant local checks and open a pull request describing the problem,
    resulting behaviour, validation and limitations. Link the roadmap phase and
    companion PR when both repositories change.
-4. Review the exact diff and CI results. Obtain the required merge approval,
-   merge the finished work and retire the incorporated branch.
-5. Treat deployment as a separate approved action. Record its exact revision,
-   verification and rollback, including any unverified physical behaviour.
+4. Review the exact diff and CI results. For runtime changes, obtain approval for
+   the named trial deployment and device checks, preserving rollback artifacts.
+5. Trial-deploy the exact feature-branch commit while keeping the PR open. Record
+   its revision, artifact hashes and relevant live/device acceptance results.
+   Fix and retest on the same branch if acceptance fails. A relevant untested or
+   failed check keeps the acceptance gate open; explicitly scope unrelated checks.
+6. Document results, limitations, rollback and testing-session closeout. Then seek
+   merge approval, merge the accepted work and retire the incorporated branch.
+   A runtime change after testing requires appropriate retesting of that revision.
+
+Documentation-only changes use review and relevant local checks without an
+unnecessary device deployment. Local/CI success alone never establishes physical
+acceptance. Deployment approval and merge approval remain separate. This sequence
+was selected on 8 November 2026 and replaces merging runtime work before trials.
 
 A phase can use several PRs. No permanent development or staging branch is
 needed. Do not rewrite published history to make it look tidy. Old work that is
