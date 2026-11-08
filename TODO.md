@@ -1,15 +1,29 @@
 # TODO
 
+Updated 8 November 2026. The [roadmap](ROADMAP.md) owns the accepted enhancement
+scope and separate phase approvals; [decisions](DECISIONS.md) record the why.
+Checked items below describe recorded results, not a fresh live inspection.
+
 - [x] Research Google Photos API restrictions and Android DreamService lifecycle.
 - [x] Build the Android screensaver, local photo/weather host and offline cache.
 - [x] Add automated host and JVM policy tests and verify the signed debug APK.
-- [ ] Review and approve installing the Pi host and sideloading the TV app.
+- [x] Install the Pi host and TV app with approval; record the 147-photo deployment
+  from `3fbb127` in [TRIAL.md](TRIAL.md).
 - [ ] Test idle entry, first-key exit and non-interruption of streaming and Xbox/HDMI on the Sony.
 - [ ] Check rendering, photo orientation, crossfades and offline recovery with an exported album.
 - [ ] Determine whether this Sony firmware exposes a configurable idle timeout.
-- [ ] Validate real daily forecast output and midnight/DST handling on the TV.
-- [ ] Build and validate the HA OS app container on the Pi.
+- [x] Verify the initial live daily forecast and TV weather overlay; recorded in TRIAL.md.
+- [ ] Check actual TV behaviour at midnight/DST; synthetic coverage is not device evidence.
+- [x] Build/start the HA OS local app on the Pi and record health/authentication/weather checks.
+- [x] Complete Phase 0 documentation: roadmap, decision log and maintenance procedure.
+- [ ] Obtain the scoped authorisation for Phase 1 BOM weather; then implement,
+  review and separately approve its deployment. Do not start later phases automatically.
+- [ ] Complete an approved TV-session closeout: debugging disabled and ordinary
+  playback, idle entry and exit checked. Current debugging state is not reverified.
 - [ ] Consider Google Ambient API partner access only if unattended album sync becomes essential.
 
-Aviation, household notifications, calendar and photo metadata are future work.
-The MVP is built locally but not deployed. See README.md and VALIDATION.md for scope and checks.
+Photo presentation and household notices/interactions are accepted future phases,
+not implemented features. Aircraft implementation needs its own later plan.
+Calendar and photo metadata remain deferred. The MVP was deployed on 7 November;
+see [TRIAL.md](TRIAL.md) for results and [VALIDATION.md](VALIDATION.md) for the
+initial local-validation snapshot.

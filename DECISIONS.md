@@ -1,0 +1,151 @@
+# Bravia decisions and deferred work
+
+Decisions recorded on 8 November 2026. Read the [roadmap](ROADMAP.md) for phase
+boundaries and status. An accepted design is not an implemented or deployed
+feature. [TRIAL.md](TRIAL.md) records historical device results.
+
+For a new decision, record its status/date, phase, reason, alternatives, evidence,
+uncertainty and revisit condition. Link implementation revisions and deployment
+results when they exist; until then state **not implemented**. Preserve a
+superseded decision and link its replacement rather than erasing the reason.
+
+## D01 - Do not apply skinny-bravia
+
+**Status:** accepted exclusion; all phases. No cleanup from that project applied
+by this work.
+
+The [guide](https://github.com/therealhoodboy/skinny-bravia) targets Android 9 and
+includes broad removal/disablement of packages relevant to HDMI/Bravia Sync,
+screensavers, rendering and accessibility. Our recorded TV runs Android 12 and
+already plays photos. There is no measured app bottleneck that justifies the
+blanket package changes. An uninstall list is not a performance diagnosis.
+
+Alternative: measure our app's decoding, rendering, memory and input handling
+first. Revisit only for a demonstrated bottleneck, an individually understood
+package, Sony-version compatibility, explicit device approval and a rollback.
+
+## D02 - Use native HA for the notice foundation
+
+**Status:** accepted design; Phases 3, 5 and 6; not implemented.
+
+Use core-maintained helpers, scripts, automations and source events with a small
+feed adapter. Provide everyday destination controls in HA rather than requiring
+YAML edits for each preference change. This matches the household's practice of
+making quick adjustments in the UI. Restored helper values are runtime state;
+source logic and definitions remain reviewed configuration in Git.
+
+[Ticker](https://github.com/analytix-energy-solutions/ticker) is a close feature
+match for subscriptions and history, but research found a younger project,
+concentrated maintenance, documented auto-clear restart limitations and open
+reliability/permission reports. An issue report is not independently verified
+proof. AI assistance alone is not a reason to reject software.
+[Alert2](https://github.com/redstone99/hass-alert2) has a longer project history
+and useful suppression/snooze features, but still needs feed/routing work and
+adds another dependency. Neither is selected as a dependency by this plan.
+
+Revisit if native configuration becomes difficult to maintain, an established
+manager demonstrably reduces custom work, or more advanced fault lifecycles are
+needed. Compare actual release behaviour, tests, permissions and maintenance,
+not just feature lists or popularity. Do not build a full custom manager by
+default.
+
+## D03 - Designs B and C, with adaptive portrait pairs
+
+**Status:** accepted design; Phase 2 and future Phase 7; not implemented.
+
+B is a photo area beside a clear information column. C is a dark aircraft map
+with selected-flight details and the shared notice layer. The generated mockups
+used sample content; they were concepts rather than app screenshots. B suits
+the selected everyday layout; C remains a separate feature.
+
+Many album photos are portrait and currently leave black space on both sides.
+Pair consecutive portraits when they fit, preserve complete foreground images,
+retain album order and provide a single-photo setting. Automatic cropping was
+not selected. Use subdued static fill for residual space. Revisit pairing or
+information-column proportions after couch-distance review and actual TV tests.
+
+## D04 - Persistent offline storage is no longer required
+
+**Status:** accepted requirement change; cache removal deferred.
+
+The existing host/TV caches remain implemented and were unchanged by the album
+deployment. Removing them is not part of visual work or project cleanup. A
+replacement still needs bounded downloads/decoding and defined failure behaviour.
+Revisit only through a separate storage discussion, with migration and recovery
+implications reviewed. Do not clear app data to make implementation match the
+new requirement.
+
+## D05 - Notices are passive outside the running screensaver
+
+**Status:** accepted design; Phases 3-6; not implemented.
+
+Meaningful household occurrences and attention conditions enter a typed feed,
+then destination filters decide delivery. Record before routing so suppressed
+items can be reviewed privately. Do not copy every state transition or raw log.
+TV notices must not wake the TV, launch over playback or switch HDMI inputs.
+
+Updates are grouped from their first implementation; see the
+[count and lifecycle rules](ROADMAP.md#updates-are-grouped-from-the-first-implementation).
+Individual component/version details belong in the private inbox, with one
+TV-facing count. Revisit source breadth only if a specific useful event is
+missing; do not respond to noise by adding more unfiltered sources.
+
+## D06 - Include remote interaction and local TV hiding
+
+**Status:** accepted design; Phase 4; not implemented.
+
+The user wants both HA source integrations and TV remote interactions. Hide only
+the selected occurrence on this TV, persist the hidden state, allow it to be
+revealed in setup, and let new occurrences reappear. Back exits immediately;
+Home/power remain system-owned. Preserve a first-input-exit setting.
+
+Local hiding is smaller and clearer than shared acknowledgement. It does not
+resolve a fault, dismiss an HA Repair or silence phone reminders. Revisit shared
+acknowledgement only with separately designed permissions, state synchronisation
+and failure semantics. Sony input behaviour remains unverified for this feature.
+
+## D07 - Prefer the installed BOM weather source
+
+**Status:** accepted design; Phase 1; not implemented or deployed.
+
+Read-only inspection on 8 November identified the installed BOM component and
+its daily/hourly entities; household identifiers belong in the
+[HA companion notes](https://github.com/lachlanw-117/Wright-Home-Assistant/blob/docs/bravia-host-trial/docs/bravia_ambient_host.md).
+The host already supports a selected HA weather entity and daily forecasts.
+Prefer that interface over adding a separate direct BOM client to the TV.
+
+Keep attribution, source freshness and local-day correctness visible. Do not
+silently fall back to another provider. Entity ownership was inspected, but live
+readings/forecast output were not verified because the attempted Supervisor API
+route returned 401. Revisit the adapter if actual forecast responses show an
+incompatibility. Verify before a separately approved source change.
+
+## D08 - Aircraft details are conditional, not a promised free data service
+
+**Status:** accepted research direction; Phase 7 planning deferred.
+
+One anonymous Sydney-region sample found usable positions/type data from
+[adsb.fi](https://github.com/adsbfi/opendata) and
+[adsb.lol](https://www.adsb.lol/docs/open-data/api). This is not a coverage or
+reliability guarantee. ADSBDB enrichment returned useful details in the sample,
+but its [route-data notice](https://www.adsbdb.com/) requires permission/use
+clarification. Callsign matching is not independently verified live routing.
+Aircraft data and map imagery are separate provider decisions.
+
+Revisit with sustained coverage/age checks, permitted display/cache use, map
+attribution and a budget decision before implementing C. No paid subscription,
+receiver purchase, website scraping or precise home location in Git is selected.
+
+## D09 - Close maintenance sessions instead of leaving debugging as a dependency
+
+**Status:** accepted procedure; no device cleanup performed in Phase 0.
+
+Normal app operation does not require ADB. After an approved device session,
+disable debugging and verify ordinary use; review the Developer options master
+switch separately. Disconnecting the computer does not disable TV debugging.
+Last recorded debugging was enabled; its present state is not assumed.
+
+Keep recovery artifacts and signing material private. Do not equate cleanup with
+deleting caches, backups or source photos, removing system packages, disabling HA
+Terminal & SSH, or relocating shared toolchains. Follow
+[MAINTENANCE.md](MAINTENANCE.md). Revisit when an actual maintenance need appears.
