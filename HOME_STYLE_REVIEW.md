@@ -1,9 +1,12 @@
 # Home-style refinement and Home-screen ad review
 
-Status: layout accepted for local implementation on 11 November 2026; Android
-candidate implemented and signed locally. Git publication/PR explicitly approved;
-live deployment and device acceptance remain pending.
-Ad/launcher work remains research only; no live change occurred.
+Status: layout accepted for local implementation on 11 November 2026; candidate
+committed/pushed as PR #5, with exact-head CI passed. The user subsequently approved
+the named photo-host update/restart and TV APK trial, now installed. Visual
+acceptance is recorded and the debugging port is closed. The user confirmed Back
+and normal idle entry with debugging off; tonight's session is closed. Multi-day
+low-retention observation and merge approval remain pending.
+Ad/launcher work remains research only; no ad-related live change occurred.
 The existing installation has several days of user-reported ordinary use without
 issues. Do not repeat routine acceptance merely to resume. See
 [session evidence](TV_TEST_2026-11-11.md).
@@ -179,5 +182,68 @@ the old docs branch still points to the unchanged main baseline. The user approv
 committing/pushing this layout/retention candidate and opening its PR. Publish the
 status/research and runtime changes as distinct commits in that focused PR. Keep
 it open for the separately approved host/TV trial and successful device acceptance;
-merge still requires its own approval. No live deployment, launcher installation
-or system setting change has occurred for this candidate.
+merge still requires its own approval. This preparation checkpoint preceded the
+approved host/TV deployment recorded below; no launcher change is included.
+
+## Approved trial readiness - 11 November 2026
+
+[PR #5](https://github.com/lachlanw-117/Bravia-Ambient-Display/pull/5) is open against
+main at `29b3784f255ee7d29500a03c3166bae05248342d`. Local checks CI run
+42997970641 passed. Local APK and packaged-host hashes match the private candidate
+inventory. The user approved updating/restarting only the Bravia photo host and
+installing the candidate TV APK; no Core restart, launcher change or merge.
+
+Readiness checks found the host/SSH ports reachable and TV debugging unavailable.
+The user was asked to enable debugging for this approved trial. Initial SSH
+authentication was denied and worked after the user restored existing access, as
+recorded below. No installation/rebuild is
+claimed from port reachability. Keep current packages and private app/cache backups
+before a replacement; do not read saved options, tokens or signing keys.
+
+If the existing cache lacks today's forecast low, the update cannot recover that
+value retroactively. Capture tomorrow's supplied low during ordinary five-minute
+refreshes and verify date rollover/daytime retention subsequently. Until a valid
+matching minimum exists, showing only High is expected. A synthetic retention test
+does not by itself verify this multi-day live sequence.
+
+## Approved trial deployment - 11 November 2026
+
+The existing SSH authentication worked after the user restored access; no key,
+token or saved option was inspected or changed. The user enabled TV debugging for
+the approved session. The actual prior TV APK and Pi package matched the recorded
+accepted versions. Current/previous APK copies, preserved package and Bravia-only
+app backup are held privately; exact recovery identities are in the ignored trial
+inventory, not Git. The private backup file was verified present before replacement.
+
+Only server.mjs changed in the Pi package. The uploaded source hash was verified,
+then local_bravia_ambient was stopped, rebuilt and started successfully. Live
+package hash matched source from PR head 29b3784f255ee7d29500a03c3166bae05248342d.
+Health returned 200/ok and unauthenticated weather returned 401. App runtime stats
+were available. This establishes service operation, not an authenticated forecast
+or a multi-day retention pass. No Core restart, Thread/SSH configuration change,
+provider switch or credential change occurred.
+
+The candidate APK installed with install -r, preserving app data. The actual
+installed APK was pulled back and its hash matched the recorded signed candidate.
+An external launch of the non-exported Preview activity was rejected by Android;
+no manifest/security setting was changed. The user was asked to open Preview via
+the normal app and report date/clock, colour, spacing, freshness and physical Back.
+The user accepted the appearance and supplied a private photo showing the full
+date above the clock, paired complete photos, the tighter cream weather column,
+colour accents and right-aligned Checked 1 min ago. Today showed High 27 with no
+low; Tomorrow showed High 24 / Low 19. This is authenticated app-rendered weather
+evidence, not a direct inspection of upstream rows or stored-cache contents. The
+photo is not copied into Git. The missing Today low is consistent with no earlier
+captured value; that explanation is not independently proved for this date.
+
+ADB was disabled after visual acceptance. The command disconnected, and a fresh
+TCP probe confirmed the TV actively refused port 5555. Developer options master
+was not changed. The user was asked to confirm physical Back and ordinary idle
+entry with debugging off; the user replied that all works. Scoped visual/ordinary
+use acceptance and session closeout are complete. No debugging re-enable is needed
+to inspect Tomorrow becoming Today during ordinary use.
+
+Do not mark the dated-low lifecycle verified solely from installation. A same-date
+low must first be captured; overnight promotion and later blank-response retention
+need their own subsequent observation. Preserve these limits when closing the
+visual trial. The PR remains open and main is unchanged.
