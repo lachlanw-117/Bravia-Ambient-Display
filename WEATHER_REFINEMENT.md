@@ -1,5 +1,14 @@
 # Weather summary refinement
 
+## Superseding closeout - recorded 11 November 2026
+
+The user approved both final merges after acceptance. Bravia PR #4 merged on
+8 November as `f45548e43bf3d07704538d38e31a971c50769593`; HA PR #7 merged as
+`626c8cb5e234c3cf401f314238ec54f150e52c71`. Pending-merge wording below describes
+historical checkpoints. Runtime revisions and device acceptance are unchanged by
+these merges. See the [next TV test](TV_TEST_2026-11-11.md) for today's user
+observations, unresolved checks and deferred layout/Home-screen-ad priorities.
+
 ## Status and boundaries - 8 November 2026
 
 Implemented locally. The user approved Git publication, the accepted Phase 2

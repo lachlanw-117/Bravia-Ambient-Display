@@ -1,12 +1,13 @@
 # Sony Bravia Ambient Display
 
 A local-first family-photo screensaver for the Sony X90K Google TV.
-This is an MVP under development. The APK builds and the local tests pass;
-the debug APK was installed on the TV on 7 November 2026 and the user reports
-that screensaver behaviour works as expected. The Pi host is now installed and
-running; authenticated weather and its TV overlay were verified, and the user
-subsequently confirmed playback of the imported 147-photo album.
-See [trial results](TRIAL.md).
+The household trial uses a Pi photo/weather host and a 147-photo album. Cream
+presentation, portrait pairs, Now/Today/Tomorrow weather and photo continuation
+passed scoped household acceptance on 8 November 2026 and merged into main.
+Debugging was disabled at closeout. These are historical results, not fresh live
+inspection or complete streaming/HDMI/recovery coverage. See [trial results](TRIAL.md)
+and the [11 November TV test](TV_TEST_2026-11-11.md) for current observations and
+remaining checks. No reinstall is needed merely to resume.
 
 [![Local checks](https://github.com/lachlanw-117/Bravia-Ambient-Display/actions/workflows/checks.yml/badge.svg?branch=main)](https://github.com/lachlanw-117/Bravia-Ambient-Display/actions/workflows/checks.yml)
 
@@ -42,18 +43,21 @@ refreshes on screensaver entry and every five minutes while running, keeping its
 last complete album if downloads fail. Both caches survive process restarts.
 No additional always-on computer is needed.
 
-The slideshow uses a 30-second default and 1.5-second crossfade, fits each complete
-photo without cropping, and displays time, date, current temperature/condition and
-today's forecast high/low at bottom right. Slide duration is configurable from
-10 to 300 seconds. Bitmaps are decoded to a maximum 1920 by 1080 bounding box to
-limit TV memory use; the screen scales them to its resolution.
+The slideshow fits complete photos without cropping, pairs consecutive portraits
+when enabled and remembers progress across sessions in fixed album order. A cream
+sidebar shows time/date, Now temperature, Today/Tomorrow forecast conditions and
+ranges, and check age above space reserved for future notices. Missing forecast
+values remain explicit. Slide duration is configurable from 10 to 300 seconds,
+with a 30-second source default and 60-second household preference. Decoding and
+prefetch are bounded; see [Phase 2](PHASE2.md) for rendering and performance limits.
 
-The initial deployment used `weather.forecast_home`; the approved Phase 1 branch
-trial now selects the installed BOM daily source, using `Australia/Sydney`.
+The initial deployment used `weather.forecast_home`; the accepted deployment
+selects the installed BOM daily source, using `Australia/Sydney`.
 The adapter reads its state and requests daily forecasts
 through `weather.get_forecasts`. It chooses today's entry by local date, never
-substitutes tomorrow, retains same-day forecast data on partial failure, and
-labels stale readings as cached. [Phase 1](PHASE1.md) records the selected BOM
+substitutes tomorrow and retains date-matched forecast data on partial failure.
+Today and Tomorrow use separate rows; freshness uses check age with specific
+delayed-check wording. [Phase 1](PHASE1.md) records the selected BOM
 source, offset-free local forecast dates and provider-isolated caching. Provider
 attribution remains in the feed; the user requested no visible TV credit during
 review. That final version passed scoped TV acceptance/closeout; merge approval
@@ -182,7 +186,8 @@ Clearing the TV app's data explicitly removes its cache and saved access key.
 [Phase 2](PHASE2.md) records the design B photo/sidebar trial:
 adaptive portrait pairs, complete-image fitting and a static cream background.
 It is deployed on the TV; the user accepted the cream palette and debugging is
-closed. The user confirmed ordinary idle/Back with debugging off. The feature PR stays open until acceptance and separate merge approval.
+closed. The user confirmed ordinary idle/Back with debugging off. Phase 2 and the
+subsequent weather/photo-resume PRs were separately approved and merged.
 
 The accepted direction is design B with adaptive portrait pairs, BOM weather,
 native HA notice controls and local TV notice hiding. Design C is a later
@@ -210,9 +215,8 @@ data, not household photos.
 
 Follow [the infrastructure trial](TRIAL.md) to test TV rendering and idle behaviour, then Pi connectivity and HA weather separately. Family photos are optional until those checks pass.
 
-The [weather summary refinement](WEATHER_REFINEMENT.md) is implemented locally on
-its separate feature branch: observed temperature under Now, explicit Today and
-Tomorrow forecasts, and check-age/cached labels above the future notice area.
-Its named host/TV trial is deployed and accepted, with debugging closed; separate
-merge approval remains pending.
-Photo continuation across sessions was subsequently included at the user's request.
+The [weather refinement](WEATHER_REFINEMENT.md) is deployed, accepted and merged:
+observed temperature under Now, explicit Today/Tomorrow forecasts, quiet check-age
+text and photo continuation. The [current test record](TV_TEST_2026-11-11.md)
+preserves remaining acceptance work and deferred layout/Home-screen-ad priorities.
+Notices are not implemented.
