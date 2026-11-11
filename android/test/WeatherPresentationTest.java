@@ -30,7 +30,11 @@ public final class WeatherPresentationTest {
         check(WeatherPresentation.freshness(now.toString(),true,today,tomorrow,now).contains("Weather check delayed"),"stale report retained");
         check(WeatherPresentation.condition("unknown").equals("Forecast unavailable"),"unknown is explicit");
         check(WeatherPresentation.condition("lightning-rainy").equals("Thunderstorms"),"bounded long condition");
-        check(WeatherPresentation.range(tomorrow).contains("Low —"),"missing low never fabricated");
+        check(WeatherPresentation.range(tomorrow).equals("High 21°"),"missing low is omitted, never fabricated");
+        check(WeatherPresentation.range(today).equals("High 19°   Low 11°"),"both actual forecast values retained");
+        check(WeatherPresentation.range(new Forecast(today.date,null,null,-3d,null,false)).equals("Low -3°"),"low-only forecast including negative values");
+        check(WeatherPresentation.range(new Forecast(today.date,null,0d,0d,null,false)).equals("High 0°   Low 0°"),"real zero is not missing");
+        check(WeatherPresentation.range(new Forecast(today.date,null,Double.NaN,Double.POSITIVE_INFINITY,null,false)).isEmpty(),"nonfinite values are not displayed");
         check(WeatherPresentation.range(null).isEmpty(),"missing day no range");
         check(WeatherPresentation.freshness("bad",false,today,tomorrow,now).equals("Check time unavailable"),"unknown check time");
         System.out.println("PASS "+assertions+" weather date, provenance and freshness assertions");

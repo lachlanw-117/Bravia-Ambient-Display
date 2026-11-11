@@ -127,15 +127,29 @@ export async function fetchWeather({ haUrl, haToken, weatherEntity, timeZone }, 
   const today = localDay(now, timeZone);
   const old = previous?.weatherEntity === weatherEntity ? previous : {};
   const dailyForecasts = [today, calendarDay(today, 1)].map(date => {
+    const retained = (Array.isArray(old.dailyForecasts) ? old.dailyForecasts.find(r => r?.date === date) : null)
+      ?? (old.forecastDay === date ? { low: old.low, checkedAt: old.forecastAt } : null);
     const usable = Array.isArray(rows) ? rows.filter(row => row &&
       (conditions.has(row.condition) || Number.isFinite(row.temperature) || Number.isFinite(row.templow))) : [];
     const row = selectForecast(usable, now, timeZone, date);
     const condition = conditions.has(row?.condition) ? row.condition : null;
-    const high = numberOrNull(row?.temperature), low = numberOrNull(row?.templow);
-    if (condition || high !== null || low !== null)
-      return { date, condition, high, low, checkedAt: now.toISOString(), cached: false };
-    const retained = Array.isArray(old.dailyForecasts) ? old.dailyForecasts.find(r => r?.date === date) : null;
-    if (retained) return { ...retained, cached: true };
+    const high = numberOrNull(row?.temperature), suppliedLow = numberOrNull(row?.templow);
+    if (condition || high !== null || suppliedLow !== null) {
+      let low = suppliedLow, lowCheckedAt = low === null ? null : now.toISOString();
+      // BOM may omit Day 0's minimum after morning. Keep only the last supplied
+      // minimum for this provider/date/unit; tomorrow's value never fills today.
+      const priorCheck = retained?.lowCheckedAt ?? retained?.checkedAt;
+      const priorAge = now - Date.parse(priorCheck);
+      if (low === null && Number.isFinite(retained?.low) && Number.isFinite(priorAge) && priorAge >= 0
+          && (old.unit === undefined || old.unit === (state.attributes.temperature_unit ?? '°C'))) {
+        low = retained.low; lowCheckedAt = priorCheck;
+      }
+      // checkedAt is this successful row check. Preserve the low's source-check
+      // time separately without an extra TV label or a new stale-data warning.
+      return { date, condition, high, low, lowCheckedAt, checkedAt: now.toISOString(), cached: false };
+    }
+    const previousRow = Array.isArray(old.dailyForecasts) ? old.dailyForecasts.find(r => r?.date === date) : null;
+    if (previousRow) return { ...previousRow, cached: true };
     // Legacy cache compatibility: never promote an old entity condition into a forecast.
     if (old.forecastDay === date && (Number.isFinite(old.high) || Number.isFinite(old.low)))
       return { date, condition: null, high: numberOrNull(old.high), low: numberOrNull(old.low), checkedAt: old.forecastAt ?? null, cached: true };
