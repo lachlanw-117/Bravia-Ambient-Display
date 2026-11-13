@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Wright Ambient — home-style review</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#eae5dc;color:#30342f;font:16px system-ui,sans-serif}
+main{max-width:1920px;margin:auto;padding:28px}h1{font:400 30px Georgia,serif;margin:0 0 10px}
+p{max-width:880px;line-height:1.6}button{font:inherit;padding:10px 16px;border:1px solid #a29c90;border-radius:7px;background:#faf7f0;color:#30342f;cursor:pointer}
+button[aria-pressed="true"]{background:#315e64;color:white}nav{display:flex;gap:10px;margin:20px 0}
+.boards{display:grid;grid-template-columns:1fr 1fr;gap:24px}figure{margin:0}figcaption{margin-bottom:10px;font-weight:600}svg{display:block;width:100%;height:auto;background:#f5f1e7;border:1px solid #d3ccbd;border-radius:4px}
+.note{font-size:14px;color:#53584e}.focus .boards{max-width:1060px;margin:auto}
+.focus svg{max-height:850px}.focus figure{min-width:0}
+@media(max-width:1000px){.boards{grid-template-columns:1fr}main{padding:18px}.focus .boards{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.focus .boards{grid-template-columns:1fr}}
+</style>
+</head>
+<body><main>
+<h1>A little more home</h1>
+<p>Current layout beside a proposed warmer, tighter information column. Text sizes, photo area and future notice space stay the same. All illustrations and weather values here are synthetic; this is a design comparison, not a TV screenshot.</p>
+<nav aria-label="Preview view"><button id="full" aria-pressed="true">Whole TV</button><button id="focus" aria-pressed="false">Focus on sidebar</button></nav>
+<div class="boards">
+<figure><figcaption>Current arrangement</figcaption><svg id="before" viewBox="0 0 1920 1080" role="img" aria-label="Current cream photo display with separated weekday and date and muted weather"></svg></figure>
+<figure><figcaption>Proposed: date first, less space, warmer colour</figcaption><svg id="after" viewBox="0 0 1920 1080" role="img" aria-label="Proposed cream photo display with full date above time, tighter weather, colourful icons and right aligned freshness"></svg></figure>
+</div>
+<p class="note">Current view shows the missing-low dash; proposed view includes a previously captured forecast low for that same date, with no extra label. If no low was captured, only the high appears. All numbers are illustrative. The region below the divider stays empty. Browser fonts can differ from Android; final readability and long-text cases need review on the TV.</p>
+</main>
+<script>
+const cream='#f5f1e7',ink='#30342f',muted='#60665c';
+function t(value,x,y,size,fill=ink,extra=''){return '<text x="'+x+'" y="'+y+'" font-size="'+size+'" fill="'+fill+'" '+extra+'>'+value+'</text>'}
+function sun(x,y,bright){return '<g transform="translate('+x+' '+y+')"><circle cx="15" cy="14" r="9" fill="'+(bright?'#dca229':'#976621')+'"/><g stroke="'+(bright?'#dca229':'#976621')+'" stroke-width="2.2" stroke-linecap="round"><path d="M15 0v3m0 22v3M1 14h3m22 0h3M5 4l3 3m14 15 3 3M5 24l3-3M22 6l3-3"/></g></g>'}
+function cloud(x,y,bright){return '<g transform="translate('+x+' '+y+')"><path d="M4 23C-5 23-3 10 6 11C7-1 24-2 28 11C40 9 42 23 32 23Z" fill="'+(bright?'#b4c7cd':'none')+'" stroke="'+(bright?'#4d7988':'#52645c')+'" stroke-width="2"/></g>'}
+function forecast(label,y,condition,hi,lo,bright){
+ let s=t(label,1431,y,19.44,muted);
+ s+=sun(1431,y+5,bright);
+ if(condition==='Partly cloudy')s+=cloud(1435,y+10,bright);
+ s+=t(condition,1477,y+32.4,23.76);
+ if(bright)s+=t('High '+hi+'°',1431,y+61.56,23.76,'#9d4e32')+(lo==='—'?'':t('Low '+lo+'°',1552,y+61.56,23.76,'#356e85'));
+ else s+=t('High '+hi+'°   Low '+(lo==='—'?'—':lo+'°'),1431,y+61.56,23.76,muted);
+ return s;
+}
+function scenery(){
+return '<defs><linearGradient id="sky" x2="0" y2="1"><stop stop-color="#a8cbd3"/><stop offset="1" stop-color="#eee2c8"/></linearGradient></defs>'+
+'<rect width="1382.4" height="1080" fill="#ece5d7"/>'+
+'<g stroke="#faf7ef" stroke-width="12">'+
+'<rect x="67" y="133" width="610" height="814" fill="url(#sky)"/>'+
+'<rect x="704" y="133" width="610" height="814" fill="#d6dcbf"/></g>'+
+'<g><circle cx="523" cy="280" r="61" fill="#efd9a0"/>'+
+'<path d="M73 610L270 358 514 688 671 520V940H73Z" fill="#718f8e"/>'+
+'<path d="M73 769Q200 580 390 768T671 730V940H73Z" fill="#486c62"/>'+
+'<path d="M710 505Q930 381 1308 548V940H710Z" fill="#a8b39a"/>'+
+'<path d="M710 702Q920 488 1308 716V940H710Z" fill="#748b70"/>'+
+'<path d="M710 900Q900 659 1308 809V940H710Z" fill="#4b6e5e"/></g>';
+}
+function panel(proposed){
+ let s='<g font-family="Arial, sans-serif">'+scenery()+'<rect x="1382.4" width="537.6" height="1080" fill="'+cream+'"/>';
+ s+=t(proposed?'Wednesday 11 November 2026':'WEDNESDAY',1431,75.6,proposed?24.84:19.44,muted);
+ s+=t('6:42',1431,172.8,84.24,ink,'font-weight="300"')+t('PM',1610,172.8,24.84,muted);
+ if(!proposed)s+=t('11 November 2026',1431,221.4,24.84,muted);
+ s+=t('NOW',1431,proposed?246.24:286.2,19.44,muted)+t('24°C',1431,proposed?324:378,75.6,ink,'font-weight="300"');
+ s+=forecast('TODAY',proposed?388.8:459,'Sunny',27,proposed?16:'—',proposed);
+ s+=forecast('TOMORROW',proposed?496.8:567,'Partly cloudy',25,17,proposed);
+ s+=t('Checked 5 min ago',proposed?1871.4:1431,proposed?631.8:685.8,19.44,muted,proposed?'text-anchor="end"':'');
+ return s+'<path d="M1431 712.8H1871.4" stroke="#d5d6ca" stroke-width="1"/></g>';
+}
+document.getElementById('before').innerHTML=panel(false);
+document.getElementById('after').innerHTML=panel(true).replaceAll('id="sky"','id="skyAfter"').replaceAll('url(#sky)','url(#skyAfter)');
+function setFocus(focus){
+ document.body.classList.toggle('focus',focus);
+ for(const id of ['before','after'])document.getElementById(id).setAttribute('viewBox',focus?'1382.4 0 537.6 1080':'0 0 1920 1080');
+ document.getElementById('focus').setAttribute('aria-pressed',String(focus));
+ document.getElementById('full').setAttribute('aria-pressed',String(!focus));
+}
+document.getElementById('focus').onclick=()=>setFocus(true);
+document.getElementById('full').onclick=()=>setFocus(false);
+</script>
+</body></html>

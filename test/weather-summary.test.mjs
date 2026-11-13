@@ -1,6 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { calendarDay, selectForecast, fetchWeather, weatherView } from '../server/server.mjs';
+import { promises as fs } from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import { atomicJson, calendarDay, selectForecast, fetchWeather, weatherView } from '../server/server.mjs';
 
 const config = {haUrl:'http://synthetic-ha',haToken:'synthetic-only',weatherEntity:'weather.example',timeZone:'Australia/Sydney'};
 const now = new Date('2026-11-08T02:00:00Z');
@@ -41,6 +44,77 @@ test('missing today never substitutes tomorrow; partial valid rows keep missing 
   assert.equal(partial.dailyForecasts[0].high,null);
   assert.equal(partial.dailyForecasts[0].low,11);
 });
+
+test('daytime removal retains the dated morning low while fresh values and tomorrow stay independent',async()=>{
+  const morning=new Date('2026-11-07T21:00:00Z'); // 08:00 Sydney, same local date as now
+  const previous=await fetchWeather(config,{},get(),morning);
+  assert.equal(previous.dailyForecasts[0].low,11);
+  const daytime=await fetchWeather(config,previous,get([{...rows[0],templow:null},rows[1]]),now);
+  assert.equal(daytime.low,11);
+  assert.equal(daytime.dailyForecasts[0].lowCheckedAt,morning.toISOString());
+  assert.equal(daytime.dailyForecasts[0].checkedAt,now.toISOString());
+  assert.equal(daytime.high,19);
+  assert.equal(daytime.dailyForecasts[0].condition,'rainy');
+  assert.equal(daytime.dailyForecasts[0].cached,false);
+  assert.equal(daytime.dailyForecasts[1].low,14); // This belongs to tomorrow, not today.
+  assert.equal(weatherView(daytime,now,config.timeZone).forecastStale,false);
+});
+
+test('repeated blanks preserve original low check time and supplied revisions including zero replace it',async()=>{
+  const first=await fetchWeather(config,{},get(),now);
+  const blank=[{...rows[0],templow:null},rows[1]];
+  const later=new Date(now.getTime()+300000);
+  const retained=await fetchWeather(config,first,get(blank),later);
+  const again=await fetchWeather(config,retained,get(blank),new Date(later.getTime()+300000));
+  assert.equal(again.low,11);
+  assert.equal(again.dailyForecasts[0].lowCheckedAt,now.toISOString());
+  const revised=await fetchWeather(config,again,get([{...rows[0],templow:0},rows[1]]),later);
+  assert.equal(revised.low,0);
+  assert.equal(revised.dailyForecasts[0].lowCheckedAt,later.toISOString());
+});
+
+test('midnight reuses only the forecast minimum already captured for the new date',async()=>{
+  const previous=await fetchWeather(config,{},get(),now);
+  const midnight=new Date('2026-11-08T13:00:00Z');
+  const result=await fetchWeather(config,previous,get([{...rows[1],templow:null}]),midnight);
+  assert.equal(result.forecastDay,'2026-11-09');assert.equal(result.low,14);
+  assert.equal(result.dailyForecasts[0].lowCheckedAt,now.toISOString());
+  const nextDay=new Date('2026-11-09T13:00:00Z');
+  const missing=await fetchWeather(config,previous,get([{datetime:'2026-11-10T00:00:00',temperature:22,templow:null}]),nextDay);
+  assert.equal(missing.low,null); // Never carry the previous calendar day's minimum.
+});
+
+test('no captured minimum, another provider, another unit or invalid prior check cannot fill a blank',async()=>{
+  const previous=await fetchWeather(config,{},get(),now);
+  const blank=[{...rows[0],templow:null},rows[1]];
+  for(const old of [{},{...previous,weatherEntity:'weather.other'},{...previous,unit:'°F'},
+    {...previous,dailyForecasts:[{...previous.dailyForecasts[0],lowCheckedAt:'invalid'}]},
+    {...previous,dailyForecasts:[{...previous.dailyForecasts[0],lowCheckedAt:new Date(now.getTime()+60000).toISOString()}]}]) {
+    const result=await fetchWeather(config,old,get(blank),now);
+    assert.equal(result.low,null);assert.equal(result.high,19);
+  }
+});
+
+test('dated minimum survives the persisted weather-cache round trip and older cache schema',async t=>{
+  const dir=await fs.mkdtemp(path.join(os.tmpdir(),'ambient-low-test-'));
+  t.after(()=>fs.rm(dir,{recursive:true,force:true}));
+  const file=path.join(dir,'weather.json');
+  const first=await fetchWeather(config,{},get(),now);
+  await atomicJson(file,first);
+  const restored=JSON.parse(await fs.readFile(file,'utf8'));
+  const later=new Date(now.getTime()+300000);
+  const blank=[{...rows[0],templow:null},rows[1]];
+  const next=await fetchWeather(config,restored,get(blank),later);
+  assert.equal(next.low,11);
+  assert.equal(next.dailyForecasts[0].lowCheckedAt,now.toISOString());
+  const older=structuredClone(restored);
+  delete older.dailyForecasts[0].lowCheckedAt;
+  assert.equal((await fetchWeather(config,older,get(blank),later)).low,11);
+  const legacy={weatherEntity:config.weatherEntity,forecastDay:rows[0].datetime.slice(0,10),low:11,forecastAt:now.toISOString()};
+  const migrated=await fetchWeather(config,legacy,get(blank),later);
+  assert.equal(migrated.low,11);
+  assert.equal(migrated.dailyForecasts[0].lowCheckedAt,now.toISOString());
+});
 test('provider changes discard forecasts and malformed records do not hide valid same-day rows',async()=>{
   const previous=await fetchWeather(config,{},get(),now);
   previous.weatherEntity='weather.other';
@@ -80,4 +154,26 @@ test('impossible calendar dates and local 24-hour rollover cannot be treated as 
   const march=new Date('2026-03-02T02:00:00Z');
   assert.equal(selectForecast([{datetime:'2026-02-30T00:00:00+11:00',temperature:99}],march,config.timeZone),undefined);
   assert.equal(selectForecast([{datetime:'2026-11-08T24:00:00',temperature:99}],now,config.timeZone),undefined);
+});
+
+test('unit changes discard whole-row and legacy fallbacks on missing or failed forecasts', async()=>{
+  const initial=await fetchWeather(config,{},get(),now);
+  const legacy={weatherEntity:config.weatherEntity,forecastDay:'2026-11-08',
+    high:19,low:11,forecastAt:now.toISOString()};
+  for(const prior of [initial, legacy]) {
+    for(const unit of ['°C','°F']) {
+      for(const fail of [false,true]) {
+        const current={...state,attributes:{...state.attributes,temperature_unit:unit}};
+        const result=await fetchWeather(config,prior,get([],current,fail),now);
+        assert.equal(result.unit,unit);
+        assert.equal(result.dailyForecasts.length,unit==='°C'?(prior===initial?2:1):0);
+        assert.equal(result.high,unit==='°C'?19:null);
+        assert.equal(result.low,unit==='°C'?11:null);
+      }
+    }
+  }
+  const fahrenheit={...initial,unit:'°F'};
+  const result=await fetchWeather(config,fahrenheit,get([],state,true),now);
+  assert.equal(result.dailyForecasts.length,0);
+  assert.equal(result.high,null);assert.equal(result.low,null);
 });

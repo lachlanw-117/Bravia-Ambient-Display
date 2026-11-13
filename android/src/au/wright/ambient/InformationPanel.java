@@ -3,6 +3,10 @@ package au.wright.ambient;
 import android.content.Context;
 import android.graphics.*;
 import android.view.View;
+import android.text.Layout;
+import android.text.StaticLayout;
+import android.text.TextPaint;
+import android.text.TextUtils;
 import org.json.JSONObject;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -26,7 +30,7 @@ final class InformationPanel extends View {
         lastWeather=weather;lastMinute=minute;
         TimeZone zone=TimeZone.getTimeZone(weather.optString("timeZone","Australia/Sydney"));
         clock=format("h:mm",now,zone);period=format("a",now,zone);
-        weekday=format("EEEE",now,zone).toUpperCase(Locale.getDefault());date=format("d MMMM yyyy",now,zone);
+        weekday=format("EEEE",now,zone);date=format("d MMMM yyyy",now,zone);
         boolean available=weather.has("temperature")&&!weather.isNull("temperature")&&Double.isFinite(weather.optDouble("temperature"));
         temperature=available?String.format(Locale.getDefault(),"%.0f%s",weather.optDouble("temperature"),weather.optString("unit","°C")):"—";
         java.time.Instant instant=now.toInstant();
@@ -50,7 +54,7 @@ final class InformationPanel extends View {
         if(stale&&newWeather)android.util.Log.w("AmbientWeather","Freshness: checkAgeSeconds="+fetchedAge+
             " reportAgeSeconds="+reportAge+" feedStale="+weather.optBoolean("stale",true));
         status=!available?"Waiting for weather":WeatherPresentation.freshness(weather.optString("fetchedAt",null),stale,today,tomorrow,instant);
-        String content=weekday+" "+clock+" "+period+" "+date+" Now "+temperature+
+        String content=weekday+" "+date+" "+clock+" "+period+" Now "+temperature+
             " Today "+forecastContent(today)+" Tomorrow "+forecastContent(tomorrow)+" "+status;
         if(!content.equals(lastContent)){lastContent=content;setContentDescription(content);invalidate();}
     }
@@ -69,33 +73,55 @@ final class InformationPanel extends View {
         int save=canvas.save();canvas.scale(getWidth()/layout.width,getHeight()/layout.height);
         float h=layout.height,x=layout.panelLeft+h*0.045f,right=layout.width-h*0.045f,w=right-x;
         paint.setColor(0xfff5f1e7);canvas.drawRect(layout.panelLeft,0,layout.width,h,paint);
-        text(canvas,weekday,x,h*0.07f,h*0.018f,w,0xff60665c,normal);
+        int information=canvas.save();canvas.clipRect(layout.panelLeft,0,layout.width,h*0.65f);
+        paint.setTypeface(normal);paint.setTextSize(h*0.023f);
+        if(paint.measureText(weekday+" "+date)<=w)
+            text(canvas,weekday+" "+date,x,h*0.07f,h*0.023f,w,0xff60665c,normal);
+        else {
+            text(canvas,weekday,x,h*0.045f,h*0.023f,w,0xff60665c,normal);
+            text(canvas,date,x,h*0.075f,h*0.023f,w,0xff60665c,normal);
+        }
         paint.setTypeface(light);paint.setTextSize(h*0.078f);paint.setColor(0xff30342f);
         float clockWidth=paint.measureText(clock);
         text(canvas,clock,x,h*0.16f,h*0.078f,w,0xff30342f,light);
         text(canvas,period,x+clockWidth+12,h*0.16f,h*0.023f,Math.max(1,w-clockWidth-12),0xff60665c,normal);
-        text(canvas,date,x,h*0.205f,h*0.023f,w,0xff60665c,normal);
-        text(canvas,"NOW",x,h*0.265f,h*0.018f,w,0xff60665c,normal);
-        text(canvas,temperature,x,h*0.35f,h*0.07f,w,0xff30342f,light);
-        forecast(canvas,"TODAY",today,x,h*0.425f,h,w);
-        forecast(canvas,"TOMORROW",tomorrow,x,h*0.525f,h,w);
-        text(canvas,status,x,h*0.635f,h*0.018f,w,0xff60665c,normal);
+        text(canvas,"NOW",x,h*0.228f,h*0.018f,w,0xff60665c,normal);
+        text(canvas,temperature,x,h*0.30f,h*0.07f,w,0xff30342f,light);
+        float todayEnd=forecast(canvas,"TODAY",today,x,h*0.36f,h,w);
+        float tomorrowEnd=forecast(canvas,"TOMORROW",tomorrow,x,Math.max(h*0.46f,todayEnd+h*0.04f),h,w);
+        paragraph(canvas,status,x,Math.max(h*0.585f,tomorrowEnd+h*0.036f),h*0.018f,w,0xff60665c,true);
+        canvas.restoreToCount(information);
         paint.setColor(0xffd5d6ca);paint.setStrokeWidth(1);canvas.drawLine(x,h*0.66f,right,h*0.66f,paint);
         // The region below the divider is reserved for a separately approved notice phase.
         canvas.restoreToCount(save);
     }
-    private void forecast(Canvas canvas,String label,WeatherPresentation.Forecast row,float x,float baseline,float h,float w) {
+    private float forecast(Canvas canvas,String label,WeatherPresentation.Forecast row,float x,float baseline,float h,float w) {
         text(canvas,label,x,baseline,h*0.018f,w,0xff60665c,normal);
         String forecastCode=row==null?null:row.condition;
         boolean icon=!WeatherPresentation.condition(forecastCode).equals("Forecast unavailable");
         if(icon)glyph(canvas,x,baseline+h*0.005f,h*0.028f,forecastCode);
         float inset=icon?h*0.043f:0;
-        text(canvas,WeatherPresentation.condition(forecastCode),x+inset,baseline+h*0.03f,h*0.022f,w-inset,0xff30342f,normal);
-        text(canvas,WeatherPresentation.range(row),x,baseline+h*0.057f,h*0.022f,w,0xff60665c,normal);
+        float end=paragraph(canvas,WeatherPresentation.condition(forecastCode),x+inset,baseline+h*0.03f,h*0.022f,w-inset,0xff30342f,false);
+        String high=WeatherPresentation.highLabel(row),low=WeatherPresentation.lowLabel(row);
+        if(high.isEmpty()&&low.isEmpty())return end;
+        float rangeY=Math.max(baseline+h*0.057f,end+h*0.027f);
+        text(canvas,high,x,rangeY,h*0.022f,w,0xff9d4e32,normal);
+        paint.setTypeface(normal);paint.setTextSize(h*0.022f);
+        float lowX=x+(high.isEmpty()?0:paint.measureText(high+"   "));
+        text(canvas,low,lowX,rangeY,h*0.022f,w-(lowX-x),0xff356e85,normal);
+        return rangeY;
+    }
+    private float paragraph(Canvas canvas,String value,float x,float baseline,float size,float width,int colour,boolean right) {
+        TextPaint style=new TextPaint(Paint.ANTI_ALIAS_FLAG);style.setTypeface(normal);style.setTextSize(size);style.setColor(colour);
+        StaticLayout block=StaticLayout.Builder.obtain(value,0,value.length(),style,Math.max(1,(int)width))
+            .setAlignment(right?Layout.Alignment.ALIGN_OPPOSITE:Layout.Alignment.ALIGN_NORMAL)
+            .setIncludePad(false).setMaxLines(2).setEllipsize(TextUtils.TruncateAt.END).build();
+        int save=canvas.save();canvas.translate(x,baseline-block.getLineBaseline(0));block.draw(canvas);canvas.restoreToCount(save);
+        return baseline+block.getLineBaseline(block.getLineCount()-1)-block.getLineBaseline(0);
     }
     private void text(Canvas canvas,String text,float x,float baseline,float size,float width,int colour,Typeface face) {
         if(text.isEmpty())return;paint.setTypeface(face);paint.setTextSize(size);
-        float measured=paint.measureText(text);if(measured>width)paint.setTextSize(size*width/measured);
+        text=TextUtils.ellipsize(text,new TextPaint(paint),Math.max(1,width),TextUtils.TruncateAt.END).toString();
         paint.setColor(colour);paint.setStyle(Paint.Style.FILL);canvas.drawText(text,x,baseline,paint);
     }
     private void glyph(Canvas canvas,float x,float y,float size,String code) {
@@ -105,20 +131,22 @@ final class InformationPanel extends View {
             paint.setColor(0xff60665c);canvas.drawLine(20,50,80,50,paint);canvas.restoreToCount(save);return;
         }
         if(code.equals("sunny")||code.equals("partlycloudy")) {
-            paint.setColor(0xff976621);paint.setStyle(Paint.Style.FILL);canvas.drawCircle(64,32,18,paint);
+            paint.setColor(0xffdca229);paint.setStyle(Paint.Style.FILL);canvas.drawCircle(64,32,18,paint);
             for(int i=0;i<8;i++) { double angle=i*Math.PI/4;canvas.drawLine(64+(float)Math.cos(angle)*25,32+(float)Math.sin(angle)*25,64+(float)Math.cos(angle)*32,32+(float)Math.sin(angle)*32,paint); }
         }
         if(code.equals("clear-night")) {
             paint.setColor(0xff686047);paint.setStyle(Paint.Style.STROKE);rect.set(20,10,80,70);canvas.drawArc(rect,35,285,false,paint);
         } else if(!code.equals("sunny")) {
-            paint.setColor(0xff52645c);paint.setStyle(Paint.Style.STROKE);
+            paint.setColor(0xff4d7988);paint.setStyle(Paint.Style.FILL);
             Path cloud=new Path();cloud.moveTo(24,72);cloud.cubicTo(-2,72,0,39,25,40);
-            cloud.cubicTo(25,12,67,10,73,42);cloud.cubicTo(101,36,108,72,80,72);cloud.close();canvas.drawPath(cloud,paint);
+            cloud.cubicTo(25,12,67,10,73,42);cloud.cubicTo(101,36,108,72,80,72);cloud.close();
+            paint.setColor(0xffb4c7cd);canvas.drawPath(cloud,paint);
+            paint.setColor(0xff4d7988);paint.setStyle(Paint.Style.STROKE);canvas.drawPath(cloud,paint);
             if(code.contains("rain")||code.equals("pouring")) {
-                paint.setColor(0xff3f6c7a);for(int i=0;i<3;i++)canvas.drawLine(27+i*23,83,21+i*23,96,paint);
+                paint.setColor(0xff356e85);for(int i=0;i<3;i++)canvas.drawLine(27+i*23,83,21+i*23,96,paint);
             }
             if(code.contains("lightning")) {
-                paint.setColor(0xff976621);Path bolt=new Path();bolt.moveTo(60,72);bolt.lineTo(49,87);bolt.lineTo(61,87);bolt.lineTo(51,100);canvas.drawPath(bolt,paint);
+                paint.setColor(0xffdca229);Path bolt=new Path();bolt.moveTo(60,72);bolt.lineTo(49,87);bolt.lineTo(61,87);bolt.lineTo(51,100);canvas.drawPath(bolt,paint);
             }
         }
         paint.setStyle(Paint.Style.FILL);canvas.restoreToCount(save);

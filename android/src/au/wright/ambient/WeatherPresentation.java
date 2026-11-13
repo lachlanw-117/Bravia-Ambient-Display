@@ -66,7 +66,14 @@ public final class WeatherPresentation {
     }
     public static String range(Forecast row) {
         if(row==null)return "";
-        return "High "+degrees(row.high)+"   Low "+degrees(row.low);
+        String high=highLabel(row),low=lowLabel(row);
+        return high.isEmpty()?low:low.isEmpty()?high:high+"   "+low;
+    }
+    public static String highLabel(Forecast row) {
+        return row==null||row.high==null||!Double.isFinite(row.high)?"":"High "+degrees(row.high);
+    }
+    public static String lowLabel(Forecast row) {
+        return row==null||row.low==null||!Double.isFinite(row.low)?"":"Low "+degrees(row.low);
     }
     private static String degrees(Double value) {
         return value==null||!Double.isFinite(value)?"—":String.format(Locale.getDefault(),"%.0f°",value);

@@ -1,5 +1,27 @@
 ﻿# Infrastructure trial without photos
 
+## Latest status and next test - 11 November 2026
+
+The sections below preserve the initial 7 November infrastructure/album trial.
+Later work supersedes that baseline: Phase 1 and Phase 2 were accepted and merged,
+followed by the accepted weather/photo-resume trial. Bravia PR #4 merged on
+8 November as `f45548e43bf3d07704538d38e31a971c50769593`. Last recorded installed
+Android runtime: `55a749b52a065400bb489e29020b9cf658f43431`; see
+[weather/playback evidence](WEATHER_REFINEMENT.md). Debugging was disabled and
+ordinary idle/Back passed at closeout; this does not prove today's device binary
+or debugging state.
+
+On 11 November the user confirmed Preview features work as expected except
+today's Low is often missing. Guided idle/streaming checks are in the
+[current session record](TV_TEST_2026-11-11.md); results remain individually
+pending until reported. The user subsequently confirmed being happy with idle
+entry (untimed) and several days of use without issues in response to the
+streaming-check request. This is positive ordinary-use evidence; individual apps,
+paused-video, HDMI and controlled failure/recovery remain unverified. No repeat
+timed check is requested now, and no reinstall is needed merely to resume.
+
+## Initial trial context
+
 Test one dependency at a time. No Google account or family photos are needed.
 The TV APK was installed on 7 November 2026 and the user confirmed that the
 screensaver works as expected. The Pi host was installed and started later that

@@ -15,6 +15,32 @@ Read [AGENTS.md](AGENTS.md) before acting, then this roadmap, the
 `AGENTS.md` and [household host notes](https://github.com/lachlanw-117/Wright-Home-Assistant/blob/main/docs/bravia_ambient_host.md)
 before work that crosses repositories.
 
+## Current session and next priorities - 11 November 2026
+
+The accepted weather/photo-resume work merged as Bravia PR #4 on 8 November.
+See [the current TV acceptance session](TV_TEST_2026-11-11.md) for installation
+evidence, today's user report and pending idle/streaming checks. The initial
+baseline below is historical, not the latest installed layout.
+
+Before notice implementation, the household wants a home-style layout review
+(full date above time, tighter spacing, possible right-aligned freshness and
+warmer colour accents) and investigation of **Home-screen advertising only**.
+Ads inside streaming apps are excluded. Blanket skinny-bravia changes remain
+excluded; targeted, reversible options may be researched separately. These are
+planned priorities, not implementation/deployment approval. Preserve the cream
+minimalism, readable text, complete photos and future notice space. Investigate
+the frequently missing Today minimum before deciding its presentation. See the
+[concrete layout and ad-options review](HOME_STYLE_REVIEW.md) and its offline
+comparison. The user subsequently accepted the proposed layout and authorised
+local implementation. The signed local Android candidate omits unavailable
+forecast values and implements the spacing/colour changes; it is not committed,
+deployed or device-verified. See HOME_STYLE_REVIEW.md for evidence and remaining
+live forecast uncertainty. The user subsequently authorised retaining each dated
+provider forecast low when the current value is blank, without an extra label or
+actuals cutover. Local host retention tests pass; Git publication/PR is explicitly
+approved. Live deployment and merge are not approved for this candidate.
+Ad/launcher work remains research only.
+
 ## Current baseline and ownership
 
 The last recorded host/TV deployment used source

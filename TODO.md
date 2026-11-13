@@ -1,6 +1,6 @@
 # TODO
 
-Updated 8 November 2026. The [roadmap](ROADMAP.md) owns the accepted enhancement
+Updated 11 November 2026. The [roadmap](ROADMAP.md) owns the accepted enhancement
 scope and separate phase approvals; [decisions](DECISIONS.md) record the why.
 Checked items below describe recorded results, not a fresh live inspection.
 
@@ -29,13 +29,23 @@ Checked items below describe recorded results, not a fresh live inspection.
 - [x] Obtain separate Phase 2 merge approval and merge the accepted PRs.
 - [x] Complete the weather-summary/photo-resume trial, user acceptance and debugging
   closeout; see WEATHER_REFINEMENT.md.
-- [ ] Obtain separate weather/playback merge approval and merge accepted PRs.
+- [x] Obtain separate weather/playback merge approval and merge accepted PRs.
+- [ ] Complete the [11 November TV acceptance checks](TV_TEST_2026-11-11.md),
+  recording Home idle timing and streaming/paused-video/HDMI results individually.
+- [ ] Investigate the often-missing Today minimum against the actual daily feed;
+  do not substitute another day's minimum or an observed value.
+- [x] Implement the requested same-date/provider forecast-low retention locally,
+  with no extra visible label; 27 synthetic host tests and packaging checks pass.
+- [ ] Obtain Git approval, then separate host/TV trial approval for the local
+  layout/retention candidate; do not mark it deployed from local build evidence.
+- [ ] Review the deferred home-style layout and Home-screen-ad priorities before
+  notice implementation; no blanket debloating or in-app ad removal.
 - [x] Disable TV debugging and verify TCP 5555 refuses connections; leave Developer
   options master enabled to preserve unreviewed settings. Reboot persistence untested.
 - [ ] Consider Google Ambient API partner access only if unattended album sync becomes essential.
 
 Photo presentation is implemented and accepted; the weather/playback refinement
-is accepted in trial and awaiting merge. Household notices/interactions remain
+is accepted and merged. Household notices/interactions remain
 future phases. Aircraft implementation needs its own later plan.
 Calendar and photo metadata remain deferred. The MVP was deployed on 7 November;
 see [TRIAL.md](TRIAL.md) for results and [VALIDATION.md](VALIDATION.md) for the
