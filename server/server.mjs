@@ -125,7 +125,10 @@ export async function fetchWeather({ haUrl, haToken, weatherEntity, timeZone }, 
     rows = result.service_response?.[weatherEntity]?.forecast;
   } catch { /* Keep today's previous forecast when only the forecast request fails. */ }
   const today = localDay(now, timeZone);
-  const old = previous?.weatherEntity === weatherEntity ? previous : {};
+  const unit = state.attributes.temperature_unit ?? '°C';
+  // Gate every fallback, including whole rows and legacy high/low caches.
+  // Unit-less legacy caches historically used the default Celsius unit.
+  const old = previous?.weatherEntity === weatherEntity && (previous.unit ?? '°C') === unit ? previous : {};
   const dailyForecasts = [today, calendarDay(today, 1)].map(date => {
     const usable = Array.isArray(rows) ? rows.filter(row => row &&
       (conditions.has(row.condition) || Number.isFinite(row.temperature) || Number.isFinite(row.templow))) : [];
@@ -143,7 +146,7 @@ export async function fetchWeather({ haUrl, haToken, weatherEntity, timeZone }, 
   }).filter(Boolean);
   const forecast = dailyForecasts.find(row => row.date === today);
   const conditionSource = state.attributes.condition_source ?? 'unspecified';
-  return { weatherEntity, temperature: state.attributes.temperature, unit: state.attributes.temperature_unit ?? '°C',
+  return { weatherEntity, temperature: state.attributes.temperature, unit,
     // HA's report time proves entity reporting, not the upstream observation age.
     condition: state.state, conditionSource,
     // Only an explicit observation provenance may label a condition as observed.
