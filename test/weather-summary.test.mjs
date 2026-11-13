@@ -155,3 +155,25 @@ test('impossible calendar dates and local 24-hour rollover cannot be treated as 
   assert.equal(selectForecast([{datetime:'2026-02-30T00:00:00+11:00',temperature:99}],march,config.timeZone),undefined);
   assert.equal(selectForecast([{datetime:'2026-11-08T24:00:00',temperature:99}],now,config.timeZone),undefined);
 });
+
+test('unit changes discard whole-row and legacy fallbacks on missing or failed forecasts', async()=>{
+  const initial=await fetchWeather(config,{},get(),now);
+  const legacy={weatherEntity:config.weatherEntity,forecastDay:'2026-11-08',
+    high:19,low:11,forecastAt:now.toISOString()};
+  for(const prior of [initial, legacy]) {
+    for(const unit of ['°C','°F']) {
+      for(const fail of [false,true]) {
+        const current={...state,attributes:{...state.attributes,temperature_unit:unit}};
+        const result=await fetchWeather(config,prior,get([],current,fail),now);
+        assert.equal(result.unit,unit);
+        assert.equal(result.dailyForecasts.length,unit==='°C'?(prior===initial?2:1):0);
+        assert.equal(result.high,unit==='°C'?19:null);
+        assert.equal(result.low,unit==='°C'?11:null);
+      }
+    }
+  }
+  const fahrenheit={...initial,unit:'°F'};
+  const result=await fetchWeather(config,fahrenheit,get([],state,true),now);
+  assert.equal(result.dailyForecasts.length,0);
+  assert.equal(result.high,null);assert.equal(result.low,null);
+});

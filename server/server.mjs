@@ -125,7 +125,10 @@ export async function fetchWeather({ haUrl, haToken, weatherEntity, timeZone }, 
     rows = result.service_response?.[weatherEntity]?.forecast;
   } catch { /* Keep today's previous forecast when only the forecast request fails. */ }
   const today = localDay(now, timeZone);
-  const old = previous?.weatherEntity === weatherEntity ? previous : {};
+  const unit = state.attributes.temperature_unit ?? '°C';
+  // Gate every fallback, including whole rows and legacy high/low caches.
+  // Unit-less legacy caches historically used the default Celsius unit.
+  const old = previous?.weatherEntity === weatherEntity && (previous.unit ?? '°C') === unit ? previous : {};
   const dailyForecasts = [today, calendarDay(today, 1)].map(date => {
     const retained = (Array.isArray(old.dailyForecasts) ? old.dailyForecasts.find(r => r?.date === date) : null)
       ?? (old.forecastDay === date ? { low: old.low, checkedAt: old.forecastAt } : null);
@@ -140,8 +143,7 @@ export async function fetchWeather({ haUrl, haToken, weatherEntity, timeZone }, 
       // minimum for this provider/date/unit; tomorrow's value never fills today.
       const priorCheck = retained?.lowCheckedAt ?? retained?.checkedAt;
       const priorAge = now - Date.parse(priorCheck);
-      if (low === null && Number.isFinite(retained?.low) && Number.isFinite(priorAge) && priorAge >= 0
-          && (old.unit === undefined || old.unit === (state.attributes.temperature_unit ?? '°C'))) {
+      if (low === null && Number.isFinite(retained?.low) && Number.isFinite(priorAge) && priorAge >= 0) {
         low = retained.low; lowCheckedAt = priorCheck;
       }
       // checkedAt is this successful row check. Preserve the low's source-check
@@ -157,7 +159,7 @@ export async function fetchWeather({ haUrl, haToken, weatherEntity, timeZone }, 
   }).filter(Boolean);
   const forecast = dailyForecasts.find(row => row.date === today);
   const conditionSource = state.attributes.condition_source ?? 'unspecified';
-  return { weatherEntity, temperature: state.attributes.temperature, unit: state.attributes.temperature_unit ?? '°C',
+  return { weatherEntity, temperature: state.attributes.temperature, unit,
     // HA's report time proves entity reporting, not the upstream observation age.
     condition: state.state, conditionSource,
     // Only an explicit observation provenance may label a condition as observed.
