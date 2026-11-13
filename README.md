@@ -9,6 +9,21 @@ inspection or complete streaming/HDMI/recovery coverage. See [trial results](TRI
 and the [11 November TV test](TV_TEST_2026-11-11.md) for current observations and
 remaining checks. No reinstall is needed merely to resume.
 
+Phase 2 and the weather/playback refinement were merged on 8 November 2026.
+Recorded acceptance is complete for the scoped trial; broader outage and long-run
+recovery testing remains outstanding. See merged [Phase 2 PR #3](https://github.com/lachlanw-117/Bravia-Ambient-Display/pull/3)
+and [weather/playback PR #4](https://github.com/lachlanw-117/Bravia-Ambient-Display/pull/4).
+Trial documents retain intermediate pending-approval notes as historical records;
+those notes are superseded by these merges. This summary does not claim a fresh
+device check.
+
+On 14 November 2026, the user confirmed they are happy with the screensaver and
+explicitly approved merging the 11 November home-style trial (PR #5).
+This closes its household acceptance gate without claiming the detailed
+forecast-low, failure/recovery or HDMI checks were independently observed.
+The subsequent forecast-unit cache fix is source-tested but not deployed;
+the last recorded installed runtime remains `29b3784f255ee7d29500a03c3166bae05248342d`.
+
 [![Local checks](https://github.com/lachlanw-117/Bravia-Ambient-Display/actions/workflows/checks.yml/badge.svg?branch=main)](https://github.com/lachlanw-117/Bravia-Ambient-Display/actions/workflows/checks.yml)
 
 The [implementation roadmap](ROADMAP.md) separates the accepted enhancements into
