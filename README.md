@@ -8,6 +8,14 @@ running; authenticated weather and its TV overlay were verified, and the user
 subsequently confirmed playback of the imported 147-photo album.
 See [trial results](TRIAL.md).
 
+Phase 2 and the weather/playback refinement were merged on 8 November 2026.
+Recorded acceptance is complete for the scoped trial; broader outage and long-run
+recovery testing remains outstanding. See merged [Phase 2 PR #3](https://github.com/lachlanw-117/Bravia-Ambient-Display/pull/3)
+and [weather/playback PR #4](https://github.com/lachlanw-117/Bravia-Ambient-Display/pull/4).
+Trial documents retain intermediate pending-approval notes as historical records;
+those notes are superseded by these merges. This summary does not claim a fresh
+device check.
+
 [![Local checks](https://github.com/lachlanw-117/Bravia-Ambient-Display/actions/workflows/checks.yml/badge.svg?branch=main)](https://github.com/lachlanw-117/Bravia-Ambient-Display/actions/workflows/checks.yml)
 
 The [implementation roadmap](ROADMAP.md) separates the accepted enhancements into
@@ -182,7 +190,8 @@ Clearing the TV app's data explicitly removes its cache and saved access key.
 [Phase 2](PHASE2.md) records the design B photo/sidebar trial:
 adaptive portrait pairs, complete-image fitting and a static cream background.
 It is deployed on the TV; the user accepted the cream palette and debugging is
-closed. The user confirmed ordinary idle/Back with debugging off. The feature PR stays open until acceptance and separate merge approval.
+closed. The user confirmed ordinary idle/Back with debugging off. Separate merge approval
+was supplied and Phase 2 merged on 8 November 2026.
 
 The accepted direction is design B with adaptive portrait pairs, BOM weather,
 native HA notice controls and local TV notice hiding. Design C is a later
@@ -210,9 +219,9 @@ data, not household photos.
 
 Follow [the infrastructure trial](TRIAL.md) to test TV rendering and idle behaviour, then Pi connectivity and HA weather separately. Family photos are optional until those checks pass.
 
-The [weather summary refinement](WEATHER_REFINEMENT.md) is implemented locally on
-its separate feature branch: observed temperature under Now, explicit Today and
+The [weather summary refinement](WEATHER_REFINEMENT.md) merged on 8 November 2026
+and provides observed temperature under Now, explicit Today and
 Tomorrow forecasts, and check-age/cached labels above the future notice area.
-Its named host/TV trial is deployed and accepted, with debugging closed; separate
-merge approval remains pending.
+Its named host/TV trial was deployed and accepted, with debugging closed; separate
+merge approval was supplied and the weather/playback refinement merged.
 Photo continuation across sessions was subsequently included at the user's request.
