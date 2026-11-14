@@ -30,9 +30,9 @@ points to HA. First-input exit is retained. Remote navigation, local hiding and
 acknowledgement are deferred, superseding the earlier requirement to ship those
 interactions together with the feed. The user subsequently approved commit/push
 and host/TV deployment, explicitly excluding merge and requesting ADB remain on.
-PR #8 is open and deployed for trial. Photos/weather render, but notices show
-unavailable because HA's response fails the readiness/schema gate. Relevant
-notice and TV acceptance remains pending; see the trial record above.
+PR #8 is open and deployed for trial. The initial readiness failure was traced
+to HA exposing schema version `"1"` as text and corrected in the host adapter.
+Relevant notice and TV acceptance remains pending; see the trial record above.
 
 ## Current session and next priorities - 11 November 2026
 

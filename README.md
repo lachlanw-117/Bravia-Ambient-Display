@@ -25,8 +25,8 @@ The subsequent forecast-unit cache fix is source-tested but not deployed;
 the last recorded installed runtime remains `29b3784f255ee7d29500a03c3166bae05248342d`.
 
 The [household-alert candidate](HOUSEHOLD_ALERTS.md) is deployed for trial from
-feature PR #8, which remains open. Notice acceptance is failing at HA's feed
-readiness/schema gate; photos/weather render, but alerts are unavailable. It adds a compact
+feature PR #8, which remains open. The HA schema string/number mismatch has been
+corrected in the host; final TV visual acceptance is pending. It adds a compact
 display-only list below weather using HA's TV-filtered attention view. See the
 [offline synthetic comparison](docs/household-alerts-comparison.html).
 

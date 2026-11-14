@@ -1,6 +1,6 @@
 # Household alerts - display-only candidate
 
-Status: **deployed for trial; notice acceptance failing; not merged**. Work is on
+Status: **deployed for trial; readiness mismatch corrected; TV acceptance pending; not merged**. Work is on
 `feature/household-alerts` from Bravia `bddf067`. The user approved commit/push,
 TV installation and Bravia host rebuild/restart on 14 November 2026, explicitly
 excluding merge, and explicitly requested that ADB debugging remain enabled.
@@ -8,6 +8,24 @@ That instruction supersedes the normal debugging-disable closeout for this sessi
 The unrelated untracked `HOME_SCREEN_ADS.md` is preserved.
 
 ## Deployment trial - 14 November 2026
+
+The initial failure below is retained as trial history. Read-only HA UI inspection
+subsequently established state `ready` and schema **string `"1"`**, not number `1`,
+with two TV-routed items. The adapter's strict numeric comparison caused rejection.
+Host-only fix `37ce0adfad0d603d21d4da1f276e7b54ec9a2128` accepts exactly `1` and
+`"1"`; unavailable states, other versions and coercible spellings remain rejected.
+37 host tests and exact-head CI run 43573554088 passed before the approved
+Bravia-only stop/rebuild/start. Installed notice module SHA-256 is
+`2b74753f115a03d554e537269eed007988900c5cb169b2de5e41565dba678cb2`;
+server/Dockerfile/configuration and Android remain unchanged from the hashes below.
+The previous diagnostic module is preserved privately at
+`/backup/bravia-notices-pre-schema-fix-0249312`. No HA configuration, source rule,
+helper value, reload or Core restart was needed. The existing Template editor draft
+was restored after the read-only inspection.
+
+After the fix the host starts without a new notice-failure log, but ADB screenshots
+return empty image data. User visual confirmation of the two natural notices
+(living-room TV lights visibility loss and one grouped upgrade) is pending.
 
 [PR #8](https://github.com/lachlanw-117/Bravia-Ambient-Display/pull/8) is open;
 the user explicitly instructed **do not merge**. Initial runtime `fc28daf1e14a492b49abef45c2e1b34ff04f0ca9`
@@ -38,10 +56,8 @@ configuration `c2abaa1ff2329c5f72556386aebfd5822b6f56e767d28e903a45230f6ff122c3`
 Private local APKs/screenshots and source manifests remain under ignored
 `build/notice-preview`; no household photos or saved options are committed.
 
-Next: inspect the real TV sensor's state and schema through authorised read-only
-HA access, correct the integration on the feature branch and trial the exact
-reviewed revision. Do not weaken readiness validation to make an unavailable feed
-look healthy. Natural lifecycle/routing checks, couch-distance review and physical
+Next: obtain visual confirmation of the corrected feed on the TV. Natural
+lifecycle/routing checks, couch-distance review and physical
 Back/ordinary idle acceptance remain pending. Keep the PR open.
 
 ## Ownership and display
@@ -90,7 +106,8 @@ times remain null. Only events have an expiry; an inactive recent event can stil
 display until that deadline. Component IDs/versions and raw source evidence are
 used only inside the host to build the grouped count and are not returned.
 
-Require HA state `ready`, `attributes.schema_version: 1` and a valid bounded item
+Require HA state `ready`, `attributes.schema_version` equal to number `1` or exact
+string `"1"`, and a valid bounded item
 array. At most 64 records, 300-character titles, 256-character occurrence IDs,
 256 upgrade details, 256 KiB upstream body and 60,000-byte sanitised snapshot are
 accepted. The whole snapshot fails on invalid records or duplicate identities;
