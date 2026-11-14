@@ -56,9 +56,9 @@ Local refresh results and unpublished CI status are in [the refresh record](docs
 
 ## Recorded device acceptance
 
-- Photo presentation and ordinary idle/Back: [Phase 2](PHASE2.md).
-- Weather and playback continuation: [weather refinement](WEATHER_REFINEMENT.md).
-- Home-style layout: [11 November record](TV_TEST_2026-11-11.md).
+- Photo presentation and ordinary idle/Back: [Phase 2](docs/history/photo-presentation-2026-11-08.md).
+- Weather and playback continuation: [weather refinement](docs/history/weather-refinement-2026-11-08.md).
+- Home-style layout: [11 November record](docs/history/tv-acceptance-2026-11-11.md).
 - Corrected notice feed and user-confirmed display: [household alerts](HOUSEHOLD_ALERTS.md).
 
 Full HDMI/app-specific coverage, controlled outages, on-device midnight/DST,

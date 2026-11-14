@@ -1,215 +1,83 @@
-# Bravia decisions and deferred work
+# Design decisions
 
-> Current scope, 14 November 2026: the photo/weather/notice product is complete
-> for the owner's current needs. Earlier phase/design statuses below are dated
-> history and are superseded where later records say so. Remote notice controls,
-> phone migration and new source families are not active commitments here.
-> The sole future concept is a separate aircraft screensaver; see the [current roadmap](ROADMAP.md).
+Current choices, reviewed 14 November 2026. The [design evolution](docs/design-evolution.md)
+explains how household trials shaped them; the [original decision log](docs/history/decisions-2026-11-14.md)
+preserves alternatives and superseded proposals.
 
-Decisions recorded on 8 November 2026. Read the [roadmap](ROADMAP.md) for phase
-boundaries and status. An accepted design is not an implemented or deployed
-feature. [TRIAL.md](TRIAL.md) records historical device results.
+## Android owns the screensaver lifecycle
 
-For a new decision, record its status/date, phase, reason, alternatives, evidence,
-uncertainty and revisit condition. Link implementation revisions and deployment
-results when they exist; until then state **not implemented**. Preserve a
-superseded decision and link its replacement rather than erasing the reason.
+DreamService uses Android's idle lifecycle. The app does not wake the TV, switch
+inputs or launch notices over viewing. Every remote input dismisses it. Broad
+Sony package removal was excluded without a measured bottleneck and a specific,
+understood change. See [architecture](docs/architecture.md).
 
-## D01 - Do not apply skinny-bravia
+## Fit whole photos and bound resource use
 
-**Status:** accepted exclusion; all phases. No cleanup from that project applied
-by this work.
+Complete-image fitting and consecutive portrait pairing preserve photographs
+and album order. Bounded transactional caches retain working content through
+failed refreshes. An earlier discussion relaxed the offline requirement; it did
+not remove caches or establish a cache-removal task.
 
-The [guide](https://github.com/therealhoodboy/skinny-bravia) targets Android 9 and
-includes broad removal/disablement of packages relevant to HDMI/Bravia Sync,
-screensavers, rendering and accessibility. Our recorded TV runs Android 12 and
-already plays photos. There is no measured app bottleneck that justifies the
-blanket package changes. An uninstall list is not a performance diagnosis.
+## Reuse HA interfaces and keep ownership clear
 
-Alternative: measure our app's decoding, rendering, memory and input handling
-first. Revisit only for a demonstrated bottleneck, an individually understood
-package, Sony-version compatibility, explicit device approval and a rollback.
+The host consumes HA weather and daily forecasts, retaining provider attribution
+in the feed. Household source rules, notice recovery, routing and phone delivery
+belong in HA. Bravia exposes authenticated, read-only feeds; HA credentials stay
+on the host and private runtime values stay outside Git.
 
-## D02 - Use native HA for the notice foundation
+## Keep notices passive and compact
 
-**Status:** accepted design; Phases 3, 5 and 6; not implemented.
+The current scope is display-only: up to three severity-ordered rows, grouped
+updates, an overflow count and no paging. First-input exit is preserved. Earlier
+remote hiding/acknowledgement proposals are superseded, not active commitments.
+Failed retrieval retains last-known unresolved items with a stale warning;
+events still expire at HA's deadline. See the [notice contract](HOUSEHOLD_ALERTS.md).
 
-Use core-maintained helpers, scripts, automations and source events with a small
-feed adapter. Provide everyday destination controls in HA rather than requiring
-YAML edits for each preference change. This matches the household's practice of
-making quick adjustments in the UI. Restored helper values are runtime state;
-source logic and definitions remain reviewed configuration in Git.
+## Distinguish source, deployment and acceptance
 
-[Ticker](https://github.com/analytix-energy-solutions/ticker) is a close feature
-match for subscriptions and history, but research found a younger project,
-concentrated maintenance, documented auto-clear restart limitations and open
-reliability/permission reports. An issue report is not independently verified
-proof. AI assistance alone is not a reason to reject software.
-[Alert2](https://github.com/redstone99/hass-alert2) has a longer project history
-and useful suppression/snooze features, but still needs feed/routing work and
-adds another dependency. Neither is selected as a dependency by this plan.
+Accepted main and installed revisions are recorded separately. Runtime changes
+need an approved exact-revision trial and scoped acceptance before merge approval;
+documentation needs review and local checks. The notice PR stays open and
+unmerged by request. ADB is unnecessary for ordinary operation, but the owner's
+14 November instruction explicitly leaves it enabled. See [maintenance](MAINTENANCE.md).
 
-Revisit if native configuration becomes difficult to maintain, an established
-manager demonstrably reduces custom work, or more advanced fault lifecycles are
-needed. Compare actual release behaviour, tests, permissions and maintenance,
-not just feature lists or popularity. Do not build a full custom manager by
-default.
+## Historical decision references
 
-## D03 - Designs B and C, with adaptive portrait pairs
+Earlier decision IDs remain available below. Their original wording and statuses
+belong to the dated archive; this page and the [current roadmap](ROADMAP.md) state
+the present scope.
 
-**Status:** Phase 2 trial-deployed with scoped visual/ordinary-use acceptance recorded;
-future Phase 7 remains an accepted concept only. See [Phase 2](PHASE2.md).
+<a id="bravia-decisions-and-deferred-work"></a>
+<a id="d01---do-not-apply-skinny-bravia"></a>
 
-B is a photo area beside a clear information column. C is a dark aircraft map
-with selected-flight details and the shared notice layer. The generated mockups
-used sample content; they were concepts rather than app screenshots. B suits
-the selected everyday layout; C remains a separate feature.
+- [D01: Sony package changes](docs/history/decisions-2026-11-14.md#d01---do-not-apply-skinny-bravia).
+<a id="d02---use-native-ha-for-the-notice-foundation"></a>
 
-Many album photos are portrait and currently leave black space on both sides.
-Pair consecutive portraits when they fit, preserve complete foreground images,
-retain album order and provide a single-photo setting. Automatic cropping was
-not selected. Use subdued static fill for residual space. Revisit pairing or
-information-column proportions after couch-distance review and actual TV tests.
+- [D02: HA notice foundation](docs/history/decisions-2026-11-14.md#d02---use-native-ha-for-the-notice-foundation).
+<a id="d03---designs-b-and-c-with-adaptive-portrait-pairs"></a>
 
-## D04 - Persistent offline storage is no longer required
+- [D03: Layout concepts](docs/history/decisions-2026-11-14.md#d03---designs-b-and-c-with-adaptive-portrait-pairs).
+<a id="d04---persistent-offline-storage-is-no-longer-required"></a>
 
-**Status:** accepted requirement change; cache removal deferred.
+- [D04: Offline requirement discussion](docs/history/decisions-2026-11-14.md#d04---persistent-offline-storage-is-no-longer-required).
+<a id="d05---notices-are-passive-outside-the-running-screensaver"></a>
 
-The existing host/TV caches remain implemented and were unchanged by the album
-deployment. Removing them is not part of visual work or project cleanup. A
-replacement still needs bounded downloads/decoding and defined failure behaviour.
-Revisit only through a separate storage discussion, with migration and recovery
-implications reviewed. Do not clear app data to make implementation match the
-new requirement.
+- [D05: Passive notices](docs/history/decisions-2026-11-14.md#d05---notices-are-passive-outside-the-running-screensaver).
+<a id="d06---include-remote-interaction-and-local-tv-hiding"></a>
 
-## D05 - Notices are passive outside the running screensaver
+- [D06: Superseded interaction proposal](docs/history/decisions-2026-11-14.md#d06---include-remote-interaction-and-local-tv-hiding).
+<a id="d07---prefer-the-installed-bom-weather-source"></a>
 
-**Status:** accepted design; Phases 3-6; not implemented.
+- [D07: Weather provider](docs/history/decisions-2026-11-14.md#d07---prefer-the-installed-bom-weather-source).
+<a id="d08---aircraft-details-are-conditional-not-a-promised-free-data-service"></a>
 
-Meaningful household occurrences and attention conditions enter a typed feed,
-then destination filters decide delivery. Record before routing so suppressed
-items can be reviewed privately. Do not copy every state transition or raw log.
-TV notices must not wake the TV, launch over playback or switch HDMI inputs.
+- [D08: Aircraft research limits](docs/history/decisions-2026-11-14.md#d08---aircraft-details-are-conditional-not-a-promised-free-data-service).
+<a id="d09---close-maintenance-sessions-instead-of-leaving-debugging-as-a-dependency"></a>
 
-Updates are grouped from their first implementation; see the
-[count and lifecycle rules](ROADMAP.md#updates-are-grouped-from-the-first-implementation).
-Individual component/version details belong in the private inbox, with one
-TV-facing count. Revisit source breadth only if a specific useful event is
-missing; do not respond to noise by adding more unfiltered sources.
+- [D09: Original maintenance procedure](docs/history/decisions-2026-11-14.md#d09---close-maintenance-sessions-instead-of-leaving-debugging-as-a-dependency).
+<a id="d10---accepted-main-branches-and-short-lived-changes"></a>
 
-## D06 - Include remote interaction and local TV hiding
+- [D10: Source and trial workflow](docs/history/decisions-2026-11-14.md#d10---accepted-main-branches-and-short-lived-changes).
+<a id="d11---display-only-tv-notices-first"></a>
 
-**Status:** accepted design; Phase 4; not implemented.
-
-The user wants both HA source integrations and TV remote interactions. Hide only
-the selected occurrence on this TV, persist the hidden state, allow it to be
-revealed in setup, and let new occurrences reappear. Back exits immediately;
-Home/power remain system-owned. Preserve a first-input-exit setting.
-
-Local hiding is smaller and clearer than shared acknowledgement. It does not
-resolve a fault, dismiss an HA Repair or silence phone reminders. Revisit shared
-acknowledgement only with separately designed permissions, state synchronisation
-and failure semantics. Sony input behaviour remains unverified for this feature.
-
-## D07 - Prefer the installed BOM weather source
-
-**Status:** Phase 1 deployed, scoped acceptance/closeout verified and PR #2 merged on 8 November.
-
-Read-only inspection on 8 November identified the installed BOM component and
-its daily/hourly entities; household identifiers belong in the
-[HA companion notes](https://github.com/lachlanw-117/Wright-Home-Assistant/blob/main/docs/bravia_ambient_host.md).
-The host already supports a selected HA weather entity and daily forecasts.
-Prefer that interface over adding a separate direct BOM client to the TV.
-
-Keep provider attribution in the feed/docs, and make source freshness and local-day
-correctness clear. During the 8 November live trial the user rejected the full
-sentence, then a smaller credit, and explicitly selected no visible TV credit.
-That supersedes the original visible-attribution requirement; retain the reason
-so a later redesign does not reintroduce it by accident. Do not
-silently fall back to another provider. Entity ownership was inspected, but live
-readings/forecast output were not verified because the attempted Supervisor API
-route returned 401. Subsequent authenticated browser inspection verified current
-readings and daily forecast output on 8 November. The offset-free forecast dates
-need explicit local-calendar handling; that fix and provider-isolated caching are
-deployed. Attribution remains in the feed, with visible credit removed after user
-review. See [Phase 1](PHASE1.md) for evidence, acceptance and freshness limitations.
-Revisit if upstream observation
-age cannot be established sufficiently for household use, or actual responses
-change. Future deployments still require a separately approved source change.
-
-## D08 - Aircraft details are conditional, not a promised free data service
-
-**Status:** accepted research direction; Phase 7 planning deferred.
-
-One anonymous Sydney-region sample found usable positions/type data from
-[adsb.fi](https://github.com/adsbfi/opendata) and
-[adsb.lol](https://www.adsb.lol/docs/open-data/api). This is not a coverage or
-reliability guarantee. ADSBDB enrichment returned useful details in the sample,
-but its [route-data notice](https://www.adsbdb.com/) requires permission/use
-clarification. Callsign matching is not independently verified live routing.
-Aircraft data and map imagery are separate provider decisions.
-
-Revisit with sustained coverage/age checks, permitted display/cache use, map
-attribution and a budget decision before implementing C. No paid subscription,
-receiver purchase, website scraping or precise home location in Git is selected.
-
-## D09 - Close maintenance sessions instead of leaving debugging as a dependency
-
-**Status:** accepted procedure; no device cleanup performed in Phase 0.
-
-Normal app operation does not require ADB. After an approved device session,
-disable debugging and verify ordinary use; review the Developer options master
-switch separately. Disconnecting the computer does not disable TV debugging.
-Last recorded debugging was enabled; its present state is not assumed.
-
-Keep recovery artifacts and signing material private. Do not equate cleanup with
-deleting caches, backups or source photos, removing system packages, disabling HA
-Terminal & SSH, or relocating shared toolchains. Follow
-[MAINTENANCE.md](MAINTENANCE.md). Revisit when an actual maintenance need appears.
-
-## D10 - Accepted main branches and short-lived changes
-
-**Status:** repository consolidation authorised on 8 November 2026.
-
-Use `main` as the accepted baseline in each repository, with a focused branch/PR
-per coherent change. GitHub Actions runs synthetic/local checks; it does not
-deploy. Deployment records identify installed revisions separately from `main`.
-Retire incorporated branches without rewriting history. Preserve superseded work
-with an archive reference before deleting its branch. See
-[CONTRIBUTING.md](CONTRIBUTING.md).
-
-On 8 November the user refined the acceptance order: keep runtime PRs open,
-trial-deploy the exact feature-branch commit with approval, record successful
-relevant device acceptance and closeout, then request merge approval. This
-supersedes merging runtime changes before deployment. CI cannot establish Sony
-rendering/input or physical HA behaviour. Failed trials stay on the branch for
-fixes and retesting. Documentation-only changes need review/local checks without
-device deployment. Historical baseline merges do not become retroactive claims
-of device acceptance. Revisit only if a suitable isolated staging environment can
-establish the same acceptance evidence without the household trial.
-
-The initial Bravia branch was also its default branch. Consolidation establishes
-`main` without discarding that history. HA keeps its existing `main`. The repos
-retain separate source/household responsibilities. Bravia's private visibility is
-unchanged; publishing is a separate decision. Revisit branch complexity only if
-parallel release support or collaboration creates a demonstrated need.
-
-## D11 - Display-only TV notices first
-
-**Status:** accepted and authorised for local implementation, 14 November 2026;
-subsequently published and deployed for trial with approval. The HA schema type
-mismatch is corrected and the user visually confirmed both notices display
-correctly. Broader trial checks remain pending. PR #8 is open and unmerged.
-
-Consume HA's TV-filtered household attention sensor through the existing private
-host. HA retains lifecycle and routing ownership. Show a compact severity-ordered
-list below weather, up to three readable two-line rows. Overflow is a count with
-“View in HA”, not automatic paging. Leave a fresh empty feed quiet. Tighten the
-clock-to-Now gap and put the divider directly beneath the weather check text.
-
-Retain first-input dismissal. Navigation, local hiding and acknowledgement are
-deferred; this supersedes the earlier Phase 4 requirement to ship interaction
-with the feed. During outages retain last-known unresolved notices with a warning
-after two minutes; one-shot events still expire at HA's deadline. An unavailable
-feed is not proof of recovery or household health. See [the implementation and
-acceptance record](HOUSEHOLD_ALERTS.md).
+- [D11: Display-only notice scope](docs/history/decisions-2026-11-14.md#d11---display-only-tv-notices-first).

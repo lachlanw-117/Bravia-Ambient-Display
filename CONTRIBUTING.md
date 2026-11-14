@@ -2,7 +2,7 @@
 
 `main` is the accepted source baseline. Runtime changes reach it after successful
 relevant device testing of an approved feature-branch trial. It is not a claim
-that every change is currently installed on the TV or Pi. [TRIAL.md](TRIAL.md) and the companion HA deployment
+that every change is currently installed on the TV or Pi. [TRIAL.md](docs/history/initial-trial-2026-11-07.md) and the companion HA deployment
 notes identify actual deployed revisions and remaining acceptance checks.
 Read [AGENTS.md](AGENTS.md) before acting.
 

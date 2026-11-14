@@ -1,0 +1,125 @@
+> Historical record, archived 14 November 2026. Intermediate plans and pending
+> checks are dated evidence, not current instructions or a new backlog. See the
+> [current overview](../../README.md) and [design evolution](../design-evolution.md).
+
+﻿# Infrastructure trial without photos
+
+## Latest status and next test - 11 November 2026
+
+The sections below preserve the initial 7 November infrastructure/album trial.
+Later work supersedes that baseline: Phase 1 and Phase 2 were accepted and merged,
+followed by the accepted weather/photo-resume trial. Bravia PR #4 merged on
+8 November as `f45548e43bf3d07704538d38e31a971c50769593`. Last recorded installed
+Android runtime: `55a749b52a065400bb489e29020b9cf658f43431`; see
+[weather/playback evidence](weather-refinement-2026-11-08.md). Debugging was disabled and
+ordinary idle/Back passed at closeout; this does not prove today's device binary
+or debugging state.
+
+On 11 November the user confirmed Preview features work as expected except
+today's Low is often missing. Guided idle/streaming checks are in the
+[current session record](tv-acceptance-2026-11-11.md); results remain individually
+pending until reported. The user subsequently confirmed being happy with idle
+entry (untimed) and several days of use without issues in response to the
+streaming-check request. This is positive ordinary-use evidence; individual apps,
+paused-video, HDMI and controlled failure/recovery remain unverified. No repeat
+timed check is requested now, and no reinstall is needed merely to resume.
+
+## Initial trial context
+
+Test one dependency at a time. No Google account or family photos are needed.
+The TV APK was installed on 7 November 2026 and the user confirmed that the
+screensaver works as expected. The Pi host was installed and started later that
+evening; authenticated weather and the TV overlay were verified without photos.
+
+## Recorded results
+
+These are historical results from the initial photo-free trial. The later album
+deployment below supersedes its empty-folder, zero-photo and source-revision
+details; neither section proves the current live state.
+
+- TV APK installation: ADB returned Success; the user confirmed the app is visible.
+- Screensaver behaviour: user reported working as expected. Individual streaming,
+  HDMI, remote-button and power checks have not been separately recorded.
+- TV OS version: Android 12. System-picker availability: not yet recorded.
+- Local host validation: all 10 synthetic Node tests pass; local app package generated.
+- Pi host: version 0.1.0 from `b05ca1f6bbf3f8151c950150ac5cdd7bb5dbd826`,
+  installed as `local_bravia_ambient` and started on HA OS 18.4 / aarch64,
+  Core 2026.11.0. The existing Terminal & SSH app exposes local packages at
+  `/local_apps`. No previous Bravia package or photo folder existed; no existing
+  installation files were replaced. All three generated package hashes matched.
+- LAN health: HTTP 200 with `{"ok":true}` at `http://192.168.0.142:8099/health`.
+  Unauthenticated weather returned HTTP 401; authenticated manifest had zero photos.
+  The source folder `/share/bravia-ambient` was created and remains empty.
+- Authenticated live weather around 22:08 Australia/Sydney on 7 November 2026:
+  15.1°C, `partlycloudy`, today's high 15.1°C / low 14.4°C; both stale flags false.
+- TV connection around 22:10: host URL and random access key saved; Preview showed
+  **Weather: Feed received**, **15°C partlycloudy**, **High 15° Low 14°**.
+  The TV rounds the host readings. **No album cached** is expected with zero photos.
+  The key was not printed or committed; no existing credential files were opened.
+- Failure/recovery: pending. No stop/restart test or HA core restart was performed.
+- Weather-label update from `8e4e856`: installed with explicit user approval
+  using ADB `install -r` (Success) at approximately 22:18 Australia/Sydney on
+  7 November 2026. Preview visibly showed **Weather: Feed received**,
+  **15°C Partly cloudy**, **High 15° Low 14°**. Saved host settings survived.
+  Local Android build, DEX, signing verification and all 15 existing JVM assertions
+  passed before installation. The previous APK was preserved locally.
+  No cache implementation change or HA core restart was needed or performed.
+- Persistent offline photo storage is no longer required by the user. The installed
+  APK still caches photos; no storage implementation change has been made.
+
+## First album deployment — 7 November 2026
+
+With explicit approval, host and TV were updated from source commit
+`3fbb12727382c538e43fdef125de39687d20bc07` to accept up to 250 photos.
+The 8 MiB per-photo and 256 MiB album limits and cache implementation are unchanged.
+All 11 synthetic host tests passed, including 147/250 acceptance and 251 rejection
+without replacing the last-good manifest. Android build, APK verification and the
+15 existing JVM assertions passed before deployment.
+
+The user's local export contained 147 still photos (65 JPEG and 82 HEIC) and
+29 MP4 files. HEICs were converted locally to oriented JPEG copies; existing JPEGs
+were copied byte-for-byte. MP4s were excluded; their possible Live Photo pairing
+was not independently confirmed. The source ZIP remains untouched outside Git.
+All 147 output photos decoded locally and are distinct: 219,526,548 bytes total
+(209.36 MiB), largest 5,986,670 bytes (5.71 MiB). No resizing was necessary.
+
+All 147 transferred files matched local SHA-256 checksums before publication to
+`/share/bravia-ambient`. The previous host package is preserved locally on the Pi
+at `/backup/bravia-package-b05ca1f`; a local app backup was created before rebuild.
+Only the Bravia app was stopped/rebuilt/started; HA core was not restarted.
+The matching TV APK installed with ADB `install -r` (Success).
+Authenticated host manifest and source folder both contain 147 photos, and the
+weather feed remained fresh. The first TV download took several minutes with the
+infrastructure waiting screen visible. The user then confirmed that photos were
+appearing. This confirms visible photo playback, not a complete review of all
+147 photos, orientation, crossfades or offline/failure recovery. Screenshot capture
+returned empty data during this phase, so playback confirmation is user-reported.
+
+## Trial sequence
+
+1. **TV application only.** Sideload the APK and open Preview without configuring
+   a host. Expect a diagnostic screen, moving local clock/date and unavailable
+   weather. Check Back/Home and reopening Preview. This proves installation and
+   rendering; it does not prove automatic screensaver entry.
+2. **TV idle lifecycle.** Select the screensaver through the system picker if
+   available. Test launcher idle, remote dismissal, streaming, paused playback and
+   Xbox/HDMI. Stop here if the firmware cannot support the required behaviour.
+   Restore the original screensaver if it interrupts ordinary use.
+3. **Pi host.** Install/start the packaged HA local app with a random access key.
+   Leave the photo folder empty. Check `http://PI_ADDRESS:8099/health` from a LAN
+   browser: expect `{"ok":true}`. This proves the port is reachable, not authentication
+   or HA weather. A missing source directory may log a photo-sync warning.
+4. **Authenticated TV connection.** Enter the host URL and key in the TV setup,
+   save and reopen Preview. Expect Weather: Feed received. A wrong key or blocked
+   port gives Feed unavailable. Photo status can remain "No album cached" for an
+   empty feed; that message also covers connection failure and is not an auth test.
+5. **HA weather.** Look for real temperature, condition and today's high/low in
+   the overlay. Feed received alone does not prove the HA request succeeded.
+   Missing readings isolate the remaining work to the host-to-HA path.
+6. **Failure recovery.** With approval, stop/restart the host and reopen Preview.
+   Clock/date must keep working. Cached weather must be labelled stale when aged.
+   Confirm recovery; refresh occurs on entry and every five minutes while running.
+
+Only then add a small exported album to test decoding, crossfades and offline photo
+playback. A photo-free trial cannot validate those components. Record the TV's OS
+version, picker availability, each result and any error before changing architecture.

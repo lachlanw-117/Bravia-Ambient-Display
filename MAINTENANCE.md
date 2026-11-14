@@ -18,7 +18,7 @@ Runtime trials deploy an exact feature-branch commit while its PR stays open.
 Successful relevant device acceptance and recorded closeout precede merge
 approval; `main` is the accepted baseline. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
-1. Name the phase and exact local work. Inspect branches, working trees and
+1. Name the scope and exact local work. Inspect branches, working trees and
    relevant live drift without opening credentials or saved app options.
 2. Record the reviewed revision/local diff and relevant APK/package hashes.
    Package version 0.1.0 alone does not distinguish the recorded deployments.
@@ -64,7 +64,7 @@ The installed app does not need ADB for normal playback. Android documents
 [ADB](https://developer.android.com/tools/adb) and
 [Developer options](https://developer.android.com/studio/debug/dev-options)
 separately; Sony menus and behaviour still need observation. The last recorded
-trial had debugging enabled. The later [Phase 1 record](PHASE1.md) documents
+trial had debugging enabled. The later [Phase 1 record](docs/history/bom-weather-2026-11-08.md) documents
 debugging disabled, TCP 5555 refusing connections and user-confirmed ordinary use
 on 8 November. The master switch remains on to preserve unreviewed settings;
 reboot persistence was not tested. Consult the latest trial record, not this

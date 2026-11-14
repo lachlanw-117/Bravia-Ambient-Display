@@ -120,5 +120,7 @@ and represents no employer or client work. See [contributing](CONTRIBUTING.md).
 ## Documentation and future direction
 
 The [documentation index](docs/README.md) covers setup, architecture, validation,
-operation and dated trials. The [roadmap](ROADMAP.md) has one future concept:
+operation and validation. For the optional journey, [design evolution](docs/design-evolution.md)
+connects the key choices; detailed trials live in the [history archive](docs/history/README.md).
+The [roadmap](ROADMAP.md) has one future concept:
 a **separate aircraft-tracking screensaver**, requiring its own later plan.
