@@ -3,7 +3,7 @@ import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { createHash, timingSafeEqual } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
-import { NoticeFeed, noticesView } from './notices.mjs';
+import { NoticeFeed, noticesView, noticeFailureReason } from './notices.mjs';
 
 export const LIMITS = { count: 250, photoBytes: 8 * 1024 * 1024, albumBytes: 256 * 1024 * 1024 };
 export const localDay = (date, timeZone) => new Intl.DateTimeFormat('en-CA', {
@@ -226,7 +226,7 @@ export async function main() {
   const notices = new NoticeFeed(config, savedNotices, next => atomicJson(path.join(data, 'notices.json'), next));
   const updateNotices = async () => {
     try { await notices.update(); }
-    catch { console.warn('Notice update failed; keeping previous snapshot'); }
+    catch (error) { console.warn('Notice update failed: '+noticeFailureReason(error)+'; keeping previous snapshot'); }
   };
   void update(); void updateNotices();
   const timer = setInterval(update, 300000);

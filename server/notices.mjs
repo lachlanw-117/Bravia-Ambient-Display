@@ -1,5 +1,12 @@
 // This adapter reads the TV-filtered view only, never the private attention store.
 export const NOTICE_LIMITS = { bytes: 262144, items: 64, title: 300 };
+// Only fixed diagnostic labels may reach logs, never response bodies or exception text.
+export function noticeFailureReason(error) {
+  const reasons = ['Invalid notice text','Invalid notice timestamp','Invalid notices','Invalid notice',
+    'Duplicate notice','Unsupported notice','Invalid upgrade details','Notice request failed',
+    'Notice response too large','Notice feed not ready','Sanitised notices too large'];
+  return reasons.includes(error?.message) ? error.message : 'Request or storage failure';
+}
 const text = (value, max) => {
   if (typeof value !== 'string' || !value.trim() || value.length > max || /[\u0000-\u001f\u007f]/u.test(value))
     throw Error('Invalid notice text');

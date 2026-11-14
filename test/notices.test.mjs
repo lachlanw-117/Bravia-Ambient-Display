@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { NoticeFeed, fetchNotices, noticesView, sanitiseItems, restoreNotices, NOTICE_LIMITS } from '../server/notices.mjs';
+import { NoticeFeed, fetchNotices, noticesView, sanitiseItems, restoreNotices, NOTICE_LIMITS, noticeFailureReason } from '../server/notices.mjs';
 import { makeServer } from '../server/server.mjs';
 
 const now = new Date('2026-11-14T06:00:00Z');
@@ -11,6 +11,11 @@ const row = (extra = {}) => ({ key:'synthetic_fault', occurrence_id:'synthetic:1
   last_valid_observation:at, resolved_at:null, quality:'valid', display_until:0,
   evidence:[{entity_id:'sensor.private',state:'private'}], phone_routes:['private-recipient'], ...extra });
 const response = items => new Response(JSON.stringify({state:'ready',attributes:{schema_version:1,items}}));
+
+test('diagnostics contain only fixed labels, never upstream exception content',()=>{
+  assert.equal(noticeFailureReason(Error('Invalid notice timestamp')),'Invalid notice timestamp');
+  assert.equal(noticeFailureReason(Error('synthetic private upstream body')),'Request or storage failure');
+});
 
 test('adapter reads only the TV view and allowlists public fields', async () => {
   let calls=0;
