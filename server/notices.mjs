@@ -64,7 +64,9 @@ export async function fetchNotices({ haUrl, haToken }, fetcher = fetch, now = ne
     chunks.push(Buffer.from(chunk));
   }
   const state = JSON.parse(Buffer.concat(chunks).toString('utf8'));
-  if (state.state !== 'ready' || state.attributes?.schema_version !== 1) throw Error('Notice feed not ready');
+  // HA template attributes can expose a literal numeric schema as text.
+  // Accept only the two exact v1 representations, never general numeric coercion.
+  if (state.state !== 'ready' || ![1, '1'].includes(state.attributes?.schema_version)) throw Error('Notice feed not ready');
   const snapshot = { version: 1, fetchedAt: now.toISOString(), items: sanitiseItems(state.attributes.items) };
   if (Buffer.byteLength(JSON.stringify(snapshot)) > 60000) throw Error('Sanitised notices too large');
   return snapshot;

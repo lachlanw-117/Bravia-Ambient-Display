@@ -43,6 +43,20 @@ test('grouped upgrades count distinct last-confirmed components with uncertainty
     'Update status uncertain');
 });
 
+test('HA textual schema 1 is normalised; coercible and unsupported versions stay rejected',async()=>{
+  for(const version of [1,'1']) {
+    const result=await fetchNotices(config,async()=>new Response(JSON.stringify({state:'ready',
+      attributes:{schema_version:version,items:[row()]}})),now);
+    assert.equal(result.version,1);assert.equal(result.items.length,1);
+  }
+  for(const version of ['01','1.0',' 1 ',true,null,2,'2'])
+    await assert.rejects(fetchNotices(config,async()=>new Response(JSON.stringify({state:'ready',
+      attributes:{schema_version:version,items:[]}})),now),/not ready/);
+  for(const state of ['unknown','unavailable'])
+    await assert.rejects(fetchNotices(config,async()=>new Response(JSON.stringify({state,
+      attributes:{schema_version:'1',items:[]}})),now),/not ready/);
+});
+
 test('unavailable/schema/malformed/oversized feeds fail rather than clear notices',async () => {
   for (const state of [null,{}, {state:'unavailable'}, {state:'ready',attributes:{schema_version:2,items:[]}},
     {state:'ready',attributes:{schema_version:1,items:null}},
