@@ -192,7 +192,8 @@ parallel release support or collaboration creates a demonstrated need.
 
 **Status:** accepted and authorised for local implementation, 14 November 2026;
 subsequently published and deployed for trial with approval. The HA schema type
-mismatch is corrected; TV acceptance remains pending. PR #8 is open and unmerged.
+mismatch is corrected and the user visually confirmed both notices display
+correctly. Broader trial checks remain pending. PR #8 is open and unmerged.
 
 Consume HA's TV-filtered household attention sensor through the existing private
 host. HA retains lifecycle and routing ownership. Show a compact severity-ordered

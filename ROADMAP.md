@@ -32,7 +32,9 @@ interactions together with the feed. The user subsequently approved commit/push
 and host/TV deployment, explicitly excluding merge and requesting ADB remain on.
 PR #8 is open and deployed for trial. The initial readiness failure was traced
 to HA exposing schema version `"1"` as text and corrected in the host adapter.
-Relevant notice and TV acceptance remains pending; see the trial record above.
+The user confirmed both natural notices display correctly below weather, with
+no unavailable message. Broader lifecycle/remote acceptance remains pending;
+the PR stays unmerged and ADB remains enabled as instructed.
 
 ## Current session and next priorities - 11 November 2026
 

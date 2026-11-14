@@ -1,6 +1,6 @@
 # Household alerts - display-only candidate
 
-Status: **deployed for trial; readiness mismatch corrected; TV acceptance pending; not merged**. Work is on
+Status: **deployed; notice display visually verified by the user; broader trial checks pending; not merged**. Work is on
 `feature/household-alerts` from Bravia `bddf067`. The user approved commit/push,
 TV installation and Bravia host rebuild/restart on 14 November 2026, explicitly
 excluding merge, and explicitly requested that ADB debugging remain enabled.
@@ -24,8 +24,11 @@ helper value, reload or Core restart was needed. The existing Template editor dr
 was restored after the read-only inspection.
 
 After the fix the host starts without a new notice-failure log, but ADB screenshots
-return empty image data. User visual confirmation of the two natural notices
-(living-room TV lights visibility loss and one grouped upgrade) is pending.
+return empty image data. On 14 November 2026 (Australia/Sydney), the user answered
+“Yes, both notices appear correctly” to the Preview check covering the living-room
+TV lights visibility alert, one grouped update notice below weather and absence
+of “Notices unavailable”. This verifies that scoped display result through user
+observation; it does not establish untested lifecycle, remote or outage behaviour.
 
 [PR #8](https://github.com/lachlanw-117/Bravia-Ambient-Display/pull/8) is open;
 the user explicitly instructed **do not merge**. Initial runtime `fc28daf1e14a492b49abef45c2e1b34ff04f0ca9`
@@ -44,7 +47,8 @@ It logs only fixed failure labels, excluding arbitrary exception/response conten
 | TV install | Android 12; `install -r` succeeded. Installed APK pulled back and matched candidate SHA-256 `db65da664afe6dafaa74988b6a991d5e879e9d6e36536c44536bb205c087cc75` |
 | Saved settings | Host address, masked access-key field, 60-second scenes and portrait-pair setting visibly retained; no saved credential contents read |
 | Preview rendering | Whole photo, date/time and fresh Now/Today/Tomorrow rendered; tightened spacing and divider visible |
-| **Notice acceptance** | **Failing:** TV shows “Notices unavailable”; host reports fixed diagnostic “Notice feed not ready”. This means the HA response fails the ready-state/schema gate, not proof of a specific source fault. No successful authenticated notice snapshot or notice display is claimed |
+| Initial notice failure (historical) | TV showed “Notices unavailable”; host reported “Notice feed not ready”. Read-only inspection traced the mismatch to textual schema version `"1"`; corrected at runtime revision `37ce0ad` |
+| Notice display after correction | **User-confirmed pass:** both natural notices appear correctly below weather, without the unavailable message. This is user visual evidence, not an agent screenshot or a complete lifecycle/remote acceptance pass |
 | HA inspection | Named live package hash matches the earlier installed HA trial. Browser access host unavailable and native Chrome window minimised; user asked to restore it for read-only sensor inspection. Existing remote-session API authentication returned 401; no credential contents were inspected or changed |
 | ADB | `adb_enabled=1`, TCP port 5555 and authenticated device connection verified. Left enabled at the user's explicit request; no debugging-off closeout is claimed |
 
@@ -56,9 +60,11 @@ configuration `c2abaa1ff2329c5f72556386aebfd5822b6f56e767d28e903a45230f6ff122c3`
 Private local APKs/screenshots and source manifests remain under ignored
 `build/notice-preview`; no household photos or saved options are committed.
 
-Next: obtain visual confirmation of the corrected feed on the TV. Natural
-lifecycle/routing checks, couch-distance review and physical
-Back/ordinary idle acceptance remain pending. Keep the PR open.
+Scoped visual notice acceptance is recorded. Natural lifecycle/routing checks,
+overflow on the real TV, controlled failure/recovery, restart continuity and
+physical Back/ordinary idle checks for this candidate remain unverified. Keep
+the PR open and unmerged as instructed; no additional device actions were taken
+to record this confirmation. ADB remains enabled under the explicit exception.
 
 ## Ownership and display
 

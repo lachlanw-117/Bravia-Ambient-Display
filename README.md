@@ -26,7 +26,8 @@ the last recorded installed runtime remains `29b3784f255ee7d29500a03c3166bae0524
 
 The [household-alert candidate](HOUSEHOLD_ALERTS.md) is deployed for trial from
 feature PR #8, which remains open. The HA schema string/number mismatch has been
-corrected in the host; final TV visual acceptance is pending. It adds a compact
+corrected in the host, and the user confirmed both notices display correctly.
+Broader lifecycle/remote checks remain pending. It adds a compact
 display-only list below weather using HA's TV-filtered attention view. See the
 [offline synthetic comparison](docs/household-alerts-comparison.html).
 
