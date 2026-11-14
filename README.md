@@ -24,6 +24,11 @@ forecast-low, failure/recovery or HDMI checks were independently observed.
 The subsequent forecast-unit cache fix is source-tested but not deployed;
 the last recorded installed runtime remains `29b3784f255ee7d29500a03c3166bae05248342d`.
 
+The [household-alert candidate](HOUSEHOLD_ALERTS.md) is implemented locally on a
+feature branch, with no deployment or device acceptance yet. It adds a compact
+display-only list below weather using HA's TV-filtered attention view. See the
+[offline synthetic comparison](docs/household-alerts-comparison.html).
+
 [![Local checks](https://github.com/lachlanw-117/Bravia-Ambient-Display/actions/workflows/checks.yml/badge.svg?branch=main)](https://github.com/lachlanw-117/Bravia-Ambient-Display/actions/workflows/checks.yml)
 
 The [implementation roadmap](ROADMAP.md) separates the accepted enhancements into
@@ -39,8 +44,8 @@ checks and the separation between reviewed source and actual deployment.
 flowchart LR
     Export[Manual Google Photos album export] --> Folder[Photo folder on Pi]
     Folder --> Host[Photo and weather host]
-    HA[Home Assistant weather] --> Host
-    Host -->|Authenticated LAN feed| Cache[TV private photo cache]
+    HA[Home Assistant weather and TV-filtered notices] --> Host
+    Host -->|Authenticated LAN feeds| Cache[TV private caches]
     Cache --> Dream[Android DreamService]
     OS[TV idle lifecycle] --> Dream
 ```
@@ -77,8 +82,9 @@ source, offset-free local forecast dates and provider-isolated caching. Provider
 attribution remains in the feed; the user requested no visible TV credit during
 review. That final version passed scoped TV acceptance/closeout; merge approval
 was supplied and Phase 1 merged. Missing values stay unavailable. Midnight removes
-yesterday's high/low. These are the only HA operations in the host; it is not an
-arbitrary service proxy. The live host and TV weather path passed the photo-free
+yesterday's high/low. The notice candidate additionally reads only
+`sensor.household_attention_tv`; the host is not an arbitrary service proxy.
+The live host and TV weather path passed the photo-free
 trial on 7 November 2026; see [the recorded readings](TRIAL.md).
 
 ## Google Photos decision

@@ -26,7 +26,10 @@ jobs:
       - name: Generate local app package
         run: node tools/package-addon.mjs
       - name: Check packaged server syntax
-        run: node --check build/bravia_ambient/server.mjs
+        run: |
+          node --check build/bravia_ambient/server.mjs
+          node --check build/bravia_ambient/notices.mjs
+          node -e "import('./build/bravia_ambient/server.mjs')"
 
   policy:
     name: JVM display and cache policy
@@ -43,7 +46,8 @@ jobs:
       - name: Compile and run policy assertions
         run: |
           mkdir -p build/policy-tests
-          javac -d build/policy-tests android/src/au/wright/ambient/Policy.java android/src/au/wright/ambient/PhotoPresentation.java android/test/PolicyTest.java android/test/PhotoPresentationTest.java android/src/au/wright/ambient/WeatherPresentation.java android/test/WeatherPresentationTest.java
+          javac -d build/policy-tests android/src/au/wright/ambient/Policy.java android/src/au/wright/ambient/PhotoPresentation.java android/test/PolicyTest.java android/test/PhotoPresentationTest.java android/src/au/wright/ambient/WeatherPresentation.java android/test/WeatherPresentationTest.java android/src/au/wright/ambient/NoticePresentation.java android/test/NoticePresentationTest.java
           java -cp build/policy-tests PolicyTest
           java -cp build/policy-tests PhotoPresentationTest
           java -cp build/policy-tests WeatherPresentationTest
+          java -cp build/policy-tests NoticePresentationTest

@@ -3,6 +3,7 @@ import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { createHash, timingSafeEqual } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
+import { NoticeFeed, noticesView } from './notices.mjs';
 
 export const LIMITS = { count: 250, photoBytes: 8 * 1024 * 1024, albumBytes: 256 * 1024 * 1024 };
 export const localDay = (date, timeZone) => new Intl.DateTimeFormat('en-CA', {
@@ -175,7 +176,7 @@ function authorised(header, key) {
   const a = Buffer.from(header ?? ''), b = Buffer.from('Bearer ' + key);
   return a.length === b.length && timingSafeEqual(a,b);
 }
-export function makeServer(album, key, weather) {
+export function makeServer(album, key, weather, notices = () => noticesView(null)) {
   return createServer(async (req, res) => {
     const json = (status, body) => { res.writeHead(status, { 'Content-Type':'application/json', 'Cache-Control':'no-store', 'X-Content-Type-Options':'nosniff' }); res.end(JSON.stringify(body)); };
     if (req.method !== 'GET') return json(405, { error: 'Read only' });
@@ -183,6 +184,7 @@ export function makeServer(album, key, weather) {
     if (!authorised(req.headers.authorization, key)) return json(401, { error:'Unauthorised' });
     if (req.url === '/manifest') return json(200, album.manifest);
     if (req.url === '/weather') return json(200, weather());
+    if (req.url === '/notices') return json(200, notices());
     const match = /^\/photos\/([a-f0-9]{64})$/.exec(req.url);
     if (!match || !album.manifest.photos.some(p => p.id === match[1])) return json(404, { error:'Not found' });
     try {
@@ -202,6 +204,7 @@ export async function main() {
   const album = new Album(env.PHOTO_DIR || '/share/bravia-ambient', data);
   await album.load(); await album.prune();
   let cached = await readJson(path.join(data, 'weather.json'), {});
+  const savedNotices = await readJson(path.join(data, 'notices.json'), null);
   const config = { haUrl: env.HA_URL || 'http://supervisor/core', haToken:env.HA_TOKEN || env.SUPERVISOR_TOKEN,
     weatherEntity:env.WEATHER_ENTITY || options.weather_entity || 'weather.forecast_home',
     timeZone:env.TIME_ZONE || options.time_zone || 'Australia/Sydney' };
@@ -219,11 +222,18 @@ export async function main() {
     }
     busy = false;
   };
-  await update();
+  // Listening and notices must never wait behind album IO or weather requests.
+  const notices = new NoticeFeed(config, savedNotices, next => atomicJson(path.join(data, 'notices.json'), next));
+  const updateNotices = async () => {
+    try { await notices.update(); }
+    catch { console.warn('Notice update failed; keeping previous snapshot'); }
+  };
+  void update(); void updateNotices();
   const timer = setInterval(update, 300000);
-  const server = makeServer(album,key,()=>weatherView(cached,new Date(),config.timeZone));
+  const noticeTimer = setInterval(updateNotices, 15000);
+  const server = makeServer(album,key,()=>weatherView(cached,new Date(),config.timeZone),()=>notices.view());
   server.listen(Number(env.PORT || 8099), env.BIND_HOST || '127.0.0.1', ()=>console.log('Ambient server ready'));
-  const stop = () => { clearInterval(timer); server.close(()=>process.exit(0)); };
+  const stop = () => { clearInterval(timer); clearInterval(noticeTimer); server.close(()=>process.exit(0)); };
   process.on('SIGINT',stop); process.on('SIGTERM',stop);
   return server;
 }

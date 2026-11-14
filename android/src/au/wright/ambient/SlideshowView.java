@@ -14,10 +14,11 @@ import java.util.concurrent.*;
 public final class SlideshowView extends FrameLayout {
     private final Handler handler=new Handler(Looper.getMainLooper());
     private final PhotoStore store;
+    private final NoticeStore notices;
     private final PhotoSceneView[] scenes=new PhotoSceneView[2];
     private final InformationPanel panel;
     private final TextView empty;
-    private ScheduledExecutorService photoWorker,weatherWorker;
+    private ScheduledExecutorService photoWorker,weatherWorker,noticeWorker;
     private ExecutorService decoder;
     private volatile boolean running;
     private volatile int generation;
@@ -51,6 +52,7 @@ public final class SlideshowView extends FrameLayout {
     }
     public SlideshowView(Context context) {
         super(context);setBackgroundColor(0xfff5f1e7);store=new PhotoStore(context);
+        notices=new NoticeStore(context,store);
         for(int i=0;i<2;i++) {
             scenes[i]=new PhotoSceneView(context);scenes[i].setAlpha(i==0?1f:0f);addView(scenes[i],new LayoutParams(-1,-1));
         }
@@ -71,6 +73,7 @@ public final class SlideshowView extends FrameLayout {
         sequence=new Sequence(playback.getString("next_photo",null),playback.getString("last_photo",null));
         front=0;photoQueued=false;photoStatus="Waiting for photos";
         photoWorker=Executors.newSingleThreadScheduledExecutor();weatherWorker=Executors.newSingleThreadScheduledExecutor();
+        noticeWorker=Executors.newSingleThreadScheduledExecutor();
         decoder=Executors.newSingleThreadExecutor();handler.post(tick);handler.post(advance);
         photoWorker.scheduleWithFixedDelay(()->{
             if(!running||ticket!=generation)return;
@@ -81,15 +84,21 @@ public final class SlideshowView extends FrameLayout {
             if(!running||ticket!=generation)return;
             try {store.syncWeather();}catch(Exception ignored){}
         },0,300,TimeUnit.SECONDS);
+        noticeWorker.scheduleWithFixedDelay(()->{
+            if(!running||ticket!=generation)return;
+            try {notices.sync();}catch(Exception ignored){}
+        },0,15,TimeUnit.SECONDS);
     }
     public void stop() {
         if(!running)return;running=false;generation++;handler.removeCallbacksAndMessages(null);photoQueued=false;
         if(photoWorker!=null)photoWorker.shutdownNow();if(weatherWorker!=null)weatherWorker.shutdownNow();
+        if(noticeWorker!=null)noticeWorker.shutdownNow();
         if(decoder!=null)decoder.shutdownNow();store.cancelRequests();
         for(PhotoSceneView scene:scenes){scene.animate().cancel();scene.clear();}
     }
     private final Runnable tick=new Runnable(){public void run(){if(running){
         panel.update(store.weather(),new Date());
+        panel.updateNotices(notices.snapshot(),new Date());
         if(empty.getVisibility()==VISIBLE)empty.setText("Your photos will appear here\n"+photoStatus+"\nOpen Wright Ambient setup to check the connection.");
         handler.postDelayed(this,1000);
     }}};

@@ -187,3 +187,21 @@ The initial Bravia branch was also its default branch. Consolidation establishes
 retain separate source/household responsibilities. Bravia's private visibility is
 unchanged; publishing is a separate decision. Revisit branch complexity only if
 parallel release support or collaboration creates a demonstrated need.
+
+## D11 - Display-only TV notices first
+
+**Status:** accepted and authorised for local implementation, 14 November 2026;
+implemented locally, not deployed or device-verified.
+
+Consume HA's TV-filtered household attention sensor through the existing private
+host. HA retains lifecycle and routing ownership. Show a compact severity-ordered
+list below weather, up to three readable two-line rows. Overflow is a count with
+“View in HA”, not automatic paging. Leave a fresh empty feed quiet. Tighten the
+clock-to-Now gap and put the divider directly beneath the weather check text.
+
+Retain first-input dismissal. Navigation, local hiding and acknowledgement are
+deferred; this supersedes the earlier Phase 4 requirement to ship interaction
+with the feed. During outages retain last-known unresolved notices with a warning
+after two minutes; one-shot events still expire at HA's deadline. An unavailable
+feed is not proof of recovery or household health. See [the implementation and
+acceptance record](HOUSEHOLD_ALERTS.md).

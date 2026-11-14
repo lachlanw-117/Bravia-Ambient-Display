@@ -6,4 +6,5 @@ const out=path.join(root,'build','bravia_ambient');
 await fs.mkdir(out,{recursive:true});
 for(const file of ['config.yaml','Dockerfile']) await fs.copyFile(path.join(root,'addon',file),path.join(out,file));
 await fs.copyFile(path.join(root,'server/server.mjs'),path.join(out,'server.mjs'));
+await fs.copyFile(path.join(root,'server/notices.mjs'),path.join(out,'notices.mjs'));
 console.log('Local add-on package:',out);

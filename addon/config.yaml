@@ -1,7 +1,7 @@
 name: Bravia Ambient Photo Host
 version: 0.1.0
 slug: bravia_ambient
-description: Local photo cache and weather feed for the family TV screensaver
+description: Local photos, weather and household notices for the family TV screensaver
 arch: [aarch64, amd64]
 startup: application
 boot: auto
@@ -10,7 +10,7 @@ homeassistant_api: true
 ports:
   8099/tcp: 8099
 ports_description:
-  8099/tcp: Authenticated photo and weather feed (trusted LAN only)
+  8099/tcp: Authenticated photo, weather and notice feeds (trusted LAN only)
 map:
   - type: share
     read_only: true

@@ -5,7 +5,8 @@ documentation. Phase 1 was trial-deployed with approval, passed scoped acceptanc
 and closeout, then merged with approval on 8 November; see [its record](PHASE1.md).
 Phase 2 local work and TV trial were subsequently authorised; its
 [candidate record](PHASE2.md) distinguishes preparation from deployment and
-acceptance. Phases 3-6 remain planned and require separate authorisation;
+acceptance. The 14 November notice scope below supersedes the earlier Phase 3-6
+planning status for the work it names; other phase work requires separate authorisation.
 Phase 7 requires a later implementation plan. Accepting this roadmap is not
 approval to deploy, operate devices or progress automatically to another phase.
 
@@ -14,6 +15,21 @@ Read [AGENTS.md](AGENTS.md) before acting, then this roadmap, the
 [historical trial results](TRIAL.md). Read the companion HA repository's
 `AGENTS.md` and [household host notes](https://github.com/lachlanw-117/Wright-Home-Assistant/blob/main/docs/bravia_ambient_host.md)
 before work that crosses repositories.
+
+## Household notices - 14 November 2026
+
+The user authorised local implementation of [display-only TV notices](HOUSEHOLD_ALERTS.md).
+The HA-owned inbox, lifecycle and routing are implemented in companion PR #11;
+its installed trial is `6b36c4a`, with acceptance incomplete and newer branch work
+not all deployed. This does not establish completion of every Phase 3, 5 or 6 gate.
+
+Bravia's Phase 4 subset is implemented locally on `feature/household-alerts`:
+authenticated sanitised feed, independent refresh/cache and up to three notice
+rows beneath a dynamically placed weather divider. Overflow shows a count and
+points to HA. First-input exit is retained. Remote navigation, local hiding and
+acknowledgement are deferred, superseding the earlier requirement to ship those
+interactions together with the feed. No live changes or Git publication are
+authorised by this implementation request. Relevant TV acceptance remains pending.
 
 ## Current session and next priorities - 11 November 2026
 
