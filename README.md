@@ -93,8 +93,9 @@ The Bravia app alone does not supply household source rules.
 
 The latest runtime record has **37 synthetic host tests and 278 JVM assertions**,
 plus local Android build/signature checks and scoped household acceptance. The
-workflows on this branch add local Markdown checks and an unsigned Android build;
-those additions need a CI run after publication. Compilation is not Sony input testing.
+workflows on this branch add local Markdown checks and an unsigned Android build.
+See [PR #9 checks](https://github.com/lachlanw-117/Bravia-Ambient-Display/pull/9/checks)
+for hosted results against its exact source revision. Compilation is not Sony input testing.
 
 Album maintenance uses manual exports, with no unattended Google Photos sync.
 JPEG, PNG and WebP are supported: one album, 250 photos, 8 MiB per photo and
