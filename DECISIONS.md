@@ -191,7 +191,8 @@ parallel release support or collaboration creates a demonstrated need.
 ## D11 - Display-only TV notices first
 
 **Status:** accepted and authorised for local implementation, 14 November 2026;
-implemented locally, not deployed or device-verified.
+subsequently published and deployed for trial with approval. Notice acceptance
+is failing at the HA readiness/schema gate; PR #8 remains open and unmerged.
 
 Consume HA's TV-filtered household attention sensor through the existing private
 host. HA retains lifecycle and routing ownership. Show a compact severity-ordered

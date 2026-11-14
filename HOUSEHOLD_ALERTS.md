@@ -1,11 +1,48 @@
 # Household alerts - display-only candidate
 
-Status: **authorised local implementation; implemented locally; not deployed or
-device-verified**. Work is on `feature/household-alerts` from Bravia `bddf067`.
-The user subsequently approved commit/push and TV deployment on 14 November 2026,
-explicitly excluding merge. Host rebuild/restart and temporary debugging scope
-are being clarified separately. Deployment has not yet occurred. The unrelated
-untracked `HOME_SCREEN_ADS.md` is preserved.
+Status: **deployed for trial; notice acceptance failing; not merged**. Work is on
+`feature/household-alerts` from Bravia `bddf067`. The user approved commit/push,
+TV installation and Bravia host rebuild/restart on 14 November 2026, explicitly
+excluding merge, and explicitly requested that ADB debugging remain enabled.
+That instruction supersedes the normal debugging-disable closeout for this session.
+The unrelated untracked `HOME_SCREEN_ADS.md` is preserved.
+
+## Deployment trial - 14 November 2026
+
+[PR #8](https://github.com/lachlanw-117/Bravia-Ambient-Display/pull/8) is open;
+the user explicitly instructed **do not merge**. Initial runtime `fc28daf1e14a492b49abef45c2e1b34ff04f0ca9`
+passed CI run 43572583738 and was installed on host and TV. Host-only diagnostic
+revision `024931293c39b27860d61b304a43486759ec1090` subsequently passed 36 local
+host tests and CI run 43573091484, and was installed without changing Android.
+It logs only fixed failure labels, excluding arbitrary exception/response content.
+
+| Check | Observed result |
+|---|---|
+| Prior host drift | All three previous package hashes matched the accepted home-style deployment; notice module absent |
+| Host recovery | Private app backup `da805c77` succeeded; archive existence checked. Previous source package preserved at `/backup/bravia-package-pre-household-alerts-fc28daf`; initial alert package additionally preserved at `/backup/bravia-package-initial-alerts-fc28daf` |
+| Host install | Four package hashes verified before/after copying; Bravia-only stop/rebuild/start succeeded. No Core restart, source/routing/helper changes or credentials inspected/disclosed |
+| Host reachability/authentication | LAN health 200; unauthenticated notices and weather both 401 |
+| Previous TV APK | Pulled before installation; SHA-256 `4f78ed62fa83291e51c3976c93716d5694b5909148ae81b0403d06838ad53c92`, matching the recorded prior accepted APK |
+| TV install | Android 12; `install -r` succeeded. Installed APK pulled back and matched candidate SHA-256 `db65da664afe6dafaa74988b6a991d5e879e9d6e36536c44536bb205c087cc75` |
+| Saved settings | Host address, masked access-key field, 60-second scenes and portrait-pair setting visibly retained; no saved credential contents read |
+| Preview rendering | Whole photo, date/time and fresh Now/Today/Tomorrow rendered; tightened spacing and divider visible |
+| **Notice acceptance** | **Failing:** TV shows “Notices unavailable”; host reports fixed diagnostic “Notice feed not ready”. This means the HA response fails the ready-state/schema gate, not proof of a specific source fault. No successful authenticated notice snapshot or notice display is claimed |
+| HA inspection | Named live package hash matches the earlier installed HA trial. Browser access host unavailable and native Chrome window minimised; user asked to restore it for read-only sensor inspection. Existing remote-session API authentication returned 401; no credential contents were inspected or changed |
+| ADB | `adb_enabled=1`, TCP port 5555 and authenticated device connection verified. Left enabled at the user's explicit request; no debugging-off closeout is claimed |
+
+Runtime package source hashes at diagnostic revision: server
+`d3b8ed9df44cbe47d1ca37fdb223f4682479840038c42b552849be113e293775`,
+notices `8152faaba812c24957ead63b168f45dca75c4f18173cfab5c5963a1fc5b567d6`,
+Dockerfile `882368d21f8c3822b87dde050efbde6458699a47b4a655b151b567556777fa7b`,
+configuration `c2abaa1ff2329c5f72556386aebfd5822b6f56e767d28e903a45230f6ff122c3`.
+Private local APKs/screenshots and source manifests remain under ignored
+`build/notice-preview`; no household photos or saved options are committed.
+
+Next: inspect the real TV sensor's state and schema through authorised read-only
+HA access, correct the integration on the feature branch and trial the exact
+reviewed revision. Do not weaken readiness validation to make an unavailable feed
+look healthy. Natural lifecycle/routing checks, couch-distance review and physical
+Back/ordinary idle acceptance remain pending. Keep the PR open.
 
 ## Ownership and display
 

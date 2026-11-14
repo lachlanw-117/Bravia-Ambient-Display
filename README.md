@@ -24,8 +24,9 @@ forecast-low, failure/recovery or HDMI checks were independently observed.
 The subsequent forecast-unit cache fix is source-tested but not deployed;
 the last recorded installed runtime remains `29b3784f255ee7d29500a03c3166bae05248342d`.
 
-The [household-alert candidate](HOUSEHOLD_ALERTS.md) is implemented locally on a
-feature branch, with no deployment or device acceptance yet. It adds a compact
+The [household-alert candidate](HOUSEHOLD_ALERTS.md) is deployed for trial from
+feature PR #8, which remains open. Notice acceptance is failing at HA's feed
+readiness/schema gate; photos/weather render, but alerts are unavailable. It adds a compact
 display-only list below weather using HA's TV-filtered attention view. See the
 [offline synthetic comparison](docs/household-alerts-comparison.html).
 

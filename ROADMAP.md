@@ -23,13 +23,16 @@ The HA-owned inbox, lifecycle and routing are implemented in companion PR #11;
 its installed trial is `6b36c4a`, with acceptance incomplete and newer branch work
 not all deployed. This does not establish completion of every Phase 3, 5 or 6 gate.
 
-Bravia's Phase 4 subset is implemented locally on `feature/household-alerts`:
+Bravia's Phase 4 subset is implemented on `feature/household-alerts`:
 authenticated sanitised feed, independent refresh/cache and up to three notice
 rows beneath a dynamically placed weather divider. Overflow shows a count and
 points to HA. First-input exit is retained. Remote navigation, local hiding and
 acknowledgement are deferred, superseding the earlier requirement to ship those
-interactions together with the feed. No live changes or Git publication are
-authorised by this implementation request. Relevant TV acceptance remains pending.
+interactions together with the feed. The user subsequently approved commit/push
+and host/TV deployment, explicitly excluding merge and requesting ADB remain on.
+PR #8 is open and deployed for trial. Photos/weather render, but notices show
+unavailable because HA's response fails the readiness/schema gate. Relevant
+notice and TV acceptance remains pending; see the trial record above.
 
 ## Current session and next priorities - 11 November 2026
 
