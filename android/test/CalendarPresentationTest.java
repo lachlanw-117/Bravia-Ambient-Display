@@ -9,10 +9,10 @@ public final class CalendarPresentationTest {
     private static final Instant NOW=Instant.parse("2032-12-30T13:00:00Z");
     private static Map<String,Object> row(int id,String date) {
         Map<String,Object> row=new HashMap<>();row.put("occurrenceId",String.format("%064x",id));
-        row.put("title","Example birthday");row.put("kind","birthday");row.put("localDate",date);return row;
+        row.put("title","Example birthday");row.put("localDate",date);row.put("endDateExclusive",java.time.LocalDate.parse(date).plusDays(1).toString());return row;
     }
     private static Map<String,Object> feed(List<Map<String,Object>> rows) {
-        Map<String,Object> root=new HashMap<>();root.put("schemaVersion",1);root.put("timezone","Australia/Sydney");
+        Map<String,Object> root=new HashMap<>();root.put("schemaVersion",2);root.put("timezone","Australia/Sydney");
         root.put("fetchedAt",NOW.toString());root.put("stale",false);root.put("occurrences",rows);return root;
     }
     private static void rejects(Map<String,Object> root) {
@@ -37,20 +37,29 @@ public final class CalendarPresentationTest {
         root=feed(Collections.emptyList());check(CalendarPresentation.visible(CalendarPresentation.parse(root),NOW).isEmpty(),"successful empty");
         check(CalendarPresentation.status(CalendarPresentation.parse(root),NOW).isEmpty(),"empty is fresh");
         root.put("fetchedAt",null);check(CalendarPresentation.status(CalendarPresentation.parse(root),NOW).equals("Calendar unavailable"),"unavailable restart");
-        tomorrow.put("displayAge",33);snapshot=CalendarPresentation.parse(feed(Arrays.asList(tomorrow)));
-        check(CalendarPresentation.detail(snapshot.items.get(0),NOW).equals("1 Jan · Tomorrow · turns 33"),"optional display age only");
+        String subject="  Example’s 40th birthday / 2033 @ home  ";
+        tomorrow.put("title",subject);snapshot=CalendarPresentation.parse(feed(Arrays.asList(tomorrow)));
+        check(snapshot.items.get(0).title.equals(subject),"published subject unchanged, including spaces and milestone");
+        check(CalendarPresentation.detail(snapshot.items.get(0),NOW).equals("1 Jan · Tomorrow"),"no locally appended age");
+        Map<String,Object> span=row(9,"2032-12-30");span.put("endDateExclusive","2033-01-03");
+        snapshot=CalendarPresentation.parse(feed(Arrays.asList(span)));
+        check(CalendarPresentation.visible(snapshot,NOW).size()==1,"retain underway multiday event");
+        check(CalendarPresentation.detail(snapshot.items.get(0),NOW).equals("30 Dec 2032–2 Jan 2033 · Underway"),"exclusive end displayed as final included date across years");
+        check(CalendarPresentation.visible(snapshot,Instant.parse("2033-01-02T12:59:59Z")).size()==1,"visible through final day offline");
+        check(CalendarPresentation.visible(snapshot,Instant.parse("2033-01-02T13:00:00Z")).isEmpty(),"expires at Sydney end boundary offline");
+        Map<String,Object> dstSpan=row(10,"2033-10-01");dstSpan.put("endDateExclusive","2033-10-04");
+        snapshot=CalendarPresentation.parse(feed(Arrays.asList(dstSpan)));
+        check(CalendarPresentation.detail(snapshot.items.get(0),Instant.parse("2033-10-01T14:00:00Z")).equals("1 Oct–3 Oct · Underway"),"DST range is civil dates");
         Map<String,Object> leap=row(5,"2032-02-29");snapshot=CalendarPresentation.parse(feed(Arrays.asList(leap)));
         check(CalendarPresentation.countdown(snapshot.items.get(0),Instant.parse("2032-02-27T13:00:00Z")).equals("Tomorrow"),"leap day supplied by provider");
         Map<String,Object> dst=row(6,"2033-10-03");snapshot=CalendarPresentation.parse(feed(Arrays.asList(dst)));
         check(CalendarPresentation.countdown(snapshot.items.get(0),Instant.parse("2033-10-01T14:00:00Z")).equals("Tomorrow"),"DST uses civil day");
-        for(String field:Arrays.asList("occurrenceId","title","kind","localDate")) {
+        for(String field:Arrays.asList("occurrenceId","title","localDate","endDateExclusive")) {
             Map<String,Object> bad=row(1,"2033-01-01");bad.put(field,"invalid\nvalue");rejects(feed(Arrays.asList(bad)));
         }
-        for(Object age:Arrays.asList(-1,131,1.5,"33")) {Map<String,Object> bad=row(1,"2033-01-01");bad.put("displayAge",age);rejects(feed(Arrays.asList(bad)));}
-        for(String label:Arrays.asList("Example 2000","person@example.invalid","Born 1/2")) {
-            Map<String,Object> bad=row(1,"2033-01-01");bad.put("title",label);rejects(feed(Arrays.asList(bad)));
-        }
-        rejects(feed(Arrays.asList(today,today)));rejects(feed(Arrays.asList(row(1,"2033-02-29"))));
+        Map<String,Object> badEnd=row(1,"2033-01-01");badEnd.put("endDateExclusive","2033-01-01");rejects(feed(Arrays.asList(badEnd)));
+        root=feed(Arrays.asList(today));root.put("schemaVersion",1);rejects(root);
+        rejects(feed(Arrays.asList(today,today)));Map<String,Object> badDate=row(1,"2033-02-28");badDate.put("localDate","2033-02-29");rejects(feed(Arrays.asList(badDate)));
         root=feed(Arrays.asList(today));root.put("fetchedAt",null);rejects(root);
         root=feed(Arrays.asList(today));root.put("schemaVersion",1.5);rejects(root);
         root=feed(Arrays.asList(today));root.put("timezone","UTC");rejects(root);

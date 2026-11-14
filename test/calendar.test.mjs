@@ -18,7 +18,7 @@ const graphEvent = event => ({ id: event.uid, subject: event.summary, isAllDay: 
   body: { contentType: 'text', content: event.description } });
 const provider = events => async () => new Response(JSON.stringify({ value: Array.isArray(events) ? events.map(graphEvent) : events }));
 
-test('narrow Graph GET, padded range, allowlisted output and optional age off by default', async () => {
+test('narrow read-only Graph GET never requests descriptions or derives title metadata', async () => {
   const calls = [];
   const saved = await fetchCalendar(config, async (url, options) => {
     calls.push(url); assert.equal(options.method, 'GET'); assert.equal(options.redirect, 'error');
@@ -31,12 +31,11 @@ test('narrow Graph GET, padded range, allowlisted output and optional age off by
   assert.equal(query.searchParams.get('endDateTime'), '2034-02-05T00:00:00Z');
   const view = calendarView(saved, now);
   assert.equal(view.occurrences[0].daysUntil, 1);
-  assert.deepEqual(Object.keys(view.occurrences[0]).sort(), ['occurrenceId', 'title', 'kind', 'localDate', 'daysUntil'].sort());
+  assert.deepEqual(Object.keys(view.occurrences[0]).sort(), ['occurrenceId', 'title', 'localDate', 'endDateExclusive', 'daysUntil'].sort());
   assert.ok(!JSON.stringify(view).includes('private')); assert.ok(!JSON.stringify(view).includes('2000'));
-  const aged = await fetchCalendar({ ...config, calendarAges: true }, provider([event()]), now);
-  assert.equal(aged.occurrences[0].displayAge, 33);
-  const noDescription = await fetchCalendar({ ...config, calendarAges: true }, provider([event('Example birthday', '2033-01-01', { description: undefined })]), now);
-  assert.equal(noDescription.occurrences[0].displayAge, undefined);
+  assert.equal(query.searchParams.get('$select'),'id,subject,isAllDay,start,end,isCancelled');
+  assert.equal(view.schemaVersion,2);
+
 });
 
 test('Sydney midnight, UTC/DST boundaries, leap dates and year rollover use civil days', () => {
@@ -45,6 +44,36 @@ test('Sydney midnight, UTC/DST boundaries, leap dates and year rollover use civi
     ['2033-04-02T13:00:00Z','2033-04-03']]) assert.equal(dayAt(new Date(instant)), day);
   assert.equal(daysUntil('2032-03-01','2032-02-28'), 2);
   assert.equal(validDay('2032-02-29'), true); assert.equal(validDay('2033-02-29'), false);
+});
+
+test('published subjects are exact, including publisher-owned milestones, nicknames and whitespace',async()=>{
+  for(const subject of ['  Example’s 40th birthday  ', 'Example anniversary — 20 years',
+    'Published nickname / 2033 @ home', 'Example holiday 1/2']) {
+    const saved=await fetchCalendar(config,provider([event(subject)]),now);
+    const view=calendarView(saved,now);
+    assert.equal(view.occurrences[0].title,subject);
+    assert.equal(JSON.parse(JSON.stringify(saved)).occurrences[0].title,subject);
+    assert.equal(restoreCalendar(saved,calendarSource(config)).occurrences[0].title,subject);
+    assert.ok(!Object.hasOwn(view.occurrences[0],'kind'));
+    assert.ok(!Object.hasOwn(view.occurrences[0],'displayAge'));
+  }
+});
+
+test('multi-day events survive startup and offline ageing until exclusive Sydney end',async()=>{
+  // Starts before the query window; Graph's overlapping event must not be clipped by start date.
+  const span=event('Published summer break','2032-12-01',{end:{date:'2033-01-03'}});
+  const saved=await fetchCalendar(config,provider([span]),now);
+  assert.equal(saved.occurrences[0].endDateExclusive,'2033-01-03');
+  const feed=new CalendarFeed(config,JSON.parse(JSON.stringify(saved)),async()=>{},async()=>{throw Error('offline');});
+  await assert.rejects(feed.update(now));
+  for(const instant of ['2032-12-30T13:00:00Z','2033-01-01T13:00:00Z','2033-01-02T12:59:59Z']) {
+    const view=feed.view(new Date(instant));assert.equal(view.occurrences.length,1);assert.equal(view.occurrences[0].daysUntil,0);
+  }
+  assert.equal(feed.view(new Date('2033-01-02T13:00:00Z')).occurrences.length,0);
+  const dst=await fetchCalendar(config,provider([event('Published DST break','2033-10-01',{end:{date:'2033-10-04'}})]),new Date('2033-09-30T14:00:00Z'));
+  assert.equal(calendarView(dst,new Date('2033-10-03T12:59:59Z')).occurrences.length,1);
+  assert.equal(calendarView(dst,new Date('2033-10-03T13:00:00Z')).occurrences.length,0);
+  assert.equal(restoreCalendar({...saved,schemaVersion:1},calendarSource(config)),null);
 });
 
 test('complete pagination, overlap deduplication and failed later pages never promote partial results',async()=>{
@@ -84,7 +113,7 @@ test('provider-expanded exceptions, edits/deletes, duplicate overlap and same-da
   let events = [event(), event(), event('Example occasion','2033-01-01'), event('Cancelled','2033-01-02',{ status: 'cancelled' })];
   const feed = new CalendarFeed(config, null, async () => {}, url => provider(events)(url));
   await feed.update(now); assert.equal(feed.snapshot.occurrences.length, 2);
-  const id = feed.snapshot.occurrences.find(x => x.kind === 'birthday').occurrenceId;
+  const id = feed.snapshot.occurrences.find(x => x.title === 'Example birthday').occurrenceId;
   events = [event('Edited birthday','2033-01-02', { uid: 'Example birthday', recurrence_id: '2033-01-01' })];
   await feed.update(now); assert.equal(feed.snapshot.occurrences.length, 1);
   assert.equal(feed.snapshot.occurrences[0].title, 'Edited birthday');
@@ -94,9 +123,8 @@ test('provider-expanded exceptions, edits/deletes, duplicate overlap and same-da
 });
 
 test('invalid, unavailable, truncated and oversized upstreams fail instead of clearing calendar', async () => {
-  for (const events of [null, {}, [event('', '2033-01-01')], [event('Born 2000')], [event('person@example.invalid')],
-    [event('DOB 1/2')], [event('Timed','2033-01-01',{start:{dateTime:'2033-01-01T00:00:00Z'}})],
-    [event('Long','2033-01-01',{end:{date:'2033-01-03'}})], Array(257).fill(event()),
+  for (const events of [null, {}, [event('', '2033-01-01')], [event('Timed','2033-01-01',{start:{dateTime:'2033-01-01T00:00:00Z'}})],
+    [event('Invalid range','2033-01-01',{end:{date:'2033-01-01'}})], Array(257).fill(event()),
     [event(),event('Conflicting birthday','2033-01-01',{uid:'Example birthday'})]])
     await assert.rejects(fetchCalendar(config, provider(events), now));
   for (const result of [new Response('',{status:401}),new Response('['),new Response('x'.repeat(262145))])
@@ -121,7 +149,7 @@ test('durable restart, failure retention, offline expiry, 24h stale and independ
   assert.equal(restarted.view(new Date('2033-01-01T13:00:00Z')).occurrences.length,0);
   assert.equal(restarted.view(new Date(+now-1)).stale,true);
   assert.equal(restoreCalendar(saved,calendarSource({...config,calendarId:'other'})),null);
-  assert.equal(restoreCalendar({...saved,schemaVersion:2},calendarSource(config)),null);
+  assert.equal(restoreCalendar({...saved,schemaVersion:1},calendarSource(config)),null);
   assert.equal(new CalendarFeed({...config,calendarId:''},saved,async()=>{}).view(now).fetchedAt,null);
 });
 
@@ -149,6 +177,6 @@ test('/calendar is authenticated, read only, no-store and independently unavaila
   assert.equal((await fetch(base+'/calendar')).status,401);
   assert.equal((await fetch(base+'/calendar',{method:'POST',headers})).status,405);
   const result=await fetch(base+'/calendar',{headers});assert.equal(result.headers.get('cache-control'),'no-store');
-  assert.deepEqual(await result.json(),{schemaVersion:1,timezone:'Australia/Sydney',fetchedAt:null,stale:true,occurrences:[]});
+  assert.deepEqual(await result.json(),{schemaVersion:2,timezone:'Australia/Sydney',fetchedAt:null,stale:true,occurrences:[]});
   assert.equal((await (await fetch(base+'/weather',{headers})).json()).temperature,20);
 });

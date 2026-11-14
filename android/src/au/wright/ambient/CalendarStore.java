@@ -46,8 +46,7 @@ final class CalendarStore {
         List<Map<String,Object>> rows=new ArrayList<>();
         for(int i=0;i<array.length();i++) {
             JSONObject item=array.getJSONObject(i);Map<String,Object> row=new HashMap<>();
-            for(String key:new String[]{"occurrenceId","title","kind","localDate"})row.put(key,scalar(item,key));
-            if(item.has("displayAge"))row.put("displayAge",scalar(item,"displayAge"));
+            for(String key:new String[]{"occurrenceId","title","localDate","endDateExclusive"})row.put(key,scalar(item,key));
             rows.add(row);
         }
         root.put("occurrences",rows);return CalendarPresentation.parse(root);

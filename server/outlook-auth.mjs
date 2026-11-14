@@ -3,7 +3,7 @@ import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 
 export const AUTH_BASE = 'https://login.microsoftonline.com/consumers/oauth2/v2.0';
-export const outlookScope = (readDescriptions = false) => 'offline_access https://graph.microsoft.com/' + (readDescriptions ? 'Calendars.Read' : 'Calendars.ReadBasic');
+export const outlookScope = () => 'offline_access https://graph.microsoft.com/Calendars.ReadBasic';
 export async function oauthRequest(endpoint, values, fetcher = fetch) {
   if(!['devicecode','token'].includes(endpoint))throw Error('Invalid OAuth operation');
   const response = await fetcher(AUTH_BASE + '/' + endpoint, { method: 'POST', redirect: 'error',
@@ -38,7 +38,7 @@ export async function saveRefreshToken(file, clientId, refreshToken) {
     await fs.rename(temp,file);
   } finally {await fs.unlink(temp).catch(()=>{});}
 }
-export function outlookTokenProvider({ clientId, tokenFile, readDescriptions = false }, fetcher = fetch) {
+export function outlookTokenProvider({ clientId, tokenFile }, fetcher = fetch) {
   let access=null,until=0,pending=null;
   return async () => {
     if(access&&Date.now()<until)return access;
@@ -51,7 +51,7 @@ export function outlookTokenProvider({ clientId, tokenFile, readDescriptions = f
       const saved=JSON.parse(await fs.readFile(tokenFile,'utf8'));
       if(saved.clientId!==clientId||typeof saved.refreshToken!=='string'||!saved.refreshToken||saved.refreshToken.length>16384)throw Error('Invalid private token');
       const next=validateTokens(await oauthRequest('token',{client_id:clientId,grant_type:'refresh_token',
-        refresh_token:saved.refreshToken,scope:outlookScope(readDescriptions)},fetcher));
+        refresh_token:saved.refreshToken,scope:outlookScope()},fetcher));
       await saveRefreshToken(tokenFile,clientId,next.refresh_token);
       access=next.access_token;until=Date.now()+(next.expires_in-60)*1000;return access;
     })();

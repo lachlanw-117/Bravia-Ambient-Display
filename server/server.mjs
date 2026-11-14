@@ -212,10 +212,9 @@ export async function main() {
     weatherEntity:env.WEATHER_ENTITY || options.weather_entity || 'weather.forecast_home',
     timeZone:env.TIME_ZONE || options.time_zone || 'Australia/Sydney',
     calendarId:env.OUTLOOK_CALENDAR_ID || options.outlook_calendar_id || '',
-    outlookClientId:env.OUTLOOK_CLIENT_ID || options.outlook_client_id || '',
-    calendarAges:env.CALENDAR_AGES === 'true' || options.calendar_ages === true };
+    outlookClientId:env.OUTLOOK_CLIENT_ID || options.outlook_client_id || '' };
   config.getAccessToken = config.outlookClientId ? outlookTokenProvider({ clientId: config.outlookClientId,
-    tokenFile: env.OUTLOOK_TOKEN_FILE || path.resolve(data, 'outlook-token.json'), readDescriptions: config.calendarAges }) : null;
+    tokenFile: env.OUTLOOK_TOKEN_FILE || path.resolve(data, 'outlook-token.json') }) : null;
   localDay(new Date(), config.timeZone); // Reject invalid configuration before serving requests.
   // A provider change must not relabel another provider's last-good reading.
   if (cached.weatherEntity !== config.weatherEntity) cached = {};

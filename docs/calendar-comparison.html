@@ -9,7 +9,7 @@ svg{width:100%;background:#f5f1e7;border:1px solid #d3ccbd}label{display:inline-
 @media(max-width:1000px){.boards{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:600px){.boards{grid-template-columns:1fr}}
 </style><main>
 <h1>One quiet section at a time</h1>
-<p>Offline sidebar comparison with synthetic weather, notices and calendar dates in 2032–2033. The photo area stays unchanged. Browser font metrics approximate the Android Canvas; this is not a device screenshot or evidence of live HA state.</p>
+<p>Offline sidebar comparison with synthetic weather, notices and calendar dates in 2032–2033. Event subjects are synthetic examples published by the calendar owner; Bravia adds only date/countdown text. The multi-day end shown is the last included date. The photo area stays unchanged. Browser font metrics approximate the Android Canvas; this is not a device screenshot or evidence of live HA state.</p>
 <label><input type="checkbox" id="stale"> Feed has stopped refreshing</label>
 <label><input type="checkbox" id="longWeather"> Long forecast and check text</label>
 <label><input type="checkbox" id="narrow"> Narrow sidebar / long date</label>
@@ -71,8 +71,9 @@ function draw(svg,items,baseline){
  const calendarStatus=unavailable?'Calendar unavailable':document.querySelector('#calendarStale').checked?'Calendar may be out of date':'';
  const longNames=document.querySelector('#longNames').checked;
  const occasions=unavailable||empty?[]:[
-  [longNames?'Alexandria Example-Synthetic’s birthday':'Alex’s birthday','31 Dec · Today'],
-  ['Example occasion','1 Jan · Tomorrow'],['Sam’s birthday','12 Mar · in 71 days']];
+  ['Published summer break','30 Dec 2032–2 Jan 2033 · Underway'],
+  [longNames?'Alexandria Example-Synthetic’s 40th birthday':'Alex’s 40th birthday','31 Dec · Today'],
+  ['Published occasion','1 Jan · Tomorrow']];
  const calendarCapacity=Math.max(0,Math.min(3,Math.floor((bottom-calendarTop-48.6-(calendarStatus?54:0))/86.4)));
  const shown=Math.min(occasions.length,calendarCapacity);
  if(shown===0&&(occasions.length||bottom-calendarTop<102.6))return;
@@ -80,7 +81,7 @@ function draw(svg,items,baseline){
  function ellipsis(value,y,size,color){metrics.font=size+'px Arial';while(value&&metrics.measureText(value).width>width)value=value.slice(0,-2)+'…';text(value,y,size,color);}
  occasions.slice(0,shown).forEach(([title,detail],i)=>{
   const baseline=calendarTop+70.2+i*86.4;
-  ellipsis(title,baseline,23.76,ink);ellipsis(detail,baseline+28.08,19.44,i<2?'#9d4e32':muted);
+  ellipsis(title,baseline,23.76,ink);ellipsis(detail,baseline+28.08,19.44,/Today|Tomorrow/.test(detail)?'#9d4e32':muted);
  });
  if(calendarStatus)paragraph(calendarStatus,calendarTop+70.2+shown*86.4,19.44,muted);
  else if(!occasions.length)text('No upcoming occasions',calendarTop+70.2,19.44,muted);
