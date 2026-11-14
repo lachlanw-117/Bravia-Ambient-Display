@@ -1,5 +1,12 @@
 # Calendar sidebar candidate
 
+**Parked by the user on 15 November 2026 until more physical to-do tasks progress.**
+No automatic resumption, account setup, deployment or merge. Start with the
+[current TODO status and new-chat resume instructions](TODO.md) when returning.
+Last tested runtime: `abfed948bdfa332e99a7dd5d5b03bc5d2308829a`; 53 host tests,
+343 JVM assertions and [CI run 43653319559](https://github.com/lachlanw-117/Bravia-Ambient-Display/actions/runs/43653319559)
+passed. Subsequent documentation-only commits preserve this runtime identity.
+
 Status: implemented locally, **not deployed; no device acceptance**. Work starts
 from PR #8's head `0c7ce4518c0857fa9d4f1d24ad61925bb5f89d55` on
 `feature/calendar-sidebar`. The draft PR targets `feature/household-alerts`, so its

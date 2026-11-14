@@ -3,6 +3,7 @@
 A local-first family-photo screensaver for the Sony X90K Google TV.
 
 Calendar candidate: [ownership/interface, connection setup and pending acceptance](CALENDAR.md).
+**Parked, 15 November 2026:** resume checkpoint and priorities are in [TODO.md](TODO.md).
 The private `wright-family-calendar` repository owns dates, published subjects,
 milestones and ten-year publishing. Bravia reads and displays those subjects
 verbatim, including multi-day all-day events; it performs no calendar writes.
