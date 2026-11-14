@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Wright Ambient · Calendar comparison</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#eae5dc;color:#30342f;font:16px system-ui,sans-serif}
+main{max-width:1800px;margin:auto;padding:24px}h1{font:400 30px Georgia,serif}p{max-width:1000px;line-height:1.5}
+.boards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}figure{margin:0}figcaption{margin:0 0 8px;font-weight:600}
+svg{width:100%;background:#f5f1e7;border:1px solid #d3ccbd}label{display:inline-block;margin:0 24px 18px 0}
+@media(max-width:1000px){.boards{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:600px){.boards{grid-template-columns:1fr}}
+</style><main>
+<h1>Coming up, alongside household notices</h1>
+<p>Offline sidebar comparison with synthetic weather, notices and calendar dates in 2032–2033. The photo area stays unchanged. Browser font metrics approximate the Android Canvas; this is not a device screenshot or evidence of live HA state.</p>
+<label><input type="checkbox" id="stale"> Feed has stopped refreshing</label>
+<label><input type="checkbox" id="longWeather"> Long forecast and check text</label>
+<label><input type="checkbox" id="narrow"> Narrow sidebar / long date</label>
+<label><input type="checkbox" id="calendarStale"> Calendar stale</label>
+<label><input type="checkbox" id="unavailable"> No calendar cache</label>
+<label><input type="checkbox" id="empty"> Successful empty calendar</label>
+<label><input type="checkbox" id="longNames"> Long names</label>
+<div class="boards" id="boards"></div>
+<p>Notice ordering, capacity, overflow and type sizes are unchanged. Coming up uses remaining space: up to three rows, fewer with notices or long weather, hidden if no safe row fits. No paging or focus controls. These are browser approximations, not Android acceptance.</p>
+</main><script>
+const ns='http://www.w3.org/2000/svg',h=1080,ink='#30342f',muted='#60665c';
+const metrics=document.createElement('canvas').getContext('2d');
+const sample=(title,severity='info')=>({title,severity});
+const cases=[['No notices · three occasions',[]],['Two notices',[sample('Washing finished'),sample('4 updates available')]],['One notice',[sample('Washing finished')]],
+ ['Mixed priorities',[sample('HA cannot reach the fridge through one or more channels','important'),sample('HA cannot reach the washer','warning'),sample('4 updates available')]],
+ ['Long titles',[sample('A backup failed; check backup settings and destinations before the next scheduled backup','important'),sample('HA cannot reach the Dyson Purifier Hot+Cool De-NOx','warning'),sample('4 updates available · confirmation incomplete')]],
+ ['Overflow',[sample('A backup failed; check backup settings and destinations','important'),sample('HA cannot reach the washer','warning'),sample('Washing finished'),sample('4 updates available'),sample('Washer needs a cleaning cycle')]]];
+function node(parent,type,attrs={},value){const n=document.createElementNS(ns,type);for(const [k,v]of Object.entries(attrs))n.setAttribute(k,v);if(value!==undefined)n.textContent=value;parent.append(n);return n}
+function draw(svg,items,baseline){
+ const narrow=document.querySelector('#narrow').checked,long=document.querySelector('#longWeather').checked,stale=document.querySelector('#stale').checked;
+ const w=narrow?395:537.6,x=48.6,right=w-x,width=right-x;svg.setAttribute('viewBox',`0 0 ${w} 1080`);
+ function text(value,y,size=23.76,color=ink,tx=x,weight=400){return node(svg,'text',{x:tx,y,'font-size':size,fill:color,'font-family':'Arial, sans-serif','font-weight':weight},value)}
+ function paragraph(value,y,size=23.76,color=ink,tx=x,max=width,rightAlign=false){
+  metrics.font=`${size}px Arial`;const words=value.split(' '),lines=[];let line='';
+  for(const word of words){const next=line?line+' '+word:word;if(line&&metrics.measureText(next).width>max){lines.push(line);line=word;}else line=next;}if(line)lines.push(line);
+  if(lines.length>2){lines.length=2;let last=lines[1];while(last&&metrics.measureText(last+'…').width>max)last=last.slice(0,-1);lines[1]=last+'…';}
+  lines.forEach((v,i)=>{const n=text(v,y+i*size*1.16,size,color,rightAlign?tx+max:tx);if(rightAlign)n.setAttribute('text-anchor','end');});
+  return y+(lines.length-1)*size*1.16;
+ }
+ let date=narrow?'Friday 31 December 2032':'Friday 31 December 2032';metrics.font='24.84px Arial';
+ if(metrics.measureText(date).width<=width)text(date,75.6,24.84,muted);else{text(narrow?'Friday':'Friday',48.6,24.84,muted);text(narrow?'31 December 2032':'31 December 2032',81,24.84,muted);}
+ text('5:42',172.8,84.24,ink,x,300);text('PM',172.8,24.84,muted,x+181);
+ const shift=baseline?17.28:0;
+ text('NOW',228.96+shift,19.44,muted);text('21°C',306.72+shift,75.6,ink,x,300);
+ function forecast(label,y,condition){text(label,y,19.44,muted);node(svg,'circle',{cx:x+15,cy:y+23,r:10,fill:'#dca229'});
+  const end=paragraph(condition,y+32.4,23.76,ink,x+46.44,width-46.44);
+  const range=Math.max(y+61.56,end+29.16);text('High 25°',range,23.76,'#9d4e32');text('Low 14°',range,23.76,'#356e85',x+120);return range;}
+ const todayEnd=forecast('TODAY',371.52+shift,long?'Possible showers developing during the afternoon':'Mostly sunny');
+ const tomorrowEnd=forecast('TOMORROW',Math.max(479.52+shift,todayEnd+43.2),long?'Partly cloudy with late showers':'Partly cloudy');
+ const checked=paragraph(long?'Checked 3 min ago · Forecast check overdue':'Checked 3 min ago',baseline?Math.max(631.8,tomorrowEnd+38.88):tomorrowEnd+38.88,19.44,muted,x,width,true);
+ const divider=baseline?712.8:checked+23.76;node(svg,'line',{x1:x,y1:divider,x2:right,y2:divider,stroke:'#d5d6ca'});
+ if(baseline)return;
+ const status=stale?'Notices may be out of date':'',top=divider+16.2,row=88.56,bottom=1031.4-(status?56.16:0);
+ const capacity=bottom=>Math.max(0,Math.min(3,Math.floor((bottom-top)/row)));
+ let count=capacity(bottom);if(items.length>count)count=capacity(bottom-37.8);count=Math.min(count,items.length);
+ items.slice(0,count).forEach((item,i)=>{const y=top+27+i*row;node(svg,'circle',{cx:x+5.4,cy:y-7.56,r:4.86,fill:item.severity==='important'?'#9d4e32':item.severity==='warning'?'#976621':'#52645c'});paragraph(item.title,y,23.76,ink,x+22.68,width-22.68);});
+ if(items.length>count)text(`+${items.length-count} more · View in HA`,top+count*row+27,19.44,muted);
+ if(status)paragraph(status,1009.8,19.44,muted);
+ const calendarTop=top+count*row+(items.length>count?48.6:0);
+ const unavailable=document.querySelector('#unavailable').checked,empty=document.querySelector('#empty').checked;
+ const calendarStatus=unavailable?'Calendar unavailable':document.querySelector('#calendarStale').checked?'Calendar may be out of date':'';
+ const longNames=document.querySelector('#longNames').checked;
+ const occasions=unavailable||empty?[]:[
+  [longNames?'Alexandria Example-Synthetic’s birthday':'Alex’s birthday','31 Dec · Today'],
+  ['Example occasion','1 Jan · Tomorrow'],['Sam’s birthday','12 Mar · in 71 days']];
+ const calendarCapacity=Math.max(0,Math.min(3,Math.floor((bottom-calendarTop-48.6-(calendarStatus?54:0))/86.4)));
+ const shown=Math.min(occasions.length,calendarCapacity);
+ if(shown===0&&(occasions.length||bottom-calendarTop<102.6))return;
+ text('COMING UP',calendarTop+32.4,19.44,muted);
+ function ellipsis(value,y,size,color){metrics.font=size+'px Arial';while(value&&metrics.measureText(value).width>width)value=value.slice(0,-2)+'…';text(value,y,size,color);}
+ occasions.slice(0,shown).forEach(([title,detail],i)=>{
+  const baseline=calendarTop+70.2+i*86.4;
+  ellipsis(title,baseline,23.76,ink);ellipsis(detail,baseline+28.08,19.44,i<2?'#9d4e32':muted);
+ });
+ if(calendarStatus)paragraph(calendarStatus,calendarTop+70.2+shown*86.4,19.44,muted);
+ else if(!occasions.length)text('No upcoming occasions',calendarTop+70.2,19.44,muted);
+}
+function render(){const boards=document.querySelector('#boards');boards.replaceChildren();for(const [title,items]of cases){const f=document.createElement('figure'),caption=document.createElement('figcaption');caption.textContent=title;f.append(caption);const svg=node(f,'svg',{role:'img','aria-label':title+' synthetic sidebar'});draw(svg,items,items===null);boards.append(f);}}
+document.querySelectorAll('input').forEach(input=>{input.checked=new URLSearchParams(location.search).has(input.id);input.addEventListener('change',render);});render();
+</script></html>

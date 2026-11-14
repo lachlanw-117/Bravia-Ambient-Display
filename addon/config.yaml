@@ -18,7 +18,13 @@ options:
   access_key: ''
   weather_entity: weather.forecast_home
   time_zone: Australia/Sydney
+  outlook_calendar_id: ''
+  outlook_client_id: ''
+  calendar_ages: false
 schema:
   access_key: password
   weather_entity: str
   time_zone: str
+  outlook_calendar_id: str
+  outlook_client_id: str
+  calendar_ages: bool

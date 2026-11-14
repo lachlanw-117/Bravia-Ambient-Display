@@ -7,4 +7,6 @@ await fs.mkdir(out,{recursive:true});
 for(const file of ['config.yaml','Dockerfile']) await fs.copyFile(path.join(root,'addon',file),path.join(out,file));
 await fs.copyFile(path.join(root,'server/server.mjs'),path.join(out,'server.mjs'));
 await fs.copyFile(path.join(root,'server/notices.mjs'),path.join(out,'notices.mjs'));
+await fs.copyFile(path.join(root,'server/calendar.mjs'),path.join(out,'calendar.mjs'));
+await fs.copyFile(path.join(root,'server/outlook-auth.mjs'),path.join(out,'outlook-auth.mjs'));
 console.log('Local add-on package:',out);

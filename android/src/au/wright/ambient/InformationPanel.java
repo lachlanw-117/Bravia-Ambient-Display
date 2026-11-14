@@ -24,6 +24,20 @@ final class InformationPanel extends View {
     private long lastMinute=Long.MIN_VALUE;
     private List<NoticePresentation.Item> notices=Collections.emptyList();
     private String noticeStatus="Notices unavailable",noticeContent="";
+    private List<CalendarPresentation.Item> occasions=Collections.emptyList();
+    private String calendarStatus="Calendar unavailable",calendarContent="";
+    private java.time.Instant calendarNow=java.time.Instant.EPOCH;
+    void updateCalendar(CalendarPresentation.Snapshot snapshot,Date now) {
+        java.time.Instant instant=now.toInstant();
+        List<CalendarPresentation.Item> next=CalendarPresentation.visible(snapshot,instant);
+        String status=CalendarPresentation.status(snapshot,instant);
+        StringBuilder signature=new StringBuilder(status);
+        for(CalendarPresentation.Item item:next)signature.append('|').append(item.id).append('|').append(item.title)
+            .append('|').append(CalendarPresentation.detail(item,instant));
+        if(signature.toString().equals(calendarContent))return;
+        occasions=next;calendarStatus=status;calendarContent=signature.toString();calendarNow=instant;
+        accessibility();invalidate();
+    }
     void updateNotices(NoticePresentation.Snapshot snapshot,Date now) {
         List<NoticePresentation.Item> next=NoticePresentation.visible(snapshot,now.toInstant());
         String status=NoticePresentation.status(snapshot,now.toInstant());
@@ -38,6 +52,9 @@ final class InformationPanel extends View {
         StringBuilder description=new StringBuilder(lastContent);
         for(NoticePresentation.Item item:notices)description.append(". ").append(item.title);
         if(!noticeStatus.isEmpty())description.append(". ").append(noticeStatus);
+        for(CalendarPresentation.Item item:occasions)description.append(". ").append(item.title).append(" ")
+            .append(CalendarPresentation.detail(item,calendarNow));
+        if(!calendarStatus.isEmpty())description.append(". ").append(calendarStatus);
         setContentDescription(description.toString());
     }
     InformationPanel(Context context) { super(context);setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES); }
@@ -128,6 +145,24 @@ final class InformationPanel extends View {
         int overflow=NoticePresentation.overflow(notices.size(),count);
         if(overflow>0)text(canvas,"+"+overflow+" more · View in HA",x,top+count*rowHeight+h*0.025f,h*0.018f,w,0xff60665c,normal);
         if(!noticeStatus.isEmpty())paragraph(canvas,noticeStatus,x,h*0.935f,h*0.018f,w,0xff60665c,false);
+        // Preserve the original notice allocation, then spend only remaining space.
+        float calendarTop=top+count*rowHeight+(overflow>0?h*0.045f:0);
+        drawCalendar(canvas,x,calendarTop,bottom,h,w);
+    }
+    private void drawCalendar(Canvas canvas,float x,float top,float bottom,float h,float w) {
+        boolean status=!calendarStatus.isEmpty();
+        int count=Math.min(occasions.size(),CalendarPresentation.capacity(top,bottom,h,status));
+        if(count==0&&(!occasions.isEmpty()||!CalendarPresentation.statusFits(top,bottom,h)))return;
+        text(canvas,"COMING UP",x,top+h*.03f,h*.018f,w,0xff60665c,normal);
+        for(int i=0;i<count;i++) {
+            CalendarPresentation.Item item=occasions.get(i);float baseline=top+h*.065f+i*h*.08f;
+            String countdown=CalendarPresentation.countdown(item,calendarNow);
+            int colour=countdown.equals("Today")||countdown.equals("Tomorrow")?0xff9d4e32:0xff60665c;
+            text(canvas,item.title,x,baseline,h*.022f,w,0xff30342f,normal);
+            text(canvas,CalendarPresentation.detail(item,calendarNow),x,baseline+h*.026f,h*.018f,w,colour,normal);
+        }
+        if(status)paragraph(canvas,calendarStatus,x,top+h*.065f+count*h*.08f,h*.018f,w,0xff60665c,false);
+        else if(occasions.isEmpty())text(canvas,"No upcoming occasions",x,top+h*.065f,h*.018f,w,0xff60665c,normal);
     }
     private float forecast(Canvas canvas,String label,WeatherPresentation.Forecast row,float x,float baseline,float h,float w) {
         text(canvas,label,x,baseline,h*0.018f,w,0xff60665c,normal);
