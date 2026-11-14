@@ -1,5 +1,11 @@
 # Bravia implementation roadmap
 
+Current status, 15 November 2026: calendar implementation is **parked at the user's
+request pending progress on physical to-do tasks**. It is tested on a separate
+feature branch/draft PR, not deployed or merged. Read [TODO.md](TODO.md) for the
+resume checkpoint and [CALENDAR.md](CALENDAR.md) for ownership, interface and setup.
+Older dated planning sections below do not override that checkpoint.
+
 Accepted design recorded on 8 November 2026. Phase 0 is implemented as repository
 documentation. Phase 1 was trial-deployed with approval, passed scoped acceptance
 and closeout, then merged with approval on 8 November; see [its record](PHASE1.md).

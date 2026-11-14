@@ -1,8 +1,9 @@
-param([string]$Tools = "$PSScriptRoot/../.tools/android")
+param([string]$Tools = "$PSScriptRoot/../.tools/android", [switch]$Unsigned,
+    [string]$JavaHome = '', [string]$SdkRoot = '')
 $ErrorActionPreference = 'Stop'
 $Tools = [IO.Path]::GetFullPath($Tools)
-$jdk = (Get-ChildItem "$Tools/jdk" -Directory | Select-Object -First 1).FullName
-$sdk = Join-Path $Tools 'sdk'
+$jdk = if ($JavaHome) { [IO.Path]::GetFullPath($JavaHome) } else { (Get-ChildItem "$Tools/jdk" -Directory | Select-Object -First 1).FullName }
+$sdk = if ($SdkRoot) { [IO.Path]::GetFullPath($SdkRoot) } else { Join-Path $Tools 'sdk' }
 $env:JAVA_HOME = $jdk
 $env:PATH = "$jdk/bin;$env:PATH"
 $project = [IO.Path]::GetFullPath("$PSScriptRoot/../android")
@@ -15,7 +16,7 @@ $platform = "$sdk/platforms/android-35/android.jar"
 if (!(Test-Path $platform)) { throw 'Install Android API 35 using bootstrap-windows.ps1 first' }
 New-Item -ItemType Directory -Force "$build/classes","$build/generated","$build/dex","$build/test" | Out-Null
 function Check([string]$Step) { if ($LASTEXITCODE) { throw "$Step failed ($LASTEXITCODE)" } }
-& "$jdk/bin/javac.exe" -d "$build/test" "$project/src/au/wright/ambient/Policy.java" "$project/src/au/wright/ambient/PhotoPresentation.java" "$project/test/PolicyTest.java" "$project/test/PhotoPresentationTest.java" "$project/src/au/wright/ambient/WeatherPresentation.java" "$project/test/WeatherPresentationTest.java" "$project/src/au/wright/ambient/NoticePresentation.java" "$project/test/NoticePresentationTest.java"
+& "$jdk/bin/javac.exe" -d "$build/test" "$project/src/au/wright/ambient/Policy.java" "$project/src/au/wright/ambient/PhotoPresentation.java" "$project/test/PolicyTest.java" "$project/test/PhotoPresentationTest.java" "$project/src/au/wright/ambient/WeatherPresentation.java" "$project/test/WeatherPresentationTest.java" "$project/src/au/wright/ambient/NoticePresentation.java" "$project/test/NoticePresentationTest.java" "$project/src/au/wright/ambient/CalendarPresentation.java" "$project/test/CalendarPresentationTest.java"
 Check 'JVM test compile'
 & "$jdk/bin/java.exe" -cp "$build/test" PolicyTest
 Check 'JVM tests'
@@ -25,6 +26,8 @@ Check 'Photo presentation tests'
 Check 'Weather presentation tests'
 & "$jdk/bin/java.exe" -cp "$build/test" NoticePresentationTest
 Check 'Notice presentation tests'
+& "$jdk/bin/java.exe" -cp "$build/test" CalendarPresentationTest
+Check 'Calendar presentation tests'
 & "$bt/aapt2.exe" compile --dir "$project/res" -o "$build/resources.zip"
 Check 'Resource compile'
 & "$bt/aapt2.exe" link -I $platform --manifest "$project/AndroidManifest.xml" --java "$build/generated" --version-code 1 --version-name 0.1.0 -o "$build/resources.apk" "$build/resources.zip"
@@ -41,6 +44,14 @@ Copy-Item -LiteralPath "$build/resources.apk" -Destination "$build/unsigned.apk"
 Check 'APK assembly'
 & "$bt/zipalign.exe" -f 4 "$build/unsigned.apk" "$build/aligned.apk"
 Check 'APK alignment'
+& "$bt/zipalign.exe" -c 4 "$build/aligned.apk"
+Check 'APK alignment verification'
+if ($Unsigned) {
+    $unsignedOutput = Join-Path (Split-Path $output) 'wright-ambient-unsigned.apk'
+    Copy-Item -LiteralPath "$build/aligned.apk" -Destination $unsignedOutput -Force
+    Write-Output "Unsigned APK ready locally: $unsignedOutput"
+    return
+}
 # Local debug signing material only; ignored by Git. Never used as a production identity.
 $key = Join-Path $Tools 'ambient-debug.keystore'
 if (!(Test-Path $key)) {

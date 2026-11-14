@@ -24,6 +24,20 @@ final class InformationPanel extends View {
     private long lastMinute=Long.MIN_VALUE;
     private List<NoticePresentation.Item> notices=Collections.emptyList();
     private String noticeStatus="Notices unavailable",noticeContent="";
+    private List<CalendarPresentation.Item> occasions=Collections.emptyList();
+    private String calendarStatus="Calendar unavailable",calendarContent="";
+    private java.time.Instant calendarNow=java.time.Instant.EPOCH;
+    void updateCalendar(CalendarPresentation.Snapshot snapshot,Date now) {
+        java.time.Instant instant=now.toInstant();
+        List<CalendarPresentation.Item> next=CalendarPresentation.visible(snapshot,instant);
+        String status=CalendarPresentation.status(snapshot,instant);
+        StringBuilder signature=new StringBuilder(status);
+        for(CalendarPresentation.Item item:next)signature.append('|').append(item.id).append('|').append(item.title)
+            .append('|').append(CalendarPresentation.detail(item,instant));
+        if(signature.toString().equals(calendarContent))return;
+        occasions=next;calendarStatus=status;calendarContent=signature.toString();calendarNow=instant;
+        accessibility();invalidate();
+    }
     void updateNotices(NoticePresentation.Snapshot snapshot,Date now) {
         List<NoticePresentation.Item> next=NoticePresentation.visible(snapshot,now.toInstant());
         String status=NoticePresentation.status(snapshot,now.toInstant());
@@ -36,8 +50,12 @@ final class InformationPanel extends View {
     }
     private void accessibility() {
         StringBuilder description=new StringBuilder(lastContent);
+        description.append(NoticePresentation.showNotices(notices.size())?". Home Assistant":". Coming up");
         for(NoticePresentation.Item item:notices)description.append(". ").append(item.title);
         if(!noticeStatus.isEmpty())description.append(". ").append(noticeStatus);
+        if(!NoticePresentation.showNotices(notices.size()))for(CalendarPresentation.Item item:occasions)description.append(". ").append(item.title).append(" ")
+            .append(CalendarPresentation.detail(item,calendarNow));
+        if(!NoticePresentation.showNotices(notices.size())&&!calendarStatus.isEmpty())description.append(". ").append(calendarStatus);
         setContentDescription(description.toString());
     }
     InformationPanel(Context context) { super(context);setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES); }
@@ -113,21 +131,49 @@ final class InformationPanel extends View {
         canvas.restoreToCount(save);
     }
     private void drawNotices(Canvas canvas,float x,float top,float h,float w) {
-        float bottom=h*0.955f,rowHeight=h*0.082f;
-        if(!noticeStatus.isEmpty())bottom-=h*0.052f;
-        int count=NoticePresentation.capacity(top,bottom,rowHeight);
-        if(notices.size()>count)count=NoticePresentation.capacity(top,bottom-h*0.035f,rowHeight);
-        count=Math.min(count,notices.size());
+        float bottom=h*.955f;
+        if(!noticeStatus.isEmpty())bottom-=h*.052f;
+        if(!NoticePresentation.showNotices(notices.size())) {
+            drawCalendar(canvas,x,top,bottom,h,w);
+            if(!noticeStatus.isEmpty())paragraph(canvas,"Home Assistant: "+noticeStatus,x,h*.935f,h*.018f,w,0xff60665c,false);
+            return;
+        }
+        text(canvas,"HOME ASSISTANT",x,top+h*.03f,h*.018f,w,0xff60665c,normal);
+        float bodyTop=top+h*.045f;
+        int measured=Math.min(5,notices.size());
+        StaticLayout[] blocks=new StaticLayout[measured];float[] heights=new float[measured];
+        for(int i=0;i<measured;i++) {
+            blocks[i]=textBlock(notices.get(i).title,h*.022f,w-h*.021f,0xff30342f,false);
+            heights[i]=blocks[i].getHeight()+h*.018f;
+        }
+        int count=NoticePresentation.fittedCount(notices.size(),heights,bottom-bodyTop,h*.035f);
+        float rowTop=bodyTop;
         for(int i=0;i<count;i++) {
-            NoticePresentation.Item item=notices.get(i);float baseline=top+h*0.025f+i*rowHeight;
+            NoticePresentation.Item item=notices.get(i);
             paint.setStyle(Paint.Style.FILL);
             paint.setColor(item.severity.equals("important")?0xff9d4e32:item.severity.equals("warning")?0xff976621:0xff52645c);
-            canvas.drawCircle(x+h*0.005f,baseline-h*0.007f,h*0.0045f,paint);
-            paragraph(canvas,item.title,x+h*0.021f,baseline,h*0.022f,w-h*0.021f,0xff30342f,false);
+            canvas.drawCircle(x+h*.005f,rowTop+blocks[i].getLineBaseline(0)-h*.007f,h*.0045f,paint);
+            int save=canvas.save();canvas.translate(x+h*.021f,rowTop);blocks[i].draw(canvas);canvas.restoreToCount(save);
+            rowTop+=heights[i];
         }
         int overflow=NoticePresentation.overflow(notices.size(),count);
-        if(overflow>0)text(canvas,"+"+overflow+" more · View in HA",x,top+count*rowHeight+h*0.025f,h*0.018f,w,0xff60665c,normal);
-        if(!noticeStatus.isEmpty())paragraph(canvas,noticeStatus,x,h*0.935f,h*0.018f,w,0xff60665c,false);
+        if(overflow>0)text(canvas,"+"+overflow+" more · View in HA",x,rowTop+h*.025f,h*.018f,w,0xff60665c,normal);
+        if(!noticeStatus.isEmpty())paragraph(canvas,noticeStatus,x,h*.935f,h*.018f,w,0xff60665c,false);
+    }
+    private void drawCalendar(Canvas canvas,float x,float top,float bottom,float h,float w) {
+        boolean status=!calendarStatus.isEmpty();
+        int count=Math.min(occasions.size(),CalendarPresentation.capacity(top,bottom,h,status));
+        if(count==0&&(!occasions.isEmpty()||!CalendarPresentation.statusFits(top,bottom,h)))return;
+        text(canvas,"COMING UP",x,top+h*.03f,h*.018f,w,0xff60665c,normal);
+        for(int i=0;i<count;i++) {
+            CalendarPresentation.Item item=occasions.get(i);float baseline=top+h*.065f+i*h*.08f;
+            String countdown=CalendarPresentation.countdown(item,calendarNow);
+            int colour=countdown.equals("Today")||countdown.equals("Tomorrow")?0xff9d4e32:0xff60665c;
+            text(canvas,item.title,x,baseline,h*.022f,w,0xff30342f,normal);
+            text(canvas,CalendarPresentation.detail(item,calendarNow),x,baseline+h*.026f,h*.018f,w,colour,normal);
+        }
+        if(status)paragraph(canvas,calendarStatus,x,top+h*.065f+count*h*.08f,h*.018f,w,0xff60665c,false);
+        else if(occasions.isEmpty())text(canvas,"No upcoming occasions",x,top+h*.065f,h*.018f,w,0xff60665c,normal);
     }
     private float forecast(Canvas canvas,String label,WeatherPresentation.Forecast row,float x,float baseline,float h,float w) {
         text(canvas,label,x,baseline,h*0.018f,w,0xff60665c,normal);
@@ -152,6 +198,12 @@ final class InformationPanel extends View {
             .setIncludePad(false).setMaxLines(2).setEllipsize(TextUtils.TruncateAt.END).build();
         int save=canvas.save();canvas.translate(x,baseline-block.getLineBaseline(0));block.draw(canvas);canvas.restoreToCount(save);
         return baseline+block.getLineBaseline(block.getLineCount()-1)-block.getLineBaseline(0);
+    }
+    private StaticLayout textBlock(String value,float size,float width,int colour,boolean right) {
+        TextPaint style=new TextPaint(Paint.ANTI_ALIAS_FLAG);style.setTypeface(normal);style.setTextSize(size);style.setColor(colour);
+        return StaticLayout.Builder.obtain(value,0,value.length(),style,Math.max(1,(int)width))
+            .setAlignment(right?Layout.Alignment.ALIGN_OPPOSITE:Layout.Alignment.ALIGN_NORMAL)
+            .setIncludePad(false).setMaxLines(2).setEllipsize(TextUtils.TruncateAt.END).build();
     }
     private void text(Canvas canvas,String text,float x,float baseline,float size,float width,int colour,Typeface face) {
         if(text.isEmpty())return;paint.setTypeface(face);paint.setTextSize(size);

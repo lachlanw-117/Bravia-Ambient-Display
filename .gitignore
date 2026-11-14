@@ -9,3 +9,4 @@ photos/
 .env.*
 *.keystore
 *.jks
+outlook-token.json*

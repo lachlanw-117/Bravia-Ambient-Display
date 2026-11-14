@@ -29,6 +29,8 @@ jobs:
         run: |
           node --check build/bravia_ambient/server.mjs
           node --check build/bravia_ambient/notices.mjs
+          node --check build/bravia_ambient/calendar.mjs
+          node --check build/bravia_ambient/outlook-auth.mjs
           node -e "import('./build/bravia_ambient/server.mjs')"
 
   policy:
@@ -46,8 +48,25 @@ jobs:
       - name: Compile and run policy assertions
         run: |
           mkdir -p build/policy-tests
-          javac -d build/policy-tests android/src/au/wright/ambient/Policy.java android/src/au/wright/ambient/PhotoPresentation.java android/test/PolicyTest.java android/test/PhotoPresentationTest.java android/src/au/wright/ambient/WeatherPresentation.java android/test/WeatherPresentationTest.java android/src/au/wright/ambient/NoticePresentation.java android/test/NoticePresentationTest.java
+          javac -d build/policy-tests android/src/au/wright/ambient/Policy.java android/src/au/wright/ambient/PhotoPresentation.java android/test/PolicyTest.java android/test/PhotoPresentationTest.java android/src/au/wright/ambient/WeatherPresentation.java android/test/WeatherPresentationTest.java android/src/au/wright/ambient/NoticePresentation.java android/test/NoticePresentationTest.java android/src/au/wright/ambient/CalendarPresentation.java android/test/CalendarPresentationTest.java
           java -cp build/policy-tests PolicyTest
           java -cp build/policy-tests PhotoPresentationTest
           java -cp build/policy-tests WeatherPresentationTest
           java -cp build/policy-tests NoticePresentationTest
+          java -cp build/policy-tests CalendarPresentationTest
+
+  android:
+    name: Unsigned Android calendar build
+    runs-on: windows-2025
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Compile Android without accessing signing keys
+        shell: pwsh
+        run: ./tools/build-android.ps1 -JavaHome $env:JAVA_HOME -SdkRoot $env:ANDROID_HOME -Unsigned

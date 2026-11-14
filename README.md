@@ -1,6 +1,15 @@
 # Sony Bravia Ambient Display
 
 A local-first family-photo screensaver for the Sony X90K Google TV.
+
+Calendar candidate: [ownership/interface, connection setup and pending acceptance](CALENDAR.md).
+**Parked, 15 November 2026:** resume checkpoint and priorities are in [TODO.md](TODO.md).
+The private `wright-family-calendar` repository owns dates, published subjects,
+milestones and ten-year publishing. Bravia reads and displays those subjects
+verbatim, including multi-day all-day events; it performs no calendar writes.
+The [synthetic calendar preview](docs/calendar-comparison.html) shows the sidebar
+with zero, one and many notices. This feature is not deployed or accepted on TV.
+
 The household trial uses a Pi photo/weather host and a 147-photo album. Cream
 presentation, portrait pairs, Now/Today/Tomorrow weather and photo continuation
 passed scoped household acceptance on 8 November 2026 and merged into main.

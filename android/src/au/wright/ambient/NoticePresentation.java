@@ -59,8 +59,13 @@ public final class NoticePresentation {
         long age=now.toEpochMilli()-Instant.parse(snapshot.fetchedAt).toEpochMilli();
         return snapshot.upstreamStale||age<0||age>=120000?"Notices may be out of date":"";
     }
-    public static int capacity(float top,float bottom,float rowHeight) {
-        return Math.max(0,Math.min(3,(int)Math.floor((bottom-top)/rowHeight)));
+    public static boolean showNotices(int visibleCount) { return visibleCount>0; }
+    /** Measured title heights include the gap; reserve overflow before choosing rows. */
+    public static int fittedCount(int total,float[] heights,float available,float overflowHeight) {
+        int count=0;float used=0;
+        while(count<Math.min(5,total)&&used+heights[count]<=available)used+=heights[count++];
+        while(count>0&&count<total&&used+overflowHeight>available)used-=heights[--count];
+        return count;
     }
     public static int overflow(int total,int capacity){return Math.max(0,total-capacity);}
     private static int rank(String value){return value.equals("important")?0:value.equals("warning")?1:2;}
