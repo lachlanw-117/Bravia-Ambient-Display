@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900" viewBox="0 0 1440 900" role="img" aria-labelledby="title description">
+  <title id="title">Bravia Ambient Display — illustrative product overview</title>
+  <desc id="description">Two fictional landscape illustrations beside a cream sidebar showing date, time, weather, Washing finished and a grouped update notice. All content is synthetic.</desc>
+  <defs>
+    <linearGradient id="page" x2="1" y2="1"><stop stop-color="#eeeae2"/><stop offset="1" stop-color="#dedbd2"/></linearGradient>
+    <linearGradient id="sky" x2="0" y2="1"><stop stop-color="#b8ced1"/><stop offset=".65" stop-color="#e2d5b9"/><stop offset="1" stop-color="#eabf8d"/></linearGradient>
+    <linearGradient id="evening" x2="0" y2="1"><stop stop-color="#bcc6d4"/><stop offset=".65" stop-color="#e1bcc0"/><stop offset="1" stop-color="#eccfae"/></linearGradient>
+    <linearGradient id="water" x2="0" y2="1"><stop stop-color="#a4b9b6"/><stop offset="1" stop-color="#6b8c87"/></linearGradient>
+    <clipPath id="screen"><rect x="30" y="82" width="1380" height="776" rx="14"/></clipPath>
+    <clipPath id="leftPhoto"><rect x="73" y="129" width="432" height="682" rx="2"/></clipPath>
+    <clipPath id="rightPhoto"><rect x="527" y="129" width="432" height="682" rx="2"/></clipPath>
+  </defs>
+  <rect width="1440" height="900" rx="20" fill="url(#page)"/>
+  <g font-family="Arial, Helvetica, sans-serif" fill="#303b35">
+    <text x="32" y="43" font-size="20" letter-spacing="2">WRIGHT AMBIENT</text>
+    <text x="1408" y="42" text-anchor="end" font-size="15" fill="#60665c">Illustrative layout · synthetic content</text>
+    <rect x="24" y="80" width="1392" height="784" rx="20" fill="#303832" opacity=".12"/>
+    <g clip-path="url(#screen)">
+      <rect x="30" y="82" width="1380" height="776" fill="#e8e6dc"/>
+      <path d="M30 460 Q330 275 650 493 T1030 450 V858 H30Z" fill="#d8dcd1"/>
+      <rect x="67" y="123" width="444" height="694" rx="5" fill="#faf7ee"/>
+      <g clip-path="url(#leftPhoto)">
+        <rect x="73" y="129" width="432" height="682" fill="url(#sky)"/>
+        <circle cx="399" cy="314" r="52" fill="#f5e3ac"/>
+        <path d="M73 534 L194 354 280 446 360 333 505 498 V811 H73Z" fill="#8ca5a0"/>
+        <path d="M73 565 L204 437 321 558 442 415 505 489 V811 H73Z" fill="#557e76"/>
+        <path d="M73 642 Q247 531 505 618 V811 H73Z" fill="#38655d"/>
+        <path d="M73 697 Q279 586 505 704 V811 H73Z" fill="#234c44"/>
+        <path d="M299 811 Q201 722 298 655 Q345 615 331 596 Q382 637 336 675 Q281 720 391 811Z" fill="#b8c7ac"/>
+        <path d="M201 129 L506 129" stroke="#f5eddb" stroke-width="100" opacity=".06"/>
+      </g>
+      <rect x="521" y="123" width="444" height="694" rx="5" fill="#faf7ee"/>
+      <g clip-path="url(#rightPhoto)">
+        <rect x="527" y="129" width="432" height="682" fill="url(#evening)"/>
+        <circle cx="655" cy="328" r="48" fill="#f8ddba"/>
+        <path d="M527 527 L614 411 730 506 820 376 959 523 V811 H527Z" fill="#8995a0"/>
+        <path d="M527 586 L642 493 777 571 900 449 959 503 V811 H527Z" fill="#546f78"/>
+        <rect x="527" y="605" width="432" height="206" fill="url(#water)"/>
+        <path d="M527 643 Q704 679 959 632 M527 693 Q765 716 959 683 M527 753 Q772 769 959 734" fill="none" stroke="#d7d9c0" stroke-width="3" opacity=".65"/>
+        <path d="M900 807 V520 M854 578 L899 488 944 578 M846 619 L900 513 952 619 M838 661 L899 540 959 661" fill="#294d4a" stroke="#294d4a" stroke-width="7"/>
+      </g>
+      <rect x="1024" y="82" width="386" height="776" fill="#f5f1e7"/>
+      <g transform="translate(1058 0)">
+        <text y="135" font-size="18" fill="#60665c">Saturday 14 November 2026</text>
+        <text y="214" font-size="64" font-weight="300">5:42</text><text x="145" y="214" font-size="20" fill="#60665c">pm</text>
+        <g font-size="13" fill="#60665c"><text y="252">NOW</text><text y="355">TODAY</text><text y="443">TOMORROW</text></g>
+        <text y="317" font-size="55" font-weight="300">21°C</text>
+        <circle cx="12" cy="378" r="9" fill="#dca229"/>
+        <g font-size="18"><text x="35" y="385">Mostly sunny</text><text y="411" fill="#9d4e32">High 25°</text><text x="95" y="411" fill="#356e85">Low 14°</text></g>
+        <path d="M2 473 C-5 463 4 452 14 457 C18 444 35 448 36 460 C50 459 49 475 36 475 H7Z" fill="#b4c7cd" stroke="#4d7988" stroke-width="1.5"/>
+        <g font-size="18"><text x="60" y="475">Partly cloudy</text><text y="502" fill="#9d4e32">High 23°</text><text x="95" y="502" fill="#356e85">Low 15°</text></g>
+        <text x="318" y="543" text-anchor="end" font-size="14" fill="#60665c">Checked 3 min ago</text>
+        <path d="M0 562 H318" stroke="#d5d6ca"/>
+        <circle cx="5" cy="594" r="3.5" fill="#52645c"/><text x="23" y="601" font-size="18">Washing finished</text>
+        <circle cx="5" cy="656" r="3.5" fill="#52645c"/><text x="23" y="663" font-size="18">4 updates available</text>
+      </g>
+    </g>
+  </g>
+</svg>

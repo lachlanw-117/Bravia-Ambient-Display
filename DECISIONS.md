@@ -1,5 +1,11 @@
 # Bravia decisions and deferred work
 
+> Current scope, 14 November 2026: the photo/weather/notice product is complete
+> for the owner's current needs. Earlier phase/design statuses below are dated
+> history and are superseded where later records say so. Remote notice controls,
+> phone migration and new source families are not active commitments here.
+> The sole future concept is a separate aircraft screensaver; see the [current roadmap](ROADMAP.md).
+
 Decisions recorded on 8 November 2026. Read the [roadmap](ROADMAP.md) for phase
 boundaries and status. An accepted design is not an implemented or deployed
 feature. [TRIAL.md](TRIAL.md) records historical device results.

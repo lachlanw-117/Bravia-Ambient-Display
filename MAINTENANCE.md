@@ -1,5 +1,11 @@
 # Maintenance, acceptance and cleanup
 
+Current session exception, 14 November 2026: the owner explicitly requested ADB
+remain enabled after notice display confirmation. That instruction supersedes
+the default debugging-disable step for this session. The documentation/build
+refresh changes no device settings and does not require another deployment.
+Unperformed device scenarios remain evidence limits, not newly assigned phases.
+
 This procedure was recorded during Phase 0 on 8 November 2026. It is not a record
 of completed device actions. Follow [AGENTS.md](AGENTS.md), the companion HA
 repository's instructions and the [roadmap](ROADMAP.md). Approval for one named

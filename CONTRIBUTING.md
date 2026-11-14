@@ -12,7 +12,7 @@ Read [AGENTS.md](AGENTS.md) before acting.
    `feature/bom-weather`, `feature/portrait-layout` or `docs/trial-results`.
 2. Keep changes focused, preserve unrelated work and use synthetic test data.
 3. Run the relevant local checks and open a pull request describing the problem,
-   resulting behaviour, validation and limitations. Link the roadmap phase and
+   resulting behaviour, validation and limitations. Link the scope/decision record and
    companion PR when both repositories change.
 4. Review the exact diff and CI results. For runtime changes, obtain approval for
    the named trial deployment and device checks, preserving rollback artifacts.
@@ -29,7 +29,7 @@ unnecessary device deployment. Local/CI success alone never establishes physical
 acceptance. Deployment approval and merge approval remain separate. This sequence
 was selected on 8 November 2026 and replaces merging runtime work before trials.
 
-A phase can use several PRs. No permanent development or staging branch is
+A coherent feature can use several PRs. No permanent development or staging branch is
 needed. Do not rewrite published history to make it look tidy. Old work that is
 superseded rather than merged needs an explicit audit and a recoverable reference
 before its branch is retired.
@@ -43,7 +43,9 @@ not authorise making a private project public.
 ## Automated and local checks
 
 GitHub Actions runs the Node host tests, local app packaging/server syntax check
-and JVM policy assertions on pull requests and pushes to `main`. Its token has
+and JVM policy assertions on pull requests and pushes to `main`. This refresh adds
+local Markdown validation and unsigned Android resources/Java/DEX compilation.
+Its token has
 read-only repository permissions, and action dependencies are pinned to commits.
 It does not sign/publish an APK, connect to HA/TV or deploy anything.
 
@@ -51,21 +53,36 @@ Host checks need Node 22 or later:
 
 ```sh
 npm test
+npm run test:docs
+npm run check:docs
 node tools/package-addon.mjs
 node --check build/bravia_ambient/server.mjs
+node --check build/bravia_ambient/notices.mjs
+node -e "import('./build/bravia_ambient/server.mjs')"
 ```
 
 Run the policy harness with JDK 21, creating the output directory first:
 
 ```sh
 mkdir -p build/policy-tests
-javac -d build/policy-tests android/src/au/wright/ambient/Policy.java android/src/au/wright/ambient/PhotoPresentation.java android/test/PolicyTest.java android/test/PhotoPresentationTest.java android/src/au/wright/ambient/WeatherPresentation.java android/test/WeatherPresentationTest.java
+javac -d build/policy-tests android/src/au/wright/ambient/Policy.java android/src/au/wright/ambient/PhotoPresentation.java android/test/PolicyTest.java android/test/PhotoPresentationTest.java android/src/au/wright/ambient/WeatherPresentation.java android/test/WeatherPresentationTest.java android/src/au/wright/ambient/NoticePresentation.java android/test/NoticePresentationTest.java
 java -cp build/policy-tests PolicyTest
 java -cp build/policy-tests PhotoPresentationTest
 java -cp build/policy-tests WeatherPresentationTest
+java -cp build/policy-tests NoticePresentationTest
 ```
 
-The full Windows APK build remains the separate process in [README.md](README.md).
+For a full Windows build without signing:
+
+```powershell
+./tools/build-android.ps1 -JavaHome $env:JAVA_HOME -SdkRoot $env:ANDROID_HOME -Unsigned
+```
+
+The [setup guide](docs/getting-started.md) covers portable tools and local signed
+builds. The CI Windows job calls the same unsigned command; no key or deployment
+credential is required. Missing prerequisites fail without SDK version fallback.
+For this refresh, `chore/repository-polish` starts from the notice branch; any
+later PR targets `feature/household-alerts`, so its review excludes runtime work.
 CI policy assertions do not replace Android compilation, signature verification
 or Sony rendering/input/performance tests.
 
