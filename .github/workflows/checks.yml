@@ -23,6 +23,10 @@ jobs:
           node-version: '22'
           package-manager-cache: false
       - run: npm test
+      - name: Check documentation and checker regressions
+        run: |
+          npm run test:docs
+          npm run check:docs
       - name: Generate local app package
         run: node tools/package-addon.mjs
       - name: Check packaged server syntax
@@ -51,3 +55,19 @@ jobs:
           java -cp build/policy-tests PhotoPresentationTest
           java -cp build/policy-tests WeatherPresentationTest
           java -cp build/policy-tests NoticePresentationTest
+
+  android:
+    name: Unsigned Android build
+    runs-on: windows-2025
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Compile resources, Java, DEX and aligned APK without signing
+        shell: pwsh
+        run: ./tools/build-android.ps1 -JavaHome $env:JAVA_HOME -SdkRoot $env:ANDROID_HOME -Unsigned
