@@ -34,15 +34,24 @@ does not invent annual dates from past events. Distinct same-day occasions remai
 distinct; repeated IDs/date from page overlap deduplicate, conflicting versions
 fail the whole refresh. A successful full snapshot replaces edited/deleted rows.
 
-Existing notice ordering, measured capacity, overflow and status space are
-allocated first. Coming up uses only the remainder, with no smaller text or
-automatic paging. Calendar rows collapse before notices lose space. Today and
-Tomorrow use the existing warm accent. Long calendar titles/details ellipsise;
-accessibility includes their complete text. No cache says “Calendar unavailable”;
-a successful empty snapshot says “No upcoming occasions”. At 24 hours without
-success, show “Calendar may be out of date”. A future fetch time is uncertain
-immediately. Stale rows remain available but past local days expire offline.
-If no safe row/status fits, the calendar block is temporarily hidden.
+The lower sidebar shows one section at a time: **Home Assistant** when the visible
+notice list has entries, otherwise **Coming up**. Up to five HA messages use actual
+Android text heights at the existing readable type size, with two-line wrapping,
+severity ordering and overflow. Short titles take less vertical space than long
+titles. Stale retained notices keep HA visible; event expiry and a valid empty
+snapshot allow Coming up to return. An empty but unavailable/stale HA feed leaves
+a quiet status line beside the calendar rather than implying household health.
+This replaces the first candidate's simultaneous notices/calendar layout following
+user feedback on 15 November 2026. The one-minute carousel remains a proposal;
+there is no timer, automatic paging or new remote gesture. Important notices
+should remain visible if a carousel is considered later.
+
+Calendar Today/Tomorrow use the existing warm accent. Long titles/details
+ellipsise. No calendar cache says “Calendar unavailable”; a successful empty
+snapshot says “No upcoming occasions”. After 24 hours without success, show
+“Calendar may be out of date”. Future fetch times are uncertain immediately.
+Stale rows remain available, but past local days expire offline. If no safe
+row/status fits, the calendar block is temporarily hidden.
 
 Host persistence is `DATA_DIR/calendar.json` (installed default
 `/data/cache/calendar.json`), independent of other caches. A source fingerprint
@@ -139,16 +148,16 @@ Remaining setup, in order:
 - `npm.cmd test`: **51 tests pass**, including Graph pagination/security bounds,
   calendar date/cache/error cases, OAuth renewal and device-flow cases, and all
   existing photo/weather/notice regressions. All dates and tokens are synthetic.
-- `tools/build-android.ps1 -Tools EXISTING_PRIVATE_TOOLCHAIN -Unsigned`: **407 JVM
-  assertions pass** (15 policy, 208 photo, 25 weather, 30 notices, 129 calendar).
+- `tools/build-android.ps1 -Tools EXISTING_PRIVATE_TOOLCHAIN -Unsigned`: **342 JVM
+  assertions pass** (15 policy, 208 photo, 25 weather, 34 notices, 60 calendar).
   Android resource/Java/DEX compilation and APK alignment pass without opening or
   using signing keys. Existing Java 8/deprecated fullscreen API warnings remain.
 - `node tools/package-addon.mjs`, packaged calendar/auth syntax and host import
   checks pass. The package contains both new runtime modules.
 - [Interactive synthetic preview](docs/calendar-comparison.html): normal and
   combined stale/long-weather/narrow/long-name cases rendered and visually checked
-  in headless Edge. Zero/one/two/many notices retain space, overflow remains visible,
-  and calendar collapses where needed. Empty/unavailable toggles are included.
+  in headless Edge. Zero/one/four/five/many notice cases show mutually exclusive sections, with
+  measured wrapping and visible overflow. Empty/unavailable toggles are included.
   This uses browser font metrics, not Android graphics or a device screenshot.
 
 ![Synthetic calendar/sidebar comparison](docs/calendar-preview.png)
@@ -174,7 +183,7 @@ Outstanding acceptance:
   later pages, persistence/restart and recovery.
 - Sony sidebar at couch distance with long names/weather, zero/one/many notices,
   important notices, overflow and stale/unavailable wording. No clipped content,
-  lost notice capacity or changed photo bounds.
+  calendar competing with HA messages or changed photo bounds.
 - Sydney midnight/DST/year rollover and resume while offline; past dates disappear,
   countdown changes, freshness warning appears at 24 hours.
 - Whole-photo/portrait pairs, transitions, saved continuation, weather freshness,

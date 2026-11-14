@@ -40,9 +40,13 @@ public final class NoticePresentationTest {
         check(NoticePresentation.visible(events,NOW.plusSeconds(60)).isEmpty(),"event expires at deadline offline");
         Map<String,Object> cleared=item("cleared","warning",at);cleared.put("active",false);
         check(NoticePresentation.visible(NoticePresentation.parse(feed(Arrays.asList(cleared))),NOW).isEmpty(),"inactive fault absent");
-        check(NoticePresentation.capacity(0,350,100)==3,"maximum three rows");
-        check(NoticePresentation.capacity(0,250,100)==2,"fit fewer without shrinking");
-        check(NoticePresentation.capacity(350,300,100)==0,"no negative capacity");
+        check(!NoticePresentation.showNotices(0)&&NoticePresentation.showNotices(1),"exclusive sections follow visible list");
+        check(NoticePresentation.fittedCount(5,new float[]{40,40,40,40,40},220,25)==5,"five short messages fit");
+        check(NoticePresentation.fittedCount(4,new float[]{40,70,40,70},220,25)==4,"four measured mixed rows fit exactly");
+        check(NoticePresentation.fittedCount(6,new float[]{40,40,40,40,40},220,25)==4,"overflow reserves its own space");
+        check(NoticePresentation.fittedCount(5,new float[]{70,70,70,70,70},220,25)==2,"long titles reduce count without smaller type");
+        check(NoticePresentation.fittedCount(1,new float[]{70},-1,25)==0,"no negative capacity");
+        check(NoticePresentation.fittedCount(0,new float[]{},220,25)==0,"empty list");
         check(NoticePresentation.overflow(5,3)==2&&NoticePresentation.overflow(1,3)==0,"overflow count");
         root=feed(rows);root.put("version",2);rejects(root,"schema version");
         root=feed(rows);root.put("version",1.5);rejects(root,"fractional version");

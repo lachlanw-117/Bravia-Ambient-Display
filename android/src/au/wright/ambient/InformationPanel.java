@@ -50,11 +50,12 @@ final class InformationPanel extends View {
     }
     private void accessibility() {
         StringBuilder description=new StringBuilder(lastContent);
+        description.append(NoticePresentation.showNotices(notices.size())?". Home Assistant":". Coming up");
         for(NoticePresentation.Item item:notices)description.append(". ").append(item.title);
         if(!noticeStatus.isEmpty())description.append(". ").append(noticeStatus);
-        for(CalendarPresentation.Item item:occasions)description.append(". ").append(item.title).append(" ")
+        if(!NoticePresentation.showNotices(notices.size()))for(CalendarPresentation.Item item:occasions)description.append(". ").append(item.title).append(" ")
             .append(CalendarPresentation.detail(item,calendarNow));
-        if(!calendarStatus.isEmpty())description.append(". ").append(calendarStatus);
+        if(!NoticePresentation.showNotices(notices.size())&&!calendarStatus.isEmpty())description.append(". ").append(calendarStatus);
         setContentDescription(description.toString());
     }
     InformationPanel(Context context) { super(context);setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES); }
@@ -130,24 +131,34 @@ final class InformationPanel extends View {
         canvas.restoreToCount(save);
     }
     private void drawNotices(Canvas canvas,float x,float top,float h,float w) {
-        float bottom=h*0.955f,rowHeight=h*0.082f;
-        if(!noticeStatus.isEmpty())bottom-=h*0.052f;
-        int count=NoticePresentation.capacity(top,bottom,rowHeight);
-        if(notices.size()>count)count=NoticePresentation.capacity(top,bottom-h*0.035f,rowHeight);
-        count=Math.min(count,notices.size());
+        float bottom=h*.955f;
+        if(!noticeStatus.isEmpty())bottom-=h*.052f;
+        if(!NoticePresentation.showNotices(notices.size())) {
+            drawCalendar(canvas,x,top,bottom,h,w);
+            if(!noticeStatus.isEmpty())paragraph(canvas,"Home Assistant: "+noticeStatus,x,h*.935f,h*.018f,w,0xff60665c,false);
+            return;
+        }
+        text(canvas,"HOME ASSISTANT",x,top+h*.03f,h*.018f,w,0xff60665c,normal);
+        float bodyTop=top+h*.045f;
+        int measured=Math.min(5,notices.size());
+        StaticLayout[] blocks=new StaticLayout[measured];float[] heights=new float[measured];
+        for(int i=0;i<measured;i++) {
+            blocks[i]=textBlock(notices.get(i).title,h*.022f,w-h*.021f,0xff30342f,false);
+            heights[i]=blocks[i].getHeight()+h*.018f;
+        }
+        int count=NoticePresentation.fittedCount(notices.size(),heights,bottom-bodyTop,h*.035f);
+        float rowTop=bodyTop;
         for(int i=0;i<count;i++) {
-            NoticePresentation.Item item=notices.get(i);float baseline=top+h*0.025f+i*rowHeight;
+            NoticePresentation.Item item=notices.get(i);
             paint.setStyle(Paint.Style.FILL);
             paint.setColor(item.severity.equals("important")?0xff9d4e32:item.severity.equals("warning")?0xff976621:0xff52645c);
-            canvas.drawCircle(x+h*0.005f,baseline-h*0.007f,h*0.0045f,paint);
-            paragraph(canvas,item.title,x+h*0.021f,baseline,h*0.022f,w-h*0.021f,0xff30342f,false);
+            canvas.drawCircle(x+h*.005f,rowTop+blocks[i].getLineBaseline(0)-h*.007f,h*.0045f,paint);
+            int save=canvas.save();canvas.translate(x+h*.021f,rowTop);blocks[i].draw(canvas);canvas.restoreToCount(save);
+            rowTop+=heights[i];
         }
         int overflow=NoticePresentation.overflow(notices.size(),count);
-        if(overflow>0)text(canvas,"+"+overflow+" more · View in HA",x,top+count*rowHeight+h*0.025f,h*0.018f,w,0xff60665c,normal);
-        if(!noticeStatus.isEmpty())paragraph(canvas,noticeStatus,x,h*0.935f,h*0.018f,w,0xff60665c,false);
-        // Preserve the original notice allocation, then spend only remaining space.
-        float calendarTop=top+count*rowHeight+(overflow>0?h*0.045f:0);
-        drawCalendar(canvas,x,calendarTop,bottom,h,w);
+        if(overflow>0)text(canvas,"+"+overflow+" more · View in HA",x,rowTop+h*.025f,h*.018f,w,0xff60665c,normal);
+        if(!noticeStatus.isEmpty())paragraph(canvas,noticeStatus,x,h*.935f,h*.018f,w,0xff60665c,false);
     }
     private void drawCalendar(Canvas canvas,float x,float top,float bottom,float h,float w) {
         boolean status=!calendarStatus.isEmpty();
@@ -187,6 +198,12 @@ final class InformationPanel extends View {
             .setIncludePad(false).setMaxLines(2).setEllipsize(TextUtils.TruncateAt.END).build();
         int save=canvas.save();canvas.translate(x,baseline-block.getLineBaseline(0));block.draw(canvas);canvas.restoreToCount(save);
         return baseline+block.getLineBaseline(block.getLineCount()-1)-block.getLineBaseline(0);
+    }
+    private StaticLayout textBlock(String value,float size,float width,int colour,boolean right) {
+        TextPaint style=new TextPaint(Paint.ANTI_ALIAS_FLAG);style.setTypeface(normal);style.setTextSize(size);style.setColor(colour);
+        return StaticLayout.Builder.obtain(value,0,value.length(),style,Math.max(1,(int)width))
+            .setAlignment(right?Layout.Alignment.ALIGN_OPPOSITE:Layout.Alignment.ALIGN_NORMAL)
+            .setIncludePad(false).setMaxLines(2).setEllipsize(TextUtils.TruncateAt.END).build();
     }
     private void text(Canvas canvas,String text,float x,float baseline,float size,float width,int colour,Typeface face) {
         if(text.isEmpty())return;paint.setTypeface(face);paint.setTextSize(size);

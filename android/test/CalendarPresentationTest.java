@@ -55,16 +55,13 @@ public final class CalendarPresentationTest {
         root=feed(Arrays.asList(today));root.put("schemaVersion",1.5);rejects(root);
         root=feed(Arrays.asList(today));root.put("timezone","UTC");rejects(root);
         root=feed(Arrays.asList(today));root.put("fetchedAt","bad");rejects(root);
-        // Exhaustively preserve original notice capacity and allocate calendar only afterward.
-        for(float top:new float[]{580,660,740,840})for(int total=0;total<=8;total++)for(boolean stale:new boolean[]{false,true}) {
-            float h=1080,rowHeight=h*.082f,bottom=h*.955f-(stale?h*.052f:0);
-            int notices=NoticePresentation.capacity(top,bottom,rowHeight);
-            if(total>notices)notices=NoticePresentation.capacity(top,bottom-h*.035f,rowHeight);
-            notices=Math.min(notices,total);int overflow=NoticePresentation.overflow(total,notices);
-            float remainingTop=top+notices*rowHeight+(overflow>0?h*.045f:0);
-            int count=CalendarPresentation.capacity(remainingTop,bottom,h,stale);
+        // Coming up owns the lower section only while the visible HA list is empty.
+        for(int total=0;total<=8;total++)check(NoticePresentation.showNotices(total)==(total>0),"exactly one section selected");
+        for(float top:new float[]{580,660,740,840})for(boolean stale:new boolean[]{false,true}) {
+            float h=1080,bottom=h*.955f-(stale?h*.052f:0);
+            int count=CalendarPresentation.capacity(top,bottom,h,stale);
             check(count>=0&&count<=3,"bounded calendar rows");
-            if(count>0)check(remainingTop+h*.045f+count*h*.08f+(stale?h*.05f:0)<=bottom+.01f,"calendar within remaining space");
+            if(count>0)check(top+h*.045f+count*h*.08f+(stale?h*.05f:0)<=bottom+.01f,"calendar stays within bounds");
         }
         check(CalendarPresentation.capacity(600,1031,1080,false)==3,"three rows with spare space");
         check(CalendarPresentation.capacity(950,1031,1080,false)==0,"hide when no safe row");
