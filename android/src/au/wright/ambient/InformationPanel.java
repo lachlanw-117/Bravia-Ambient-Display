@@ -11,7 +11,7 @@ import org.json.JSONObject;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-/** Quiet clock/weather sidebar. No notices, provider-credit line or device controls. */
+/** Quiet clock/weather sidebar with display-only household notices. */
 final class InformationPanel extends View {
     private final Paint paint=new Paint(Paint.ANTI_ALIAS_FLAG);
     private final RectF rect=new RectF();
@@ -22,6 +22,24 @@ final class InformationPanel extends View {
     private String lastContent="";
     private JSONObject lastWeather;
     private long lastMinute=Long.MIN_VALUE;
+    private List<NoticePresentation.Item> notices=Collections.emptyList();
+    private String noticeStatus="Notices unavailable",noticeContent="";
+    void updateNotices(NoticePresentation.Snapshot snapshot,Date now) {
+        List<NoticePresentation.Item> next=NoticePresentation.visible(snapshot,now.toInstant());
+        String status=NoticePresentation.status(snapshot,now.toInstant());
+        StringBuilder signature=new StringBuilder(status);
+        for(NoticePresentation.Item item:next)signature.append('|').append(item.id).append('|').append(item.title)
+            .append('|').append(item.severity).append('|').append(item.quality);
+        if(signature.toString().equals(noticeContent))return;
+        notices=next;noticeStatus=status;noticeContent=signature.toString();
+        accessibility();invalidate();
+    }
+    private void accessibility() {
+        StringBuilder description=new StringBuilder(lastContent);
+        for(NoticePresentation.Item item:notices)description.append(". ").append(item.title);
+        if(!noticeStatus.isEmpty())description.append(". ").append(noticeStatus);
+        setContentDescription(description.toString());
+    }
     InformationPanel(Context context) { super(context);setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES); }
     void update(JSONObject weather,Date now) {
         long minute=now.getTime()/60000;
@@ -56,7 +74,7 @@ final class InformationPanel extends View {
         status=!available?"Waiting for weather":WeatherPresentation.freshness(weather.optString("fetchedAt",null),stale,today,tomorrow,instant);
         String content=weekday+" "+date+" "+clock+" "+period+" Now "+temperature+
             " Today "+forecastContent(today)+" Tomorrow "+forecastContent(tomorrow)+" "+status;
-        if(!content.equals(lastContent)){lastContent=content;setContentDescription(content);invalidate();}
+        if(!content.equals(lastContent)){lastContent=content;accessibility();invalidate();}
     }
     private static Double number(JSONObject row,String key) {
         return row.has(key)&&!row.isNull(key)&&Double.isFinite(row.optDouble(key))?row.optDouble(key):null;
@@ -73,7 +91,6 @@ final class InformationPanel extends View {
         int save=canvas.save();canvas.scale(getWidth()/layout.width,getHeight()/layout.height);
         float h=layout.height,x=layout.panelLeft+h*0.045f,right=layout.width-h*0.045f,w=right-x;
         paint.setColor(0xfff5f1e7);canvas.drawRect(layout.panelLeft,0,layout.width,h,paint);
-        int information=canvas.save();canvas.clipRect(layout.panelLeft,0,layout.width,h*0.65f);
         paint.setTypeface(normal);paint.setTextSize(h*0.023f);
         if(paint.measureText(weekday+" "+date)<=w)
             text(canvas,weekday+" "+date,x,h*0.07f,h*0.023f,w,0xff60665c,normal);
@@ -85,15 +102,32 @@ final class InformationPanel extends View {
         float clockWidth=paint.measureText(clock);
         text(canvas,clock,x,h*0.16f,h*0.078f,w,0xff30342f,light);
         text(canvas,period,x+clockWidth+12,h*0.16f,h*0.023f,Math.max(1,w-clockWidth-12),0xff60665c,normal);
-        text(canvas,"NOW",x,h*0.228f,h*0.018f,w,0xff60665c,normal);
-        text(canvas,temperature,x,h*0.30f,h*0.07f,w,0xff30342f,light);
-        float todayEnd=forecast(canvas,"TODAY",today,x,h*0.36f,h,w);
-        float tomorrowEnd=forecast(canvas,"TOMORROW",tomorrow,x,Math.max(h*0.46f,todayEnd+h*0.04f),h,w);
-        paragraph(canvas,status,x,Math.max(h*0.585f,tomorrowEnd+h*0.036f),h*0.018f,w,0xff60665c,true);
-        canvas.restoreToCount(information);
-        paint.setColor(0xffd5d6ca);paint.setStrokeWidth(1);canvas.drawLine(x,h*0.66f,right,h*0.66f,paint);
-        // The region below the divider is reserved for a separately approved notice phase.
+        text(canvas,"NOW",x,h*0.212f,h*0.018f,w,0xff60665c,normal);
+        text(canvas,temperature,x,h*0.284f,h*0.07f,w,0xff30342f,light);
+        float todayEnd=forecast(canvas,"TODAY",today,x,h*0.344f,h,w);
+        float tomorrowEnd=forecast(canvas,"TOMORROW",tomorrow,x,Math.max(h*0.444f,todayEnd+h*0.04f),h,w);
+        float checkedEnd=paragraph(canvas,status,x,tomorrowEnd+h*0.036f,h*0.018f,w,0xff60665c,true);
+        float divider=checkedEnd+h*0.022f;
+        paint.setColor(0xffd5d6ca);paint.setStrokeWidth(1);canvas.drawLine(x,divider,right,divider,paint);
+        drawNotices(canvas,x,divider+h*0.015f,h,w);
         canvas.restoreToCount(save);
+    }
+    private void drawNotices(Canvas canvas,float x,float top,float h,float w) {
+        float bottom=h*0.955f,rowHeight=h*0.082f;
+        if(!noticeStatus.isEmpty())bottom-=h*0.052f;
+        int count=NoticePresentation.capacity(top,bottom,rowHeight);
+        if(notices.size()>count)count=NoticePresentation.capacity(top,bottom-h*0.035f,rowHeight);
+        count=Math.min(count,notices.size());
+        for(int i=0;i<count;i++) {
+            NoticePresentation.Item item=notices.get(i);float baseline=top+h*0.025f+i*rowHeight;
+            paint.setStyle(Paint.Style.FILL);
+            paint.setColor(item.severity.equals("important")?0xff9d4e32:item.severity.equals("warning")?0xff976621:0xff52645c);
+            canvas.drawCircle(x+h*0.005f,baseline-h*0.007f,h*0.0045f,paint);
+            paragraph(canvas,item.title,x+h*0.021f,baseline,h*0.022f,w-h*0.021f,0xff30342f,false);
+        }
+        int overflow=NoticePresentation.overflow(notices.size(),count);
+        if(overflow>0)text(canvas,"+"+overflow+" more · View in HA",x,top+count*rowHeight+h*0.025f,h*0.018f,w,0xff60665c,normal);
+        if(!noticeStatus.isEmpty())paragraph(canvas,noticeStatus,x,h*0.935f,h*0.018f,w,0xff60665c,false);
     }
     private float forecast(Canvas canvas,String label,WeatherPresentation.Forecast row,float x,float baseline,float h,float w) {
         text(canvas,label,x,baseline,h*0.018f,w,0xff60665c,normal);

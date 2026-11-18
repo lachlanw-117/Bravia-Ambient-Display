@@ -1,52 +1,15 @@
-# TODO
+# Project follow-up
 
-Updated 11 November 2026. The [roadmap](ROADMAP.md) owns the accepted enhancement
-scope and separate phase approvals; [decisions](DECISIONS.md) record the why.
-Checked items below describe recorded results, not a fresh live inspection.
+Updated 14 November 2026. The photo/weather/notice product is complete for the
+owner's current needs. This is an index, not a backlog of old trial checkboxes.
 
-- [x] Research Google Photos API restrictions and Android DreamService lifecycle.
-- [x] Build the Android screensaver, local photo/weather host and offline cache.
-- [x] Add automated host and JVM policy tests and verify the signed debug APK.
-- [x] Install the Pi host and TV app with approval; record the 147-photo deployment
-  from `3fbb127` in [TRIAL.md](TRIAL.md).
-- [ ] Test idle entry, first-key exit and non-interruption of streaming and Xbox/HDMI on the Sony.
-- [ ] Check rendering, photo orientation, crossfades and offline recovery with an exported album.
-- [ ] Determine whether this Sony firmware exposes a configurable idle timeout.
-- [x] Verify the initial live daily forecast and TV weather overlay; recorded in TRIAL.md.
-- [ ] Check actual TV behaviour at midnight/DST; synthetic coverage is not device evidence.
-- [x] Build/start the HA OS local app on the Pi and record health/authentication/weather checks.
-- [x] Complete Phase 0 documentation: roadmap, decision log and maintenance procedure.
-- [x] Obtain Phase 1 local authorisation, verify the BOM source and prepare tested
-  local changes; see [Phase 1](PHASE1.md).
-- [x] Commit/push Phase 1, open PRs and perform the separately approved branch trial.
-- [x] Finish scoped Phase 1 TV acceptance and debugging closeout; record tool
-  evidence and user-reported ordinary playback, idle entry and Back dismissal.
-- [x] Obtain Phase 1 merge approval and merge accepted PR #2.
-- [x] Prepare the separately authorised Phase 2 photo/sidebar candidate locally.
-- [x] Complete Phase 2 approved commits, pushes, PRs and TV trial installation.
-- [x] Accept cream palette / 60-second scenes and close Phase 2 debugging.
-- [x] Confirm ordinary idle/Back with debugging off; see [Phase 2](PHASE2.md).
-- [x] Obtain separate Phase 2 merge approval and merge the accepted PRs.
-- [x] Complete the weather-summary/photo-resume trial, user acceptance and debugging
-  closeout; see WEATHER_REFINEMENT.md.
-- [x] Obtain separate weather/playback merge approval and merge accepted PRs.
-- [ ] Complete the [11 November TV acceptance checks](TV_TEST_2026-11-11.md),
-  recording Home idle timing and streaming/paused-video/HDMI results individually.
-- [ ] Investigate the often-missing Today minimum against the actual daily feed;
-  do not substitute another day's minimum or an observed value.
-- [x] Implement the requested same-date/provider forecast-low retention locally,
-  with no extra visible label; 27 synthetic host tests and packaging checks pass.
-- [ ] Obtain Git approval, then separate host/TV trial approval for the local
-  layout/retention candidate; do not mark it deployed from local build evidence.
-- [ ] Review the deferred home-style layout and Home-screen-ad priorities before
-  notice implementation; no blanket debloating or in-app ad removal.
-- [x] Disable TV debugging and verify TCP 5555 refuses connections; leave Developer
-  options master enabled to preserve unreviewed settings. Reboot persistence untested.
-- [ ] Consider Google Ambient API partner access only if unattended album sync becomes essential.
+- [Current product and limitations](ROADMAP.md): scope and known evidence gaps.
+- [Notice trial](HOUSEHOLD_ALERTS.md): installed revisions and user-confirmed display;
+  PR #8 stays open and unmerged as instructed.
+- [Repository refresh](docs/repository-refresh.md): local documentation/build work,
+  validation and review boundaries; no device deployment.
+- [Separate aircraft screensaver](ROADMAP.md#future-separate-aircraft-screensaver):
+  the sole future concept, requiring its own later plan.
 
-Photo presentation is implemented and accepted; the weather/playback refinement
-is accepted and merged. Household notices/interactions remain
-future phases. Aircraft implementation needs its own later plan.
-Calendar and photo metadata remain deferred. The MVP was deployed on 7 November;
-see [TRIAL.md](TRIAL.md) for results and [VALIDATION.md](VALIDATION.md) for the
-initial local-validation snapshot.
+Historical unperformed tests remain labelled unverified in their records; they
+are not automatically mandatory work. ADB stays enabled under the latest instruction.

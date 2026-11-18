@@ -66,7 +66,7 @@ public final class PhotoStore {
             return c;
         } catch(Exception error){requests.remove(c);c.disconnect();throw error;}
     }
-    private byte[] get(String route,int limit) throws Exception {
+    byte[] get(String route,int limit) throws Exception {
         HttpURLConnection c=connect(route);
         try(InputStream in=c.getInputStream(); ByteArrayOutputStream out=new ByteArrayOutputStream()) {
             byte[] buffer=new byte[8192]; int n,total=0;long deadline=System.nanoTime()+30000000000L;
