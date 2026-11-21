@@ -25,17 +25,16 @@ remote button to return to normal TV use.
 
 ## Project status
 
-The photo/weather/notice product is complete for the household's current needs.
-Source review, installation and acceptance are separate records. This repository
-remains private; there is no published APK release.
+The photo/weather/notice display is on `main` and meets the household's current
+needs. Source review, installation and acceptance are separate records. There is
+no published APK release.
 
-| Baseline | Recorded state on 14 November 2026 |
+| Baseline | Recorded state on 21 November 2026 |
 | --- | --- |
-| Accepted `main` | `bddf067`: photos, weather and home-style layout; notices are not merged |
-| Installed host | `37ce0ad`: photo/weather feed and corrected HA notice adapter |
-| Installed TV | Android source `fc28daf`; photo/weather and both natural notice rows visually confirmed |
-| Notice PR | [#8](https://github.com/lachlanw-117/Bravia-Ambient-Display/pull/8) remains open and unmerged at the owner's request |
-| This refresh | Documentation and build checks only; no runtime deployment or device settings change |
+| Accepted `main` | `0067d25`: photos, weather, home-style layout and display-only household notices; PR #8 merged on 18 November |
+| Last recorded host install (14 November) | `37ce0ad`: photo/weather feed and corrected HA notice adapter |
+| Last recorded TV acceptance (14 November) | Android source `fc28daf`; photo/weather and both natural notice rows visually confirmed |
+| Notice acceptance still open | Broader lifecycle, routing, grouping, expiry, real-TV overflow, restart, outage/recovery and remote/idle checks remain outstanding; see [the notice trial](HOUSEHOLD_ALERTS.md) |
 
 The recorded device is a Sony X90K on Android 12, with a Pi 5 running HA OS.
 Other models and firmware are not certified. Installed hashes, scoped acceptance
